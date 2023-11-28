@@ -1,6 +1,6 @@
 
 # Devenv
-/venv/
+venv/
 .devenv*
 devenv.local.nix
 /_build/
