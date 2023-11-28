@@ -1,0 +1,31 @@
+
+# Devenv
+/venv/
+.devenv*
+devenv.local.nix
+/_build/
+/deps/
+/doc/
+/node_modules/
+/tmp/
+/cover/
+
+/assets/node_modules/
+
+/installer/_build/
+/installer/assets/
+/installer/deps/
+/installer/doc/
+/installer/phx_new-*.ez
+
+/integration_test/_build/
+/integration_test/deps/
+
+erl_crash.dump
+phoenix-*.ez
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
