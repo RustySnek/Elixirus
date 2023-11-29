@@ -1,0 +1,8 @@
+<h1>Home</h1>
+<input hidden phx-hook="store_token" id="token_input" value={@token} />
+<form phx-submit="login">
+  <.input type="text" value="" name="username" />
+  <.input type="password" value="" name="password" />
+  <button class="bg-pink-600 rounded-2xl px-4 py-1">Login</button>
+</form>
+<h1><%= @error_message %></h1>
