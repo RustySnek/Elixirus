@@ -16,8 +16,8 @@ defmodule ElixirusWeb.Router do
 
   scope "/", ElixirusWeb do
     pipe_through :browser
-
-    get "/", PageController, :home
+    get "/set_token", PageController, :set_token
+    live "/", HomeLive
   end
 
   # Other scopes may use custom stacks.

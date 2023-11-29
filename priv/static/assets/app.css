@@ -1271,6 +1271,11 @@ select {
   background-color: rgb(24 24 27 / var(--tw-bg-opacity));
 }
 
+.bg-pink-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(219 39 119 / var(--tw-bg-opacity));
+}
+
 .fill-cyan-900 {
   fill: #164e63;
 }
