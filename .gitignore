@@ -1,5 +1,6 @@
 
 # Devenv
+__pycache__
 venv/
 .devenv*
 devenv.local.nix
