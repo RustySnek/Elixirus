@@ -13,6 +13,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        quicksand: ["QuickSand"]
+      },
       colors: {
         brand: "#FD4F00",
       }

@@ -7,11 +7,16 @@
     <.live_title suffix=" · Phoenix Framework">
       <%= assigns[:page_title] || "Elixirus" %>
     </.live_title>
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;700&display=swap"
+    />
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
-  <body class="bg-white antialiased">
+  <body class="bg-stone-900 text-white antialiased">
     <%= @inner_content %>
   </body>
 </html>
