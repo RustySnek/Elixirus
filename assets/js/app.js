@@ -27,6 +27,7 @@ let Hooks = {}
 Hooks.store_token = {
   updated() {
     fetch(`/set_token?token=${this.el.value}`)
+    this.pushEvent("navigate_students")
   }
 }
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks,params: {_csrf_token: csrfToken}})

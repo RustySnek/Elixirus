@@ -10,6 +10,10 @@ defmodule ElixirusWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :api_token do
+    plug ElixirusWeb.Plug.PutTokenCookie
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -17,7 +21,12 @@ defmodule ElixirusWeb.Router do
   scope "/", ElixirusWeb do
     pipe_through :browser
     get "/set_token", PageController, :set_token
-    live "/", HomeLive
+    live "/", HomeLive.Index
+
+    scope "/student" do
+      pipe_through :api_token
+      live "/", StudentLive.Index
+    end
   end
 
   # Other scopes may use custom stacks.
