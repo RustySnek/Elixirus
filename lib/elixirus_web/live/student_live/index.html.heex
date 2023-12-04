@@ -1,0 +1,78 @@
+<.login_modal login_required={@login_required} token={@token} error_message="" />
+<div class="flex flex-col items-center xl:flex-row xl:justify-end">
+  <div class="flex flex-col xl:flex-row justify-between gap-10">
+    <div class="flex flex-col gap-y-4 h-[500px] w-[400px] border border-fuchsia-400 p-5 rounded-xl">
+      <span class="self-center text-2xl font-bold font-quicksand text-fuchsia-300">
+        Grades
+      </span>
+      <div :if={@grades == []} class="flex flex-col items-center justify-center w-full h-full">
+        <.inbox class="w-16 text-stone-700" mini />
+        <span class="text-4xl text-center text-stone-700 font-extrabold mt-4 font-quicksand select-none">
+          No recent grades updates
+        </span>
+      </div>
+
+      <div class="flex overflow-y-auto flex-col gap-y-2">
+        <button :for={grade <- @grades}>
+          <div class="flex flex-row border-t-2 border-t-gray-600">
+            <span class="text-2xl font-bold flex justify-center pl-4 items-center w-12">
+              <%= Map.get(grade, ~c"grade") |> to_string() %>
+            </span>
+            <div class="flex-col items-start w-72 flex px-4 py-2 ">
+              <div class="flex-row flex justify-between space-x-1 w-full">
+                <div class="line-clamp-1 self-start flex w-64 pr-1">
+                  <%= Map.get(grade, ~c"title") |> to_string() %>
+                </div>
+                <span class="line-clamp-1 flex items-center text-sm justify-center">
+                  <.scale class="w-4 self-center" mini />
+                  <%= Map.get(grade, ~c"weight") |> to_string() %>
+                </span>
+              </div>
+              <span class="line-clamp-1 text-zinc-600">
+                <%= Map.get(grade, ~c"category") |> to_string() %>
+              </span>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div class="flex flex-col gap-y-4 h-[500px] w-[400px] border border-fuchsia-400 p-5 rounded-xl">
+      <span class="self-center text-2xl font-bold font-quicksand text-fuchsia-300 ">
+        Attendance
+      </span>
+      <div :if={@attendance == []} class="flex flex-col items-center justify-center w-full h-full">
+        <.inbox class="w-16 text-stone-700" mini />
+        <span class="text-4xl text-center text-stone-700 font-extrabold mt-4 font-quicksand select-none">
+          No recent attendance updates
+        </span>
+      </div>
+
+      <div class="flex overflow-y-auto flex-col gap-y-4">
+        <button :for={attendance <- @attendance}>
+          <div class="flex flex-row  border-t-2 border-t-gray-600">
+            <span class="text-2xl font-bold flex justify-center pl-4 items-center w-12">
+              <%= Map.get(attendance, ~c"symbol") |> to_string() %>
+            </span>
+            <div class="flex-col items-start w-72 flex px-4 py-2 ">
+              <div class="flex-row flex justify-between  w-full">
+                <div class="line-clamp-1 self-start w-52 pr-1">
+                  <%= Map.get(attendance, ~c"subject") |> to_string() %>
+                </div>
+                <span class="line-clamp-1 flex items-center text-sm text-zinc-600 justify-center">
+                  <%= Map.get(attendance, ~c"date")
+                  |> to_string()
+                  |> String.split("-")
+                  |> Enum.take(-2)
+                  |> Enum.join("-") %>
+                </span>
+              </div>
+              <span class="line-clamp-1 text-zinc-600">
+                <%= Map.get(attendance, ~c"topic") |> to_string() %>
+              </span>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

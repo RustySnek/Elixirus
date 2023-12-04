@@ -1,11 +1,101 @@
 defmodule ElixirusWeb.StudentLive.Index do
+  alias ElixirusWeb.LoginModal
   use ElixirusWeb, :live_view
+  alias Phoenix.LiveView.AsyncResult
+  import Heroicons
 
-  def mount(_params, %{"api_token" => api_token}, socket) do
-    if api_token do
-      {:ok, socket}
-    else
-      {:noreply, push_navigate(socket, to: "/")}
-    end
+  def handle_event("navigate_students", %{"token" => token}, socket) do
+    socket =
+      socket
+      |> assign(:token, token)
+      |> assign(:login_required, false)
+      |> fetch_data(token, socket.assigns.semester)
+
+    {:noreply, socket}
+  end
+
+  def fetch_data(socket, api_token, semester) do
+    socket
+    |> assign(:loading_grades, AsyncResult.loading())
+    |> start_async(:load_grades, fn ->
+      {:ok, pid} = :python.start()
+
+      get_grades = :python.call(pid, :overview, :handle_overview_grades, [api_token, semester])
+      :python.stop(pid)
+      get_grades
+    end)
+    |> assign(:loading_attendance, AsyncResult.loading())
+    |> start_async(:load_attendance, fn ->
+      {:ok, pid} = :python.start()
+
+      get_attendance =
+        :python.call(pid, :overview, :handle_overview_attendance, [api_token, semester])
+
+      :python.stop(pid)
+      get_attendance
+    end)
+  end
+
+  def handle_async(:load_attendance, {:ok, attendance}, socket) do
+    socket =
+      case attendance do
+        {:ok, attendance} ->
+          socket
+          |> put_flash(:info, "Loaded attendance!")
+          |> assign(:loading_attendance, AsyncResult.ok(%AsyncResult{}, :ok))
+          |> assign(:attendance, attendance)
+
+        _ ->
+          socket |> assign(:login_required, true)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_grades, {:ok, grades}, socket) do
+    socket =
+      case grades do
+        {:ok, grades} ->
+          socket
+          |> put_flash(:info, "Loaded grades!")
+          |> assign(:loading_grades, AsyncResult.ok(%AsyncResult{}, :ok))
+          |> assign(:grades, grades)
+
+        _ ->
+          socket |> assign(:login_required, true)
+      end
+
+    {:noreply, socket}
+  end
+
+  def mount(_params, %{"api_token" => api_token} = params, socket) do
+    api_token =
+      case api_token |> Map.keys() do
+        [] -> ""
+        token -> token |> hd() |> to_charlist()
+      end
+
+    semester =
+      case Map.get(params, "semester") do
+        nil -> 0
+        semester -> semester
+      end
+
+    socket =
+      socket
+      |> assign(:token, api_token)
+      |> assign(:semester, semester)
+      |> assign(:login_required, false)
+      |> assign(:grades, [])
+      |> assign(:attendance, [])
+      |> fetch_data(api_token, semester)
+
+    {:ok, socket}
+  end
+
+  defp login_modal(assigns) do
+    ~H"""
+    <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+    """
   end
 end
