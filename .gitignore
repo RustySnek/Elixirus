@@ -11,6 +11,8 @@ devenv.local.nix
 /tmp/
 /cover/
 
+priv/static/assets
+priv/static/images
 /assets/node_modules/
 
 /installer/_build/
