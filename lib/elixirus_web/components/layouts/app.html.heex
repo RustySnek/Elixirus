@@ -1,32 +1,45 @@
 <header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v<%= Application.spec(:phoenix, :vsn) %>
-      </p>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
+  <div class="flex items-center justify-between border-b border-fuchsia-500 py-3 text-sm">
+    <div class="items-end gap-x-4 hidden xl:flex">
+      <.link navigate="/">
+        <div class="flex flex-row mr-20 gap-x-2 justify-center">
+          <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
+            Elixir<span class="text-fuchsia-900">us</span>
+          </h1>
+          <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
+        </div>
+      </.link>
+      <.link navigate={~p"/student"}>
+        <div class="flex flex-row gap-x-2">
+          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
+            Over<span class="text-fuchsia-900">view</span>
+          </h1>
+        </div>
+      </.link>
+      <.link navigate={~p"/student/grades"}>
+        <div class="flex flex-row gap-x-2">
+          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
+            Grad<span class="text-fuchsia-900">es</span>
+          </h1>
+        </div>
+      </.link>
+      <.link navigate={~p"/student/timetable"}>
+        <div class="flex flex-row gap-x-2">
+          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
+            Time<span class="text-fuchsia-900">table</span>
+          </h1>
+        </div>
+      </.link>
+      <.link navigate={~p"/student/messages"}>
+        <div class="flex flex-row gap-x-2">
+          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
+            Mess<span class="text-fuchsia-900">ages</span>
+          </h1>
+        </div>
+      </.link>
     </div>
   </div>
 </header>
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
-    <.flash_group flash={@flash} />
-    <%= @inner_content %>
-  </div>
+<main class="px-4 py-10 sm:px-6 lg:px-8">
+  <%= @inner_content %>
 </main>
