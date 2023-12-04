@@ -24,10 +24,20 @@ import topbar from "../vendor/topbar"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let Hooks = {}
+Hooks.focus_field = {
+  mounted() {
+    this.el.focus()
+  },
+}
 Hooks.store_token = {
   updated() {
     fetch(`/set_token?token=${this.el.value}`)
-    this.pushEvent("navigate_students")
+    this.pushEvent("navigate_students", {token: this.el.value})
+  }
+}
+Hooks.store_semester = {
+  updated() {
+    fetch(`set_semester?semester=${this.el.value}`)
   }
 }
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks,params: {_csrf_token: csrfToken}})

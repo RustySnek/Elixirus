@@ -1,6 +1,16 @@
 defmodule ElixirusWeb.PageController do
   use ElixirusWeb, :controller
 
+  def set_semester(conn, %{"semester" => semester}) do
+    conn
+    |> put_resp_cookie("semester", semester,
+      http_only: true,
+      same_site: "strict",
+      path: "/"
+    )
+    |> send_resp(200, "{}")
+  end
+
   def set_token(conn, %{"token" => token}) do
     conn
     |> put_resp_cookie("api_token", token,
