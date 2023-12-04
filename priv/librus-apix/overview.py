@@ -11,13 +11,13 @@ from librus_apix.timetable import get_timetable
 from handle_classes import *
 from helpers import create_token, extract_grades
 
-def handle_overview_grades(token):
+def handle_overview_grades(token, semester):
     token = create_token(token)
     try:
-        subjects, average_grades, descriptive = get_grades(token, "all")
+        subjects, average_grades, descriptive = get_grades(token, "last_login")
     except TokenError as err:
         return Atom("error".encode("utf-8")), str(err)
-    return Atom("ok".encode('utf-8')), extract_grades(handle_grades(subjects[1]))
+    return Atom("ok".encode('utf-8')), extract_grades(handle_grades(subjects[int(semester)]))
 
 def handle_homework_overview(token, monday):
     token = create_token(token)
@@ -65,18 +65,8 @@ def handle_overview_schedule(token, year, month):
 def handle_overview_attendance(token, semester):
     token = create_token(token)
     try:
-        attendance = get_attendance(token)#, {"zmiany_logowanie": ""})
+        attendance = get_attendance(token, "last_login")
     except TokenError as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode("utf-8")), handle_attendance(attendance[int(semester)])
 
-def handle_overview(token, semester):
-    token = "".join([chr(n) for n in token])
-    token = Token(token)
-    
-    attendance = get_attendance(token, {"zmiany_logowanie": ""})
-    announcements = get_announcements(token)
-    # homework = get_homework()
-    messages = get_recieved(token, 0)
-    #timetable = get_timetable(token)
-    #schedule = get_schedule(token)
