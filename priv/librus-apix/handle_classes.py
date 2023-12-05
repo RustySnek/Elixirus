@@ -20,7 +20,7 @@ def handle_schedule(schedule):
     return {day: [event.__dict__ for event in schedule[day]] for day in schedule}
 
 def handle_timetable(timetable):
-    return {weekday: [period.__dict__ for period in timetable[weekday]] for weekday in timetable}
+    return [[period.__dict__ for period in weekday] for weekday in timetable]
 
 def handle_announcements(announcements):
     return [ann.__dict__ for ann in announcements]
