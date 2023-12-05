@@ -1,0 +1,20 @@
+<.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<div :if={@timetable != []} class="relative w-full">
+  <div class="flex flex-row gap-x-5">
+    <div :for={period <- hd(@timetable)} class="w-40">
+      <%= period |> Map.get(~c"date_from") %> - <%= period |> Map.get(~c"date_to") %>
+    </div>
+  </div>
+  <div :for={weekday <- @timetable} class="flex-1">
+    <div class="flex gap-x-5 flex-row">
+      <div :for={period <- weekday} class=" flex-1 truncate flex-shrink h-20">
+        <%= period |> Map.get(~c"subject") |> to_string() %>
+      </div>
+    </div>
+  </div>
+  <div
+    class="absolute top-0 bottom-0 bg-red-500 w-1 h-full transform -translate-x-1/2"
+    style={@indicator}
+  >
+  </div>
+</div>
