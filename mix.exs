@@ -33,6 +33,7 @@ defmodule Elixirus.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.7.10"},
+      {:timex, "~> 3.7.11"},
       {:phoenix_html, "~> 3.3"},
       {:heroicons, "~> 0.5.3"},
       {:erlport, "~> 0.11.0"},
