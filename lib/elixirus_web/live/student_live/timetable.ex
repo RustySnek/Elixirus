@@ -18,11 +18,16 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     current_time = Timex.parse!(current_time, "{h24}:{m}")
 
     if !is_within_range?(current_time, [time_from, time_to]) do
-      :outside_range
+      0
     else
       total_seconds = Timex.diff(time_from, time_to, :seconds)
       elapsed_seconds = Timex.diff(current_time, time_from, :seconds)
-      (abs(elapsed_seconds / total_seconds) * 100) |> round()
+
+      percentage =
+        (abs(elapsed_seconds / total_seconds) * 100 * 100)
+        |> round()
+
+      percentage / 100 - 0.5
     end
   end
 
@@ -35,9 +40,24 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     warsaw_now() |> Date.beginning_of_week()
   end
 
-  def fetch_timetable(socket, monday) do
-    token = socket.assigns.api_token
+  def fetch_timetable(token, monday) do
     python(:overview, :handle_overview_timetable, [token, monday])
+  end
+
+  def calculate_minute_difference(time_from_str, time_to_str) do
+    if time_to_str == nil or time_from_str == nil or time_from_str == "undefined" or
+         time_to_str == "undefined" do
+      0
+    else
+      [hours_from, minutes_from] =
+        String.split(time_from_str, ":") |> Enum.map(&String.to_integer/1)
+
+      [hours_to, minutes_to] = String.split(time_to_str, ":") |> Enum.map(&String.to_integer/1)
+
+      total_minutes_from = hours_from * 60 + minutes_from
+      total_minutes_to = hours_to * 60 + minutes_to
+      total_minutes_to - total_minutes_from
+    end
   end
 
   def handle_async(:load_timetable, {:ok, timetable}, socket) do
@@ -50,13 +70,12 @@ defmodule ElixirusWeb.StudentLive.Timetable do
           date_to = Map.get(last, ~c"date_to") |> to_string()
 
           indicator =
-            case calculate_timeline_percentage("12:00", date_from, date_to) do
-              :outside_range -> "visible: hidden"
-              percentage -> "left: #{percentage}%"
+            case calculate_timeline_percentage(current_time, date_from, date_to) do
+              0 -> "visibility: hidden;"
+              percentage -> "top: #{percentage}%;"
             end
 
-          IO.inspect(indicator)
-
+          # do an async for indicator
           socket
           |> assign(:timetable, t)
           |> assign(:indicator, indicator)
@@ -64,6 +83,21 @@ defmodule ElixirusWeb.StudentLive.Timetable do
         _ ->
           assign(socket, :login_required, true)
       end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("navigate_students", %{"token" => token}, socket) do
+    socket =
+      socket
+      |> assign(:token, token)
+      |> assign(:login_required, false)
+
+    socket =
+      socket
+      |> start_async(:load_timetable, fn ->
+        fetch_timetable(token, this_weeks_monday() |> to_string())
+      end)
 
     {:noreply, socket}
   end
@@ -89,7 +123,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     socket =
       socket
       |> start_async(:load_timetable, fn ->
-        fetch_timetable(socket, monday |> to_string())
+        fetch_timetable(api_token, monday |> to_string())
       end)
 
     {:ok, socket}
