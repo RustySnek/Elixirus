@@ -8,10 +8,10 @@ const path = require("path")
 module.exports = {
   content: [
     "./js/**/*.js",
-    "../lib/elixirus_web.ex",
+    "../lib/elixirus_web.ex", 
     "../lib/elixirus_web/**/*.*ex"
   ],
-  theme: {
+    theme: {
     extend: {
       fontFamily: {
         quicksand: ["QuickSand"]
