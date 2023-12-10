@@ -44,6 +44,18 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     python(:overview, :handle_overview_timetable, [token, monday])
   end
 
+  def get_indicator_position(timetable) do
+    current_time = warsaw_now() |> Calendar.strftime("%H:%M")
+    last = timetable |> hd() |> List.last()
+    date_from = Map.get(timetable |> hd() |> hd(), ~c"date_from") |> to_string()
+    date_to = Map.get(last, ~c"date_to") |> to_string()
+
+    case calculate_timeline_percentage(current_time, date_from, date_to) do
+      0 -> "visibility: hidden;"
+      percentage -> "top: #{percentage}%;"
+    end
+  end
+
   def calculate_minute_difference(time_from_str, time_to_str) do
     if time_to_str == nil or time_from_str == nil or time_from_str == "undefined" or
          time_to_str == "undefined" do
@@ -60,25 +72,17 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     end
   end
 
+  def handle_async(:get_indicator, {:ok, indicator}, socket) do
+    {:noreply, assign(socket, :indicator, indicator)}
+  end
+
   def handle_async(:load_timetable, {:ok, timetable}, socket) do
     socket =
       case timetable do
         {:ok, t} ->
-          current_time = warsaw_now() |> Calendar.strftime("%H:%M")
-          last = t |> hd() |> List.last()
-          date_from = Map.get(t |> hd() |> hd(), ~c"date_from") |> to_string()
-          date_to = Map.get(last, ~c"date_to") |> to_string()
-
-          indicator =
-            case calculate_timeline_percentage(current_time, date_from, date_to) do
-              0 -> "visibility: hidden;"
-              percentage -> "top: #{percentage}%;"
-            end
-
-          # do an async for indicator
           socket
           |> assign(:timetable, t)
-          |> assign(:indicator, indicator)
+          |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
         _ ->
           assign(socket, :login_required, true)
