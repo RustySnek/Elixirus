@@ -3,6 +3,8 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
   import Elixirus.PythonWrapper
   alias ElixirusWeb.LoginModal
+  alias ElixirusWeb.Modal
+  import ElixirusWeb.Helpers
 
   defp is_within_range?(current_time, time_range) do
     [time_from, time_to] = time_range
@@ -123,6 +125,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       |> assign(:this_monday, monday)
       |> assign(:indicator, "hidden")
       |> assign(:timetable, [])
+      |> assign(:show_period_modal, false)
 
     socket =
       socket

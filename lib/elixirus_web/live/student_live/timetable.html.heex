@@ -1,39 +1,102 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
-
-<div :if={@timetable != []} class="relative w-full  flex flex-row">
-  <div class="flex -z-50 flex-col w-full  gap-y-4 absolute">
-    <div :for={period <- hd(@timetable)} class="w-full">
-      <div class="h-[90px] text-gray-500  flex flex-col justify-between">
-        <p class="border-t  border-dashed  border-gray-500 w-full">
-          <%= period |> Map.get(~c"date_from") %>
-        </p>
-        <p class="border-b border-gray-500 border-dashed w-full">
-          <%= period |> Map.get(~c"date_to") %>
-        </p>
-      </div>
-      <div style={"height: #{2 * calculate_minute_difference(period |> Map.get(~c"next_recess_from") |>  to_string(), period |> Map.get(~c"next_recess_to") |> to_string()) |> IO.inspect()}px"}>
+<div class="flex flex-col">
+  <div :if={@timetable == []} class="w-full h-full  absolute -z-40 flex">
+    <div class="animate-pulse bg-[#121212] flex-1 rounded-2xl"></div>
+  </div>
+  <div :if={@timetable != []} class="relative w-full  flex flex-col">
+    <div class="flex -z-40 flex-col w-full  gap-y-4">
+      <div :for={period <- hd(@timetable)} class="w-full">
+        <div class="h-[90px] text-gray-500  flex flex-col justify-between">
+          <p class="border-t  border-dashed  border-gray-500 w-full">
+            <%= period |> Map.get(~c"date_from") %>
+          </p>
+          <p class="border-b border-gray-500 border-dashed w-full">
+            <%= period |> Map.get(~c"date_to") %>
+          </p>
+        </div>
+        <div style={"height: #{2 * calculate_minute_difference(period |> stringify_value(~c"next_recess_from"), period |> stringify_value(~c"next_recess_to"))}px"}>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="overflow-x-auto gap-x-10 justify-between snap-x snap-mandatory  pl-10 ml-10 w-auto flex-row flex">
-    <div :for={weekday <- @timetable} class="w-auto snap-center">
-      <div class="flex h-full gap-y-4 flex-col  ">
-        <div :for={period <- weekday} class="xl:w-64 w-72 ">
-          <div class="w-full overflow-x-hidden">
-            <div class={" h-[90px] w-full flex flex-col justify-between py-1 px-4 #{ period |> Map.get(~c"subject") == [] &&"!border-none"} border-2 border-fuchsia-600 #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"} rounded-2xl"}>
-              <span class="flex-shrink text-center font-bold text-red-600">
-                <%= period |> Map.get(~c"info") |> Map.keys() |> Enum.join(", ") |> to_string() %>
-              </span>
-              <div class="flex-grow">
-                <span class="line-clamp-1">
-                  <%= period |> Map.get(~c"subject") |> to_string() %>
+    <div class="overflow-x-auto w-full absolute gap-x-10 justify-between snap-x snap-mandatory  pl-20  flex-row flex">
+      <div :for={weekday <- @timetable} class="w-auto snap-center">
+        <div class="flex h-full gap-y-4 flex-col  ">
+          <div
+            :for={period <- weekday}
+            :if={
+              Enum.filter(weekday, fn period ->
+                period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
+              end)
+              |> length() > 0
+            }
+            class="w-72 text-justify"
+          >
+            <div class="w-full overflow-x-hidden">
+              <.live_component
+                :if={period |> Map.get(~c"subject") != []}
+                module={Modal}
+                id={"#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
+              >
+                <div class="bg-[#121212] rounded-2xl absolute z-40">
+                  <div class="p-4 flex flex-col text-center max-w-xl gap-y-4">
+                    <span class="text-lg font-bold">
+                      <%= period |> stringify_value(~c"weekday") %>
+                    </span>
+
+                    <span class="text-lg font-bold">
+                      <%= period |> stringify_value(~c"subject") %>
+                    </span>
+                    <div
+                      :for={
+                        info <-
+                          period
+                          |> Map.get(~c"info")
+                          |> Map.values()
+                      }
+                      class="flex flex-col border-red-700 border rounded-2xl p-2"
+                    >
+                      <span :for={line <- info |> Map.values()}>
+                        <%= line |> to_string() %>
+                      </span>
+                    </div>
+
+                    <span>
+                      Lesson: <%= period |> stringify_value(~c"number") %>
+                    </span>
+                    <span>
+                      <%= period |> stringify_value(~c"teacher_and_classroom") %>
+                    </span>
+                    <span>
+                      <%= period |> stringify_value(~c"date") %>
+                    </span>
+                  </div>
+                </div>
+              </.live_component>
+
+              <button
+                disabled={period |> Map.get(~c"subject") == []}
+                phx-click={
+                  ElixirusWeb.Modal.show_modal_js(
+                    "#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"
+                  )
+                }
+                phx-target={"##{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
+                class={" hover:brightness-125 transition h-[90px] w-full flex flex-col text-justify justify-between py-1 px-4 #{ period |> Map.get(~c"subject") == [] &&"!border-none bg-inherit"}  bg-[#121212] border-2 border-fuchsia-600 #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"} rounded-2xl"}
+              >
+                <span class="flex-shrink text-center font-bold text-red-600">
+                  <%= period |> Map.get(~c"info") |> Map.keys() |> Enum.join(", ") |> to_string() %>
                 </span>
+                <div class="flex-grow">
+                  <span class="line-clamp-1">
+                    <%= period |> stringify_value(~c"subject") %>
+                  </span>
+                </div>
+                <span class="text-sm text-gray-500 ">
+                  <%= period |> stringify_value(~c"teacher_and_classroom") %>
+                </span>
+              </button>
+              <div style={"height: #{2* calculate_minute_difference(period |> stringify_value(~c"next_recess_from"), period |> stringify_value(~c"next_recess_to"))}px"}>
               </div>
-              <span class="text-sm text-gray-500 ">
-                <%= period |> Map.get(~c"teacher_and_classroom") |> to_string() %>
-              </span>
-            </div>
-            <div style={"height: #{2* calculate_minute_difference(period |> Map.get(~c"next_recess_from") |>  to_string(), period |> Map.get(~c"next_recess_to") |> to_string())}px"}>
             </div>
           </div>
         </div>
@@ -42,7 +105,7 @@
 
     <div
       style={@indicator}
-      class=" absolute right-0  bg-fuchsia-500 opacity-50 h-1  w-full transform"
+      class=" absolute right-0  bg-pink-700 opacity-50 h-[3px] z-30  w-full transform"
     >
     </div>
   </div>
