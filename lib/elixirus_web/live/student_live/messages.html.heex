@@ -1,0 +1,7 @@
+<.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<div
+  :for={message <- @messages}
+  class="flex flex-row flex-wrap w-full items-center justify-center gap-y-4 "
+>
+  <div><%= message |> stringify_value(~c"title") %></div>
+</div>
