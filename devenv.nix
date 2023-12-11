@@ -13,6 +13,8 @@
     python311
     python311Packages.pip
     nodePackages.pyright
+
+nodePackages.vscode-css-languageserver-bin
     nodePackages.vscode-html-languageserver-bin
     nodePackages."@tailwindcss/language-server"
     
