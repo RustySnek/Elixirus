@@ -1,7 +1,7 @@
 <header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-fuchsia-500 py-3 text-sm">
-    <div class="items-end gap-x-4 hidden xl:flex">
-      <.link navigate="/">
+  <div class="flex items-center overflow-hidden h-24 flex-row justify-between border-b border-fuchsia-500 py-3 text-sm">
+    <div class="items-end gap-x-4 flex-row  xl:flex">
+      <.link navigate={~c"/student"}>
         <div class="flex flex-row mr-20 gap-x-2 justify-center">
           <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
             Elixir<span class="text-fuchsia-900">us</span>
@@ -9,29 +9,23 @@
           <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
         </div>
       </.link>
-      <.link navigate={~p"/student"}>
-        <div class="flex flex-row gap-x-2">
-          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
-            Over<span class="text-fuchsia-900">view</span>
-          </h1>
-        </div>
-      </.link>
+
       <.link navigate={~p"/student/grades"}>
-        <div class="flex flex-row gap-x-2">
+        <div class=" hidden xl:flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Grad<span class="text-fuchsia-900">es</span>
           </h1>
         </div>
       </.link>
       <.link navigate={~p"/student/timetable"}>
-        <div class="flex flex-row gap-x-2">
+        <div class=" hidden xl:flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Time<span class="text-fuchsia-900">table</span>
           </h1>
         </div>
       </.link>
       <.link navigate={~p"/student/messages"}>
-        <div class="flex flex-row gap-x-2">
+        <div class="hidden xl:flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Mess<span class="text-fuchsia-900">ages</span>
           </h1>
