@@ -27,6 +27,7 @@ defmodule ElixirusWeb.Router do
       pipe_through :api_token
       live "/", StudentLive.Index
       live "/timetable", StudentLive.Timetable
+      live "/messages", StudentLive.Messages
     end
   end
 
