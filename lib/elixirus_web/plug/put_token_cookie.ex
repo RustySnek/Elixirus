@@ -26,7 +26,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
       _ ->
         conn
-        |> put_session(:api_token, Plug.Conn.Query.decode(cookie))
+        |> put_session(:token, Plug.Conn.Query.decode(cookie))
         |> put_session(:semester, semester)
     end
   end
