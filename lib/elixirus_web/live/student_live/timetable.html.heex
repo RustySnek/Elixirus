@@ -81,7 +81,7 @@
                   )
                 }
                 phx-target={"##{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
-                class={" hover:brightness-125 transition h-[90px] w-full flex flex-col text-justify justify-between py-1 px-4 #{ period |> Map.get(~c"subject") == [] &&"!border-none bg-inherit"}  bg-[#121212] border-2 border-fuchsia-600 #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"} rounded-2xl"}
+                class={" hover:brightness-125 transition h-[90px] w-full flex flex-col text-justify justify-between py-1 px-4 #{ period |> Map.get(~c"subject") == [] &&"!border-none !bg-inherit"}  duration-100 border-2 border-fuchsia-600 #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"} rounded-2xl"}
               >
                 <span class="flex-shrink text-center font-bold text-red-600">
                   <%= period |> Map.get(~c"info") |> Map.keys() |> Enum.join(", ") |> to_string() %>
