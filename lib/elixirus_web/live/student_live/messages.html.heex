@@ -1,7 +1,76 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
-<div
-  :for={message <- @messages}
-  class="flex flex-row flex-wrap w-full items-center justify-center gap-y-4 "
->
-  <div><%= message |> stringify_value(~c"title") %></div>
+<.live_component module={Modal} id="message-modal">
+  <div
+    phx-click-away="wipe_content"
+    class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50 bg-[#121212] rounded-2xl"
+  >
+    <div class="flex px-5 py-2 flex-col gap-x-4">
+      <p class="text-gray-400 text-center"><%= @author %></p>
+      <p class="text-center text-lg"><%= @title %></p>
+
+      <p class="text-gray-400 text-end"><%= @date %></p>
+    </div>
+    <p class="px-4 pb-4 overflow-y-auto max-h-[40vh]"><%= @content %></p>
+  </div>
+</.live_component>
+<div class="flex flex-col md:flex-row gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 ">
+  <div class="justify-evenly flex flex-row w-full self-center order-last z-40 fixed bottom-2 mx-auto md:hidden">
+    <button phx-value-visibility="all" phx-click="toggle_visibility">
+      <.inbox class="w-10 text-fuchsia-400" />
+    </button>
+    <button phx-value-visibility="seen" phx-click="toggle_visibility">
+      <.eye class="w-10 text-fuchsia-400" />
+    </button>
+    <button phx-value-visibility="unread" phx-click="toggle_visibility">
+      <.eye_slash class="w-10 text-fuchsia-400" />
+    </button>
+  </div>
+  <div class="flex flex-col gap-y-5 flex-grow hidden md:flex items-center w-96 bg-[#121212] rounded-2xl py-10 font-bold text-xl">
+    <button phx-value-visibility="all" phx-click="toggle_visibility">All</button>
+    <button phx-value-visibility="seen" phx-click="toggle_visibility">Seen</button>
+    <button phx-value-visibility="unread" phx-click="toggle_visibility">Unread</button>
+  </div>
+  <div
+    :if={@shown_messages != []}
+    class="flex flex-col w-full translate-x-none opacity-100 items-center gap-y-4 overflow-x-hidden md:overflow-y-auto"
+  >
+    <div
+      :for={{message, idx} <- @shown_messages |> Enum.with_index()}
+      phx-mounted={
+        JS.transition({"blur-sm", "-translate-x-full", "blur-none"},
+          time: 0 * 400 + 20 * (idx + 1)
+        )
+        |> JS.add_class("hover:rotate-1 hover:!duration-100")
+      }
+      phx-hook="slide_right"
+      id={"container-#{message |> stringify_value(~c"href")}"}
+      phx-remove={
+        JS.transition({"blur-md translate-x-none", "blur-sm", "translate-x-[120%] blur-none"},
+          time: 0 * 50 + 7 * (idx + 1)
+        )
+      }
+      style={"transition-duration: #{400 + 20 * idx}ms;"}
+      class={"hover:opacity-90 rotate-0 w-full  bg-fuchsia-800/25 #{message |> Map.get(~c"unread") == true && '!bg-red-700/25'} rounded"}
+    >
+      <button
+        class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24 xl:h-16 "
+        phx-click={
+          JS.push("view_message")
+          |> ElixirusWeb.Modal.show_modal_js("message-modal")
+        }
+        phx-value-msg_id={message |> stringify_value(~c"href")}
+        phx-value-title={message |> stringify_value(~c"title")}
+        phx-value-author={message |> stringify_value(~c"author")}
+        phx-value-date={message |> stringify_value(~c"date")}
+      >
+        <div class="truncate xl:w-1/2 xl:text-justify w-full">
+          <%= message |> stringify_value(~c"title") %>
+        </div>
+        <div class="text-base justify-between flex flex-col xl:w-1/3 w-full text-gray-400">
+          <p class="truncate text-end"><%= message |> stringify_value(~c"author") %></p>
+          <p class="truncate text-end"><%= message |> stringify_value(~c"date") %></p>
+        </div>
+      </button>
+    </div>
+  </div>
 </div>
