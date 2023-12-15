@@ -29,10 +29,21 @@ Hooks.focus_field = {
     this.el.focus()
   },
 }
+Hooks.slide_right = {
+  mounted() {
+    this.el.classList.add("-translate-x-full")
+  },
+ destroyed() {
+    this.el.classList.add("-translate-x-full")
+  },
+  
+
+}
 Hooks.store_token = {
   updated() {
-    fetch(`/set_token?token=${this.el.value}`)
-    this.pushEvent("navigate_students", {token: this.el.value})
+    fetch(`/set_token?token=${this.el.value}`).then((response) => {
+      this.pushEvent("navigate_students", {token: this.el.value})
+    })
   }
 }
 Hooks.store_semester = {
