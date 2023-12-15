@@ -2,6 +2,12 @@
 
 ### A better replacemenet for Librus Synergia frontend written in Elixir
 
+## Tech used
+ * [Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view) -  Rich, real-time user experiences with server-rendered HTML 🐦
+ * [bun](https://github.com/oven-sh/bun) - Incredibly fast JavaScript runtime, bundler, test runner, and package manager 🥖
+ * [erlport](https://github.com/erlport/erlport) - Connecting Elixir with Python 🧪 ❤️ 🐍
+ * [librus-apix](https://github.com/RustySnek/librus-apix) - Web Scraper for Librus Synergia written in Python 🪛🐍
+
 ## Working with devenv
  Run `direnv allow` to allow .envrc execution
  
