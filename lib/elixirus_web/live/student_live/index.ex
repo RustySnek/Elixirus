@@ -11,7 +11,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       |> assign(:login_required, false)
       |> fetch_data(token, socket.assigns.semester)
 
-    {:noreply, socket}
+    {:noreply, redirect(socket, to: "/student")}
   end
 
   def fetch_data(socket, api_token, semester) do
@@ -68,7 +68,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
-  def mount(_params, %{"api_token" => api_token} = params, socket) do
+  def mount(_params, %{"token" => api_token} = params, socket) do
     api_token =
       case api_token |> Map.keys() do
         [] -> ""

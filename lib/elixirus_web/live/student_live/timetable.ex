@@ -105,14 +105,20 @@ defmodule ElixirusWeb.StudentLive.Timetable do
         fetch_timetable(token, this_weeks_monday() |> to_string())
       end)
 
-    {:noreply, socket}
+    {:noreply, redirect(socket, to: "/student/timetable")}
   end
 
-  def mount(_params, %{"semester" => semester, "api_token" => api_token}, socket) do
+  def mount(_params, %{"semester" => semester, "token" => api_token}, socket) do
     api_token =
       case api_token |> Map.keys() do
-        [] -> ""
-        token -> token |> hd() |> to_charlist()
+        [] ->
+          case Map.get(socket.assigns, :token) do
+            nil -> ""
+            token -> token
+          end
+
+        token ->
+          token |> hd() |> to_charlist()
       end
 
     monday = this_weeks_monday()
