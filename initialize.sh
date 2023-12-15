@@ -21,6 +21,8 @@ if [ -d "$venv_directory" ]; then
 else
   python -m venv $venv_directory
   echo "Created python environment"
+      source $venv_directory/bin/activate
+  pip install -r $venv_directory/../requirements.txt
 fi
 
 echo -e "\nDone!"
