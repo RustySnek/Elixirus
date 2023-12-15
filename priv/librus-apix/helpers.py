@@ -1,5 +1,5 @@
 from erlport.erlterms import Atom
-from librus_apix.messages import get_recieved
+from librus_apix.messages import get_recieved, message_content
 from librus_apix.get_token import get_token, Token
 from librus_apix.grades import TokenError
 from librus_apix.student_information import get_student_information
@@ -20,6 +20,16 @@ def fetch_messages(token, page):
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), handle_messages(messages)
+
+def fetch_message_content(token, id):
+    token = create_token(token)
+    try:
+        content = message_content(token, id.decode('utf-8'))
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), content 
+
+
 
 def fetch_grades(token, semester, opt):
     try:
