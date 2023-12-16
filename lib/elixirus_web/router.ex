@@ -28,6 +28,7 @@ defmodule ElixirusWeb.Router do
       live "/", StudentLive.Index
       live "/timetable", StudentLive.Timetable
       live "/messages", StudentLive.Messages
+      live "/homework", StudentLive.Homework
     end
   end
 
