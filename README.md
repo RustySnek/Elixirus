@@ -45,3 +45,29 @@
    ```
  * ### Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
      Now you can visit [`localhost:4001`](http://localhost:4001) from your browser.
+
+## Tasks
+  ### Todo
+  - [ ] Grades Page 📑
+  - [ ] Overview Page 📄
+  - [ ] Announcements Page 📯
+  - [ ] Attendance Page ✔️
+  - [ ] Schedule Page 📆
+  - [ ] Think of some cool extras to include 😲
+  - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
+  
+  ### In Progress
+  - [ ] Homework Page 📰
+    - [ ] Implement some cool ai helper with them???? 🤖
+
+  ### Done ✓
+  
+  - [x] Timetable page 🗓️
+    - [x] Add timeline indicator 🕚
+    - [x] Add details modal 🔍
+  - [x] Messages Page 📫
+    - [x] Handle recieved messages 📩
+    - [x] Add message content modal 📑
+    - [x] Make some cool sliding animations 🎥
+  - [x] Authentication
+    - [x] Add a modal for quick login to pages  
