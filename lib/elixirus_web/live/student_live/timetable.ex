@@ -33,15 +33,6 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     end
   end
 
-  def warsaw_now() do
-    timezone = "Europe/Warsaw"
-    DateTime.now!(timezone)
-  end
-
-  def this_weeks_monday() do
-    warsaw_now() |> Date.beginning_of_week()
-  end
-
   def fetch_timetable(token, monday) do
     python(:overview, :handle_overview_timetable, [token, monday])
   end
