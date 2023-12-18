@@ -5,7 +5,7 @@ defmodule ElixirusWeb.Components.Loadings do
     ~H"""
     <svg
       aria-hidden="true"
-      class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+      class="w-24 h-24 text-gray-200 duration-1000 animate-spin dark:text-gray-600 fill-blue-600"
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
