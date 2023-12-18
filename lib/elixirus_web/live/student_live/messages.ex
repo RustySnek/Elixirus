@@ -5,6 +5,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
   import ElixirusWeb.Helpers
   import Heroicons
   alias ElixirusWeb.Modal
+  import ElixirusWeb.Components.Loadings
 
   def fetch_messages(token, page) do
     python(:helpers, :fetch_messages, [token, page])

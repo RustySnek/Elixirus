@@ -1,9 +1,12 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
 <.live_component module={Modal} id="homework_modal">
-  <div class="flex flex-col gap-y-4" phx-click-away="wipe_details">
-    <div :for={detail <- @details |> Map.keys()}>
-      <%= detail |> to_string() %>: <%= @details |> stringify_value(detail) %>
+  <div phx-click-away="wipe_details">
+    <div class="flex flex-col w-fit bg-[#121212] text-center rounded-2xl">
+      <div :for={detail <- @details |> Map.keys()} class=" py-2 px-6">
+        <%= detail |> to_string() %>: <%= @details |> stringify_value(detail) %>
+      </div>
     </div>
+    <.spinner :if={@details == %{}} />
   </div>
 </.live_component>
 

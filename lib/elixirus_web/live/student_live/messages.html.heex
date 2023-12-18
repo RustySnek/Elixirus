@@ -1,17 +1,17 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
 <.live_component module={Modal} id="message-modal">
-  <div
-    phx-click-away="wipe_content"
-    class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50 bg-[#121212] rounded-2xl"
-  >
-    <div class="flex px-5 py-2 flex-col gap-x-4">
-      <p class="text-gray-400 text-center"><%= @author %></p>
-      <p class="text-center text-lg"><%= @title %></p>
+  <div phx-click-away="wipe_content" class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50">
+    <div class={"bg-[#121212] #{@author == "" && "!bg-transparent"} rounded-2xl"}>
+      <div class="flex px-5 flex-col gap-x-4">
+        <p class="text-gray-400 text-center"><%= @author %></p>
+        <p class="text-center text-lg"><%= @title %></p>
 
-      <p class="text-gray-400 text-end"><%= @date %></p>
+        <p class="text-gray-400 text-end"><%= @date %></p>
+      </div>
+      <p class="px-4 pb-4 overflow-y-auto max-h-[40vh]"><%= @content %></p>
     </div>
-    <p class="px-4 pb-4 overflow-y-auto max-h-[40vh]"><%= @content %></p>
   </div>
+  <.spinner :if={@author == ""} />
 </.live_component>
 <div class="flex flex-col md:flex-row gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 ">
   <div class="justify-evenly flex flex-row w-full self-center order-last z-40 fixed bottom-2 mx-auto md:hidden">
