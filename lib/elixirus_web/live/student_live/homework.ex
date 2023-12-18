@@ -5,6 +5,7 @@ defmodule ElixirusWeb.StudentLive.Homework do
   alias ElixirusWeb.LoginModal
   import Heroicons
   alias ElixirusWeb.Modal
+  import ElixirusWeb.Components.Loadings
 
   def fetch_homework(token, start_date, end_date) do
     python(:helpers, :fetch_homework, [token, start_date, end_date])
