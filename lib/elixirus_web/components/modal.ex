@@ -16,7 +16,7 @@ defmodule ElixirusWeb.Modal do
         <div class="flex min-h-full items-center justify-center">
           <div
             phx-click-away={hide_modal(@id)}
-            class="w-full flex items-center justify-center max-w-3xl p-4 sm:p-6 lg:py-8"
+            class="w-fit flex items-center justify-center max-w-3xl"
           >
             <%= render_slot(@inner_block) %>
           </div>
