@@ -1,4 +1,4 @@
-![Elixir](https://github.com/RustySnek/Elixirus/assets/73820224/f98c563a-6e93-446b-8d69-79241c468199) ![us](https://github.com/RustySnek/Elixirus/assets/73820224/8db4378f-e11b-406c-b871-2086396667c6)
+![Elixirus](https://github.com/RustySnek/Elixirus/blob/master/images/elixirus_logo.png)
 
 ### A better replacement for Librus Synergia frontend written in Elixir
 
