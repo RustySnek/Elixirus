@@ -16,8 +16,6 @@ defmodule ElixirusWeb.StudentLive.Homework do
   end
 
   def handle_async(:load_details, {:ok, details}, socket) do
-    IO.inspect(details)
-
     socket =
       case details do
         {:ok, details} -> assign(socket, :details, details)
