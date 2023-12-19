@@ -30,6 +30,7 @@ defmodule ElixirusWeb.Router do
       live "/messages", StudentLive.Messages
       live "/homework", StudentLive.Homework
       live "/grades", StudentLive.Subjects
+
     end
   end
 
