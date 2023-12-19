@@ -1,0 +1,14 @@
+<.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<div class="m-5">
+  <form phx-change="search_grades">
+    <input class="bg-inherit" type="text" name="query" value={@query} />
+
+    <input class="bg-inherit" checked={@hide_empty} type="checkbox" name="hide_empty" />
+  </form>
+  <div :for={subject <- @shown_grades |> Map.keys()}>
+    <%= subject |> to_string() %>
+    <div :for={grade <- @shown_grades |> Map.get(subject)}>
+      <%= grade |> stringify_value(~c"grade") %>
+    </div>
+  </div>
+</div>
