@@ -48,7 +48,7 @@
 
 ## Tasks
   ### Todo
-  - [ ] Grades Page 📑
+
   - [ ] Overview Page 📄
   - [ ] Announcements Page 📯
   - [ ] Attendance Page ✔️
@@ -57,11 +57,11 @@
   - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
   
   ### In Progress
-  - [ ] Homework Page 📰
-    - [ ] Implement some cool ai helper with them???? 🤖
+  - [ ] Grades Page 📑
+    - [X] Add nice filtering for subjects and grades 🧐 
 
   ### Done ✓
-  
+  - [X] Homework Page 📰
   - [x] Timetable page 🗓️
     - [x] Add timeline indicator 🕚
     - [x] Add details modal 🔍
