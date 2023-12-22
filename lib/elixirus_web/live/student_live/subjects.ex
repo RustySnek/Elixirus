@@ -1,7 +1,7 @@
 defmodule ElixirusWeb.StudentLive.Subjects do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
-
+  import Heroicons
   import ElixirusWeb.Helpers
   alias ElixirusWeb.LoginModal
 
@@ -9,10 +9,10 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     hide_empty =
       case params |> Map.get("hide_empty", false) do
         "true" -> true
-        "false" -> false
         _ -> false
       end
 
+    sort_grades = params |> Map.get("sort_grades", "newest")
     query = params |> Map.get("query", "")
     grades = socket.assigns.grades
     keys = grades |> Map.keys()
@@ -28,6 +28,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
     socket =
       socket
+      |> assign(:sort_grades, sort_grades)
       |> assign(:query, query)
       |> assign(:hide_empty, hide_empty)
       |> assign(:shown_grades, shown)
@@ -53,7 +54,69 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     end)
   end
 
-  def handle_event("search_grades", %{"query" => query} = params, socket) do
+  defp sort_grades_by(grades, by) do
+    case by do
+      "newest" ->
+        grades |> Enum.reverse()
+
+      "oldest" ->
+        grades
+
+      "weight" ->
+        grades
+        |> Enum.sort_by(
+          fn grade ->
+            Map.get(grade, ~c"weight") |> to_string |> String.to_integer()
+          end,
+          :desc
+        )
+
+      "value" ->
+        grades
+        |> Enum.sort_by(
+          fn grade ->
+            if Map.get(grade, ~c"counts") == false do
+              0
+            else
+              Map.get(grade, ~c"value") |> to_string |> String.to_float()
+            end
+          end,
+          :desc
+        )
+
+      "weighed_value" ->
+        grades
+        |> Enum.sort_by(
+          fn grade ->
+            if Map.get(grade, ~c"counts") == false do
+              0
+            else
+              value =
+                Map.get(grade, ~c"value")
+                |> to_string
+                |> String.to_float()
+
+              weight =
+                Map.get(grade, ~c"weight")
+                |> to_string()
+                |> String.to_integer()
+
+              value * weight
+            end
+          end,
+          :desc
+        )
+
+      _ ->
+        grades
+    end
+  end
+
+  def handle_event(
+        "query_grades",
+        %{"query" => query, "sort_grades" => sort_grades} = params,
+        socket
+      ) do
     grades = socket.assigns.grades
     keys = grades |> Map.keys()
 
@@ -74,11 +137,12 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
     socket =
       socket
+      |> assign(:sort_grades, sort_grades)
       |> assign(:query, query)
       |> assign(:hide_empty, hide_empty)
       |> assign(:shown_grades, shown)
 
-    query_params = %{query: query, hide_empty: hide_empty}
+    query_params = %{query: query, hide_empty: hide_empty, sort_grades: sort_grades}
 
     socket =
       push_patch(socket, to: ~p"/student/grades?#{query_params}")
@@ -116,6 +180,16 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     {:noreply, socket}
   end
 
+  def handle_event("navigate_students", %{"token" => token}, socket) do
+    socket =
+      socket
+      |> assign(:token, token)
+      |> assign(:login_required, false)
+      |> start_async(:load_grades, fn -> fetch_all_grades(token, socket.assigns.semester) end)
+
+    {:noreply, redirect(socket, to: "/student/grades")}
+  end
+
   def mount(_params, %{"semester" => semester, "token" => api_token}, socket) do
     api_token =
       case api_token |> Map.keys() do
@@ -141,4 +215,3 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     {:ok, socket}
   end
 end
-

@@ -1,14 +1,38 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
-<div class="m-5">
-  <form phx-change="search_grades">
+<div class="m-5 flex flex-col gap-y-10">
+  <form phx-change="query_grades">
     <input class="bg-inherit" type="text" name="query" value={@query} />
-
+    <select name="sort_grades" selected={@sort_grades} class="bg-inherit">
+      <%= Phoenix.HTML.Form.options_for_select(
+        [
+          Newest: "newest",
+          Oldest: "oldest",
+          Weight: "weight",
+          Value: "value",
+          "Weighed Value": "weighed_value"
+        ],
+        @sort_grades
+      ) %>
+    </select>
     <input class="bg-inherit" checked={@hide_empty} type="checkbox" name="hide_empty" />
   </form>
-  <div :for={subject <- @shown_grades |> Map.keys()}>
+  <div
+    :for={subject <- @shown_grades |> Map.keys()}
+    class="bg-[#121212] py-2 px-4 gap-y-4 flex flex-col"
+  >
     <%= subject |> to_string() %>
-    <div :for={grade <- @shown_grades |> Map.get(subject)}>
-      <%= grade |> stringify_value(~c"grade") %>
+    <div class="flex flex-row font-semibold text-xl gap-x-5 flex-wrap">
+      <div
+        :for={grade <- @shown_grades |> Map.get(subject) |> sort_grades_by(@sort_grades)}
+        class="pr-1 w-14 h-14 relative items-center flex flex-row  border rounded border-fuchsia-600"
+      >
+        <p class="w-full text-center">
+          <%= grade |> stringify_value(~c"grade") %>
+        </p>
+        <p class="text-sm absolute right-1 font-normal items-start justify-end flex h-full">
+          <%= grade |> stringify_value(~c"weight") %>
+        </p>
+      </div>
     </div>
   </div>
 </div>
