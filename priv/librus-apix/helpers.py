@@ -37,7 +37,7 @@ def fetch_grades(token, semester, opt):
         subjects, average_grades, descriptive = get_grades(token, opt)
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
-    return Atom("ok".encode('utf-8')), extract_grades(handle_grades(subjects[int(semester)]))
+    return Atom("ok".encode('utf-8')), handle_grades(subjects[int(semester)])
 
 def fetch_all_grades(token, semester):
     token = create_token(token)
