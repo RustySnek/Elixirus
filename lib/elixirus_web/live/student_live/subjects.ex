@@ -14,33 +14,51 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
     sort_grades = params |> Map.get("sort_grades", "newest")
     query = params |> Map.get("query", "")
+    grades_query = params |> Map.get("grade_query", "")
     grades = socket.assigns.grades
     keys = grades |> Map.keys()
 
     keys =
-      case hide_empty do
-        false -> keys
-        _ -> remove_empty(keys, grades)
-      end
-      |> search_grades(query)
+      keys
+      |> search_subjects(query)
 
-    shown = grades |> Map.take(keys)
+    # |> search_grades(grades_query)
+    shown = grades |> Map.take(keys) |> search_grades(grades_query)
 
     socket =
       socket
       |> assign(:sort_grades, sort_grades)
       |> assign(:query, query)
+      |> assign(:grade_query, grades_query)
       |> assign(:hide_empty, hide_empty)
       |> assign(:shown_grades, shown)
 
     {:noreply, socket}
   end
 
-  defp remove_empty(keys, grades) do
-    keys |> Enum.filter(fn subject -> Map.get(grades, subject) != [] end)
+  defp search_grades(subjects, query) do
+    if query == "" do
+      subjects
+    end
+
+    subjects
+    |> Enum.map(fn {subject, grades} ->
+      filtered_grades =
+        grades
+        |> Enum.filter(fn grade ->
+          grade
+          |> Map.values()
+          |> Enum.filter(fn val ->
+            val |> to_string() |> String.downcase() |> String.contains?(String.downcase(query))
+          end) != []
+        end)
+
+      {subject, filtered_grades}
+    end)
+    |> Enum.into(%{})
   end
 
-  defp search_grades(keys, query) do
+  defp search_subjects(keys, query) do
     if query == "" do
       keys
     end
@@ -114,7 +132,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
   def handle_event(
         "query_grades",
-        %{"query" => query, "sort_grades" => sort_grades} = params,
+        %{"query" => query, "sort_grades" => sort_grades, "grade_query" => grades_query} = params,
         socket
       ) do
     grades = socket.assigns.grades
@@ -127,22 +145,25 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       end
 
     keys =
-      case hide_empty do
-        false -> keys
-        _ -> remove_empty(keys, grades)
-      end
-      |> search_grades(query)
+      keys
+      |> search_subjects(query)
 
-    shown = grades |> Map.take(keys)
+    shown = grades |> Map.take(keys) |> search_grades(grades_query)
 
     socket =
       socket
       |> assign(:sort_grades, sort_grades)
       |> assign(:query, query)
+      |> assign(:grade_query, grades_query)
       |> assign(:hide_empty, hide_empty)
       |> assign(:shown_grades, shown)
 
-    query_params = %{query: query, hide_empty: hide_empty, sort_grades: sort_grades}
+    query_params = %{
+      query: query,
+      hide_empty: hide_empty,
+      sort_grades: sort_grades,
+      grade_query: grades_query
+    }
 
     socket =
       push_patch(socket, to: ~p"/student/grades?#{query_params}")
@@ -161,11 +182,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           keys = grades |> Map.keys()
 
           keys =
-            case socket.assigns.hide_empty do
-              true -> remove_empty(keys, grades)
-              _ -> keys
-            end
-            |> search_grades(socket.assigns.query)
+            keys |> search_subjects(socket.assigns.query)
 
           shown = grades |> Map.take(keys)
 

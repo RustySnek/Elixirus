@@ -1,8 +1,28 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
 <div class="m-5 flex flex-col gap-y-10">
-  <form phx-change="query_grades">
-    <input class="bg-inherit" type="text" name="query" value={@query} />
-    <select name="sort_grades" selected={@sort_grades} class="bg-inherit">
+  <form
+    phx-change="query_grades"
+    class="select-none  xl:items-center  xl:flex-row flex-col flex gap-5"
+  >
+    <input
+      class="bg-inherit rounded"
+      placeholder="search subjects"
+      type="text"
+      name="query"
+      value={@query}
+    />
+    <input
+      class="bg-inherit rounded"
+      placeholder="search grades"
+      type="text"
+      name="grade_query"
+      value={@grade_query}
+    />
+    <select
+      name="sort_grades"
+      selected={@sort_grades}
+      class="child:bg-stone-900 rounded appearance-none child-hover:bg-fuchsia-600 bg-inherit"
+    >
       <%= Phoenix.HTML.Form.options_for_select(
         [
           Newest: "newest",
@@ -14,17 +34,28 @@
         @sort_grades
       ) %>
     </select>
-    <input class="bg-inherit" checked={@hide_empty} type="checkbox" name="hide_empty" />
+    <span class="ml-2">
+      <label>
+        Hide empty
+        <input
+          class="bg-inherit rounded h-6 w-6 text-pink-600"
+          checked={@hide_empty}
+          type="checkbox"
+          name="hide_empty"
+        />
+      </label>
+    </span>
   </form>
   <div
     :for={subject <- @shown_grades |> Map.keys()}
+    :if={not ((@hide_empty || @grade_query != "") && Map.get(@shown_grades, subject) == [])}
     class="bg-[#121212] py-2 px-4 gap-y-4 flex flex-col"
   >
     <%= subject |> to_string() %>
-    <div class="flex flex-row font-semibold text-xl gap-x-5 flex-wrap">
+    <div class="flex flex-row font-semibold text-xl gap-5 flex-wrap">
       <div
         :for={grade <- @shown_grades |> Map.get(subject) |> sort_grades_by(@sort_grades)}
-        class="pr-1 w-14 h-14 relative items-center flex flex-row  border rounded border-fuchsia-600"
+        class="w-14 h-14 relative items-center flex flex-row  border rounded border-fuchsia-600"
       >
         <p class="w-full text-center">
           <%= grade |> stringify_value(~c"grade") %>
