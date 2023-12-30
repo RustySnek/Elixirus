@@ -53,6 +53,7 @@
                           |> Map.get(~c"info")
                           |> Map.values()
                       }
+                      :if={info != []}
                       class="flex flex-col border-red-700 border rounded-2xl p-2"
                     >
                       <span :for={line <- info |> Map.values()}>
@@ -64,7 +65,8 @@
                       Lesson: <%= period |> stringify_value(~c"number") %>
                     </span>
                     <span>
-                      <%= period |> stringify_value(~c"teacher_and_classroom") %>
+                      <%= period
+                      |> stringify_value(~c"teacher_and_classroom") %>
                     </span>
                     <span>
                       <%= period |> stringify_value(~c"date") %>
@@ -92,7 +94,10 @@
                   </span>
                 </div>
                 <span class="text-sm text-gray-500 ">
-                  <%= period |> stringify_value(~c"teacher_and_classroom") %>
+                  <%= period
+                  |> stringify_value(~c"teacher_and_classroom")
+                  |> String.split("s.")
+                  |> List.last() %>
                 </span>
               </button>
               <div style={"height: #{2* calculate_minute_difference(period |> stringify_value(~c"next_recess_from"), period |> stringify_value(~c"next_recess_to"))}px"}>
