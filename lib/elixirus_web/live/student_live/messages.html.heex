@@ -8,7 +8,10 @@
 
         <p class="text-gray-400 text-end"><%= @date %></p>
       </div>
-      <p class="px-4 pb-4 overflow-y-auto max-h-[40vh]"><%= @content %></p>
+      <div class="px-4 pb-4 overflow-y-auto max-h-[40vh]">
+        <%= @content
+        |> Phoenix.HTML.Format.text_to_html() %>
+      </div>
     </div>
   </div>
   <.spinner :if={@author == ""} />
