@@ -130,6 +130,21 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     end
   end
 
+  def handle_event("view_grade", %{"grade_id" => id, "subject" => subject}, socket) do
+    {:noreply,
+     push_navigate(socket, to: ~p"/student/grades/#{subject}?grade_id=#{id}", replace: true)}
+  end
+
+  def handle_event("navigate_students", %{"token" => token}, socket) do
+    socket =
+      socket
+      |> assign(:token, token)
+      |> assign(:login_required, false)
+      |> start_async(:load_grades, fn -> fetch_all_grades(token, socket.assigns.semester) end)
+
+    {:noreply, redirect(socket, to: "/student/grades")}
+  end
+
   def handle_event(
         "query_grades",
         %{"query" => query, "sort_grades" => sort_grades, "grade_query" => grades_query} = params,
@@ -195,16 +210,6 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       end
 
     {:noreply, socket}
-  end
-
-  def handle_event("navigate_students", %{"token" => token}, socket) do
-    socket =
-      socket
-      |> assign(:token, token)
-      |> assign(:login_required, false)
-      |> start_async(:load_grades, fn -> fetch_all_grades(token, socket.assigns.semester) end)
-
-    {:noreply, redirect(socket, to: "/student/grades")}
   end
 
   def mount(_params, %{"semester" => semester, "token" => api_token}, socket) do

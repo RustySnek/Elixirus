@@ -53,8 +53,13 @@
   >
     <%= subject |> to_string() %>
     <div class="flex flex-row font-semibold text-xl gap-5 flex-wrap">
-      <div
+      <button
         :for={grade <- @shown_grades |> Map.get(subject) |> sort_grades_by(@sort_grades)}
+        phx-click="view_grade"
+        phx-value-subject={subject |> to_string()}
+        phx-value-grade_id={
+          grade |> stringify_value(~c"href") |> String.split("/") |> List.last()
+        }
         class="w-14 h-14 relative items-center flex flex-row  border rounded border-fuchsia-600"
       >
         <p class="w-full text-center">
@@ -63,7 +68,7 @@
         <p class="text-sm absolute right-1 font-normal items-start justify-end flex h-full">
           <%= grade |> stringify_value(~c"weight") %>
         </p>
-      </div>
+      </button>
     </div>
   </div>
 </div>
