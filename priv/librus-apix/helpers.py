@@ -7,12 +7,18 @@ from librus_apix.student_information import get_student_information
 from handle_classes import *
 from librus_apix.exceptions import TokenError, ParseError
 
+BASE = "http://127.0.0.1:8000/"
+API_URL = f"{BASE}token"
+MESSAGES = f"{BASE}messages"
+TIMETABLE = f"{BASE}timetable"
+GRADES = f"{BASE}grades"
+
 def extract_grades(grades):
     return [grade for subject in list(grades.values()) for grade in subject]
 
 def create_token(token_charlist):
     token = "".join([chr(n) for n in token_charlist])
-    return Token(token)
+    return Token(token, base_url=BASE, api_url=API_URL, message_url=MESSAGES, grades_url=GRADES, timetable_url=TIMETABLE)
 
 def fetch_messages(token, page):
     token = create_token(token)

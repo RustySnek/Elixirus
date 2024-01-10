@@ -2,7 +2,8 @@ from erlport.erlterms import Atom
 from datetime import datetime
 from librus_apix.get_token import Token
 from librus_apix.grades import TokenError, get_grades, ParseError
-from librus_apix.announcements import get_announcements, timedelta
+from librus_apix.announcements import get_announcements
+from datetime import timedelta
 from librus_apix.attendance import get_attendance
 from librus_apix.homework import get_homework
 from librus_apix.messages import get_recieved
