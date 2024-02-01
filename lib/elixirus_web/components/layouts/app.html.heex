@@ -1,44 +1,50 @@
 <header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center overflow-hidden h-24 flex-row justify-between border-b border-fuchsia-500 py-3 text-sm">
-    <div class="items-end gap-x-4 flex-row  xl:flex">
-      <.link navigate={~p"/student"}>
-        <div class="flex flex-row mr-20 gap-x-2 justify-center">
-          <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
-            Elixir<span class="text-fuchsia-900">us</span>
-          </h1>
-          <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
-        </div>
-      </.link>
+  <div class="flex justify-between sm:justify-start items-center overflow-hidden h-24 flex-row border-b border-fuchsia-500 py-3 text-sm">
+    <.link navigate={~p"/student"}>
+      <div class="flex flex-row mr-0 sm:mr-20 gap-x-2 justify-center">
+        <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
+          Elixir<span class="text-fuchsia-900">us</span>
+        </h1>
+        <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
+      </div>
+    </.link>
 
+    <div class="items-start gap-x-4 flex-row flex flex-wrap xl:flex md:grid grid-cols-2 hidden">
       <.link navigate={~p"/student/grades"}>
-        <div class=" hidden xl:flex flex-row gap-x-2">
+        <div class=" flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Grad<span class="text-fuchsia-900">es</span>
           </h1>
         </div>
       </.link>
       <.link navigate={~p"/student/timetable"}>
-        <div class=" hidden xl:flex flex-row gap-x-2">
+        <div class=" flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Time<span class="text-fuchsia-900">table</span>
           </h1>
         </div>
       </.link>
       <.link navigate={~p"/student/messages"}>
-        <div class="hidden xl:flex flex-row gap-x-2">
+        <div class="flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Mess<span class="text-fuchsia-900">ages</span>
           </h1>
         </div>
       </.link>
       <.link navigate={~p"/student/homework"}>
-        <div class=" hidden xl:flex flex-row gap-x-2">
+        <div class=" flex flex-row gap-x-2">
           <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
             Home<span class="text-fuchsia-900">work</span>
           </h1>
         </div>
       </.link>
     </div>
+    <div class="w-full fixed">
+      <div id="navigator" class="sm:hidden w-full  fixed bg-fuchsia-950 h-20 ">123123123</div>
+    </div>
+    <button phx-click={JS.toggle(to: "#navigator")} class="z-20 sm:hidden">
+      <Heroicons.bars_3 mini class="h-14 text-fuchsia-700" />
+    </button>
   </div>
 </header>
 <main class="pt-10">
