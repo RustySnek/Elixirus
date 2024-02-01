@@ -7,6 +7,7 @@
     "phoenix": "workspace:*",
     "phoenix_html": "workspace:*",
     "phoenix_live_view": "workspace:*",
-    "tailwindcss-language-server": "^0.0.1"
+    "tailwindcss-language-server": "^0.0.1",
+    "uuid": "^9.0.1"
   }
 }

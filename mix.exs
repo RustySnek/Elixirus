@@ -33,6 +33,7 @@ defmodule Elixirus.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.7.10"},
+      {:cachex, "~> 3.6"},
       {:timex, "~> 3.7.11"},
       {:phoenix_html, "~> 3.3"},
       {:heroicons, "~> 0.5.3"},
@@ -48,7 +49,8 @@ defmodule Elixirus.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:redirect, "~> 0.4.0"}
     ]
   end
 
