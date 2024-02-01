@@ -1,7 +1,8 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
-<div class="flex flex-col">
-  <div :if={@timetable == []} class="w-full h-full  absolute -z-40 flex">
-    <div class="animate-pulse bg-[#121212] flex-1 rounded-2xl"></div>
+<div class="flex flex-col w-full h-full">
+  <div :if={@timetable == []} class=" absolute flex items-center justify-center inset-0 -z-40">
+
+    <.spinner/>
   </div>
   <div :if={@timetable != []} class="relative w-full  flex flex-col">
     <div class="flex -z-40 flex-col w-full  gap-y-4">

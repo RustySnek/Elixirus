@@ -3,7 +3,6 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
   Reads a user_details cookie and puts user_details into session
   """
   import Plug.Conn
-  import Phoenix.Controller, only: [redirect: 2]
 
   def init(_) do
     %{}
@@ -13,6 +12,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
     conn = fetch_cookies(conn)
 
     cookie = conn.cookies["api_token"]
+    user_id = conn.cookies["user_id"]
 
     semester =
       case conn.cookies["semester"] do
@@ -20,13 +20,15 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
         sem -> Plug.Conn.Query.decode(sem)
       end
 
-    case cookie do
-      nil ->
-        conn |> redirect(to: "/")
+    case {cookie, conn.cookies["username"]} do
+      {cookie, username} when cookie == nil or username == nil ->
+        conn |> put_session(:semester, semester) |> put_session(:token, %{"not:found": []})
 
-      _ ->
+      {cookie, username} ->
         conn
         |> put_session(:token, Plug.Conn.Query.decode(cookie))
+        |> put_session(:username, username)
+        |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
     end
   end

@@ -26,6 +26,6 @@
       Login
     </button>
   </form>
-  <input hidden phx-hook="store_token" id="token_input" value={@token} />
+  <input hidden phx-hook="store_token" id="token_input" name={@username} value={@token} />
   <h2 class="self-center text-lg text-red-600"><%= @error_message %></h2>
 </div>

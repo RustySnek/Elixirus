@@ -30,7 +30,7 @@ defmodule ElixirusWeb.HomeLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("navigate_students", %{"token" => token}, socket) do
+  def handle_event("navigate_students", %{"token" => token} = params, socket) do
     socket = assign(socket, :token, token)
     {:noreply, push_navigate(socket, to: ~p"/student")}
   end

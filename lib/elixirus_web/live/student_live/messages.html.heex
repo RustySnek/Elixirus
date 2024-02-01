@@ -16,7 +16,13 @@
   </div>
   <.spinner :if={@author == ""} />
 </.live_component>
-<div class="flex flex-col md:flex-row gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 ">
+<div :if={@loaded == false} class=" absolute flex items-center justify-center inset-0 -z-40">
+  <.spinner />
+</div>
+<div
+  :if={@shown_messages != []}
+  class="flex flex-col md:flex-row gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 "
+>
   <div class="justify-evenly flex flex-row w-full self-center order-last z-40 fixed bottom-2 mx-auto md:hidden">
     <button phx-value-visibility="all" phx-click="toggle_visibility">
       <.inbox class="w-10 text-fuchsia-400" />

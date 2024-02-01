@@ -11,9 +11,23 @@ defmodule ElixirusWeb.PageController do
     |> send_resp(200, "{}")
   end
 
-  def set_token(conn, %{"token" => token}) do
+  def set_token(conn, %{"token" => token, "username" => username, "user_id" => user_id}) do
+    dbg(username)
+
     conn
     |> put_resp_cookie("api_token", token,
+      secure: true,
+      http_only: true,
+      same_site: "strict",
+      path: "/"
+    )
+    |> put_resp_cookie("user_id", user_id,
+      secure: true,
+      http_only: true,
+      same_site: "strict",
+      path: "/"
+    )
+    |> put_resp_cookie("username", username,
       secure: true,
       http_only: true,
       same_site: "strict",

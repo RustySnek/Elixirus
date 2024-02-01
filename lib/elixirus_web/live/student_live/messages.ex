@@ -89,6 +89,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
             messages |> Enum.partition(fn msg -> msg |> Map.get(~c"unread") == true end)
 
           socket
+          |> assign(:loaded, true)
           |> assign(:messages, messages)
           |> assign(:shown_messages, messages)
           |> assign(:seen_messages, seen)
@@ -113,6 +114,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
       |> assign(:token, api_token)
       |> assign(:login_required, false)
       |> assign(:show_message_modal, false)
+      |> assign(:loaded, false)
       |> assign(:messages, [])
       |> assign(:shown_messages, [])
       |> assign(:seen_messages, [])
