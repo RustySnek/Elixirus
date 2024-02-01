@@ -1,9 +1,12 @@
 defmodule ElixirusWeb.StudentLive.Grades.Subject do
   use ElixirusWeb, :live_view
+  import ElixirusWeb.Helpers
 
-  def mount(%{"subject" => subject}, %{"semester" => semester, "token" => api_token}, socket) do
-    dbg(socket.assigns)
-
+  def mount(
+        %{"subject" => subject} = params,
+        %{"semester" => semester, "token" => api_token, "user_id" => user_id},
+        socket
+      ) do
     api_token =
       case api_token |> Map.keys() do
         [] ->
@@ -16,10 +19,20 @@ defmodule ElixirusWeb.StudentLive.Grades.Subject do
           token |> hd() |> to_charlist()
       end
 
+    grade_id = Map.get(params, "grade_id", nil)
+
+    grades =
+      case Cachex.get(:elixirus_cache, user_id) do
+        {:ok, grades} -> grades
+        _ -> push_navigate(socket, to: "/student")
+      end
+
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:grades, grades)
       |> assign(:subject, subject)
+      |> assign(:shown_grade, grade_id)
       |> assign(:semester, semester)
 
     {:ok, socket}

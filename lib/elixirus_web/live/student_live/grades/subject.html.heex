@@ -1,0 +1,62 @@
+<div class="flex gap-y-5 flex-col mx-10">
+  <div :for={grade <- @grades |> Map.get(@subject |> to_charlist())}>
+    <div
+      :if={
+        grade |> Map.get(~c"href") |> to_string |> String.split("/") |> List.last() ==
+          @shown_grade
+      }
+      id={@shown_grade}
+      phx-hook="highlight_grade"
+      class=" flex flex-col sm:flex-row gap-x-20 transition duration-1000 bg-white/50"
+    >
+      <div>
+        <p class="text-3xl font-bold self-center"><%= grade |> Map.get(~c"grade") %></p>
+        <div class="flex-row flex self-center">
+          <p class="sm:text-xl text-lg"><%= grade |> stringify_value(~c"weight") %></p>
+          <Heroicons.scale outline class="w-6 ml-1 text-fuchsia-600" />
+          <p class="text-lg ml-2"><%= grade |> stringify_value(~c"category") %></p>
+        </div>
+      </div>
+
+      <div class="flex flex-col justify-between w-full">
+        <div class="flex-row flex gap-x-10">
+          <div class="flex flex-row">
+            <p class="text-xl self-center">AVG.</p>
+            <Heroicons.check
+              :if={grade |> Map.get(~c"counts") == true}
+              mini
+              class="w-8 text-fuchsia-600"
+            />
+            <Heroicons.x_mark
+              :if={grade |> Map.get(~c"counts") != true}
+              mini
+              class="w-8 text-red-600"
+            />
+          </div>
+
+          <div class="text-lg flex flex-row self-center gap-x-2">
+            <p>Real value:</p>
+            <p><%= grade |> stringify_value(~c"value") %></p>
+          </div>
+        </div>
+        <div class="flex-row justify-end gap-x-2 flex">
+          <p><%= grade |> stringify_value(~c"date") %></p>
+          <p><%= grade |> stringify_value(~c"teacher") %></p>
+        </div>
+      </div>
+    </div>
+    <div
+      :if={
+        grade |> Map.get(~c"href") |> to_string |> String.split("/") |> List.last() !=
+          @shown_grade
+      }
+      id={grade |> Map.get(~c"href") |> to_string}
+    >
+      <p><%= grade |> Map.get(~c"grade") %></p>
+      <p :for={val <- grade |> Map.values()}>
+        <%= val |> to_string() %>
+      </p>
+    </div>
+  </div>
+</div>
+
