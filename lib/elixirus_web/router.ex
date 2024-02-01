@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.Router do
+  import Redirect
   use ElixirusWeb, :router
 
   pipeline :browser do
@@ -18,10 +19,11 @@ defmodule ElixirusWeb.Router do
     plug :accepts, ["json"]
   end
 
+  redirect "/", "/student", :permanent
+
   scope "/", ElixirusWeb do
     pipe_through :browser
     get "/set_token", PageController, :set_token
-    live "/", HomeLive.Index
 
     scope "/student" do
       pipe_through :api_token
