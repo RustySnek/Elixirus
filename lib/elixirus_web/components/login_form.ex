@@ -7,6 +7,7 @@ defmodule ElixirusWeb.LoginForm do
     socket =
       socket
       |> assign(:token, "")
+      |> assign(:username, "")
       |> assign(:error_message, "")
 
     {:ok, socket}
@@ -22,10 +23,12 @@ defmodule ElixirusWeb.LoginForm do
     socket =
       case get_token do
         {:ok, token} ->
-          socket |> assign(:token, token |> to_string())
+          socket |> assign(:token, token |> to_string()) |> assign(:username, username)
 
         {:error, error_message} ->
-          assign(socket, :error_message, error_message |> to_string())
+          socket
+          |> assign(:error_message, error_message |> to_string())
+          |> assign(:username, username)
       end
 
     {:noreply, socket}

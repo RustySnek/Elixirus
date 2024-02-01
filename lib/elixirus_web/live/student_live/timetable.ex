@@ -1,6 +1,6 @@
 defmodule ElixirusWeb.StudentLive.Timetable do
   use ElixirusWeb, :live_view
-
+  import ElixirusWeb.Components.Loadings
   import Elixirus.PythonWrapper
   alias ElixirusWeb.LoginModal
   alias ElixirusWeb.Modal

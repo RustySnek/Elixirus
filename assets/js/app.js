@@ -29,6 +29,16 @@ Hooks.focus_field = {
     this.el.focus()
   },
 }
+Hooks.highlight_grade = {
+  
+  mounted() {
+    setTimeout(() => {
+     this.el.classList.add("!bg-inherit")
+    this.el.scrollIntoView({behavior: "smooth", block: "start"});
+   
+    }, 200);
+    }
+}
 Hooks.slide_right = {
   mounted() {
     this.el.classList.add("-translate-x-full")
@@ -41,8 +51,10 @@ Hooks.slide_right = {
 }
 Hooks.store_token = {
   updated() {
-    fetch(`/set_token?token=${this.el.value}`).then((response) => {
-      this.pushEvent("navigate_students", {token: this.el.value})
+    const {v4: uuidv4} = require("uuid");
+    const user_id = uuidv4();
+    fetch(`/set_token?token=${this.el.value}&username=${this.el.name}&user_id=${user_id}`).then((response) => {
+      this.pushEvent("navigate_students", {token: this.el.value, username: this.el.name, user_id: user_id})
     })
   }
 }

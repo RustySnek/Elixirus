@@ -2,6 +2,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
   import Heroicons
+  import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
   alias ElixirusWeb.LoginModal
 
@@ -135,11 +136,12 @@ defmodule ElixirusWeb.StudentLive.Subjects do
      push_navigate(socket, to: ~p"/student/grades/#{subject}?grade_id=#{id}", replace: true)}
   end
 
-  def handle_event("navigate_students", %{"token" => token}, socket) do
+  def handle_event("navigate_students", %{"token" => token, "user_id" => user_id}, socket) do
     socket =
       socket
       |> assign(:token, token)
       |> assign(:login_required, false)
+      |> assign(:user_id, user_id)
       |> start_async(:load_grades, fn -> fetch_all_grades(token, socket.assigns.semester) end)
 
     {:noreply, redirect(socket, to: "/student/grades")}
@@ -200,6 +202,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
             keys |> search_subjects(socket.assigns.query)
 
           shown = grades |> Map.take(keys)
+          Cachex.put(:elixirus_cache, socket.assigns.user_id, grades)
 
           socket
           |> assign(:grades, grades)
@@ -212,7 +215,11 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     {:noreply, socket}
   end
 
-  def mount(_params, %{"semester" => semester, "token" => api_token}, socket) do
+  def mount(
+        _params,
+        %{"semester" => semester, "token" => api_token, "user_id" => user_id},
+        socket
+      ) do
     api_token =
       case api_token |> Map.keys() do
         [] ->
@@ -228,6 +235,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:semester, semester)
       |> assign(:grades, %{})
