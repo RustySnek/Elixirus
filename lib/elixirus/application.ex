@@ -14,7 +14,8 @@ defmodule Elixirus.Application do
       # Start a worker by calling: Elixirus.Worker.start_link(arg)
       # {Elixirus.Worker, arg},
       # Start to serve requests, typically the last entry
-      ElixirusWeb.Endpoint
+      ElixirusWeb.Endpoint,
+      {Cachex, name: :elixirus_cache}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
