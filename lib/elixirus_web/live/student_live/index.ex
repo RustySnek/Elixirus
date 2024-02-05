@@ -69,6 +69,8 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def mount(_params, %{"token" => api_token} = params, socket) do
+    Cachex.purge(:elixirus_cache)
+
     api_token =
       case api_token |> Map.keys() do
         [] -> ""
