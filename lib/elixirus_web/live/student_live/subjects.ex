@@ -202,7 +202,10 @@ defmodule ElixirusWeb.StudentLive.Subjects do
             keys |> search_subjects(socket.assigns.query)
 
           shown = grades |> Map.take(keys)
-          Cachex.put(:elixirus_cache, socket.assigns.user_id, grades)
+          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "grades", grades)
+          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "grades", :timer.minutes(5))
+          IO.inspect(Cachex.ttl(:elixirus_cache, socket.assigns.user_id))
+          IO.inspect(socket.assigns.user_id)
 
           socket
           |> assign(:grades, grades)
@@ -232,6 +235,22 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           token |> hd() |> to_charlist()
       end
 
+    data =
+      case Cachex.ttl(:elixirus_cache, user_id <> "grades") do
+        {:ok, nil} ->
+          :load
+
+        {:ok, _} ->
+          case Cachex.get(:elixirus_cache, user_id <> "grades") do
+            {:ok, nil} -> :load
+            {:ok, data} -> data
+            _ -> :load
+          end
+
+        _ ->
+          :load
+      end
+
     socket =
       socket
       |> assign(:token, api_token)
@@ -240,7 +259,15 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       |> assign(:semester, semester)
       |> assign(:grades, %{})
       |> assign(:shown_grades, %{})
-      |> start_async(:load_grades, fn -> fetch_all_grades(api_token, semester) end)
+
+    socket =
+      case data do
+        :load ->
+          socket |> start_async(:load_grades, fn -> fetch_all_grades(api_token, semester) end)
+
+        data ->
+          socket |> assign(:grades, data) |> assign(:shown_grades, data)
+      end
 
     {:ok, socket}
   end

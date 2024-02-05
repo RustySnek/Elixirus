@@ -22,18 +22,24 @@ defmodule ElixirusWeb.StudentLive.Grades.Subject do
     grade_id = Map.get(params, "grade_id", nil)
 
     grades =
-      case Cachex.get(:elixirus_cache, user_id) do
+      case Cachex.get(:elixirus_cache, user_id <> "grades") do
         {:ok, grades} -> grades
-        _ -> push_navigate(socket, to: "/student")
+        _ -> nil
       end
 
     socket =
-      socket
-      |> assign(:token, api_token)
-      |> assign(:grades, grades)
-      |> assign(:subject, subject)
-      |> assign(:shown_grade, grade_id)
-      |> assign(:semester, semester)
+      case grades do
+        nil ->
+          push_navigate(socket, to: "/student/grades")
+
+        _ ->
+          socket
+          |> assign(:token, api_token)
+          |> assign(:grades, grades)
+          |> assign(:subject, subject)
+          |> assign(:shown_grade, grade_id)
+          |> assign(:semester, semester)
+      end
 
     {:ok, socket}
   end
