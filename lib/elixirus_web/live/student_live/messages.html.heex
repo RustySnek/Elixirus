@@ -47,7 +47,7 @@
       :for={{message, idx} <- @shown_messages |> Enum.with_index()}
       phx-mounted={
         JS.transition({"blur-sm", "-translate-x-full", "blur-none"},
-          time: 0 * 400 + 20 * (idx + 1)
+          time: 100 + 20 * (idx + 1)
         )
         |> JS.add_class("hover:rotate-1 hover:!duration-100")
       }
@@ -55,7 +55,7 @@
       id={"container-#{message |> stringify_value(~c"href")}"}
       phx-remove={
         JS.transition({"blur-md translate-x-none", "blur-sm", "translate-x-[120%] blur-none"},
-          time: 0 * 50 + 7 * (idx + 1)
+          time: 50 + 7 * (idx + 1)
         )
       }
       style={"transition-duration: #{400 + 20 * idx}ms;"}
