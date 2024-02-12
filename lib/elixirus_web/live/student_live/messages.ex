@@ -88,6 +88,9 @@ defmodule ElixirusWeb.StudentLive.Messages do
           {unread, seen} =
             messages |> Enum.partition(fn msg -> msg |> Map.get(~c"unread") == true end)
 
+          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "messages", messages)
+          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "messages", :timer.minutes(5))
+
           socket
           |> assign(:loaded, true)
           |> assign(:messages, messages)
@@ -102,16 +105,19 @@ defmodule ElixirusWeb.StudentLive.Messages do
     {:noreply, socket}
   end
 
-  def mount(_params, %{"token" => api_token}, socket) do
+  def mount(_params, %{"token" => api_token, "user_id" => user_id}, socket) do
     api_token =
       case api_token |> Map.keys() do
         [] -> ""
         token -> token |> hd() |> to_charlist()
       end
 
+    data = handle_cache_data(user_id, "messages")
+
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:show_message_modal, false)
       |> assign(:loaded, false)
@@ -124,7 +130,23 @@ defmodule ElixirusWeb.StudentLive.Messages do
       |> assign(:date, "")
       |> assign(:author, "")
       |> assign(:content, "")
-      |> start_async(:load_messages, fn -> fetch_messages(api_token, 0) end)
+
+    socket =
+      case data do
+        :load ->
+          socket |> start_async(:load_messages, fn -> fetch_messages(api_token, 0) end)
+
+        data ->
+          {unread, seen} =
+            data |> Enum.partition(fn msg -> msg |> Map.get(~c"unread") == true end)
+
+          socket
+          |> assign(:messages, data)
+          |> assign(:shown_messages, data)
+          |> assign(:unread_messages, unread)
+          |> assign(:seen_messages, seen)
+          |> assign(:loaded, true)
+      end
 
     {:ok, socket}
   end
