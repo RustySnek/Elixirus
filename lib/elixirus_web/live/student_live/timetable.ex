@@ -73,6 +73,9 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     socket =
       case timetable do
         {:ok, t} ->
+          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "timetable", t)
+          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "timetable", :timer.minutes(5))
+
           socket
           |> assign(:timetable, t)
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
@@ -99,7 +102,11 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     {:noreply, redirect(socket, to: "/student/timetable")}
   end
 
-  def mount(_params, %{"semester" => semester, "token" => api_token}, socket) do
+  def mount(
+        _params,
+        %{"semester" => semester, "token" => api_token, "user_id" => user_id},
+        socket
+      ) do
     api_token =
       case api_token |> Map.keys() do
         [] ->
@@ -117,6 +124,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     socket =
       socket
       |> assign(:login_required, false)
+      |> assign(:user_id, user_id)
       |> assign(:semester, semester)
       |> assign(:api_token, api_token)
       |> assign(:this_monday, monday)
@@ -124,11 +132,21 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       |> assign(:timetable, [])
       |> assign(:show_period_modal, false)
 
+    timetable = handle_cache_data(user_id, "timetable")
+
     socket =
-      socket
-      |> start_async(:load_timetable, fn ->
-        fetch_timetable(api_token, monday |> to_string())
-      end)
+      case timetable do
+        :load ->
+          socket
+          |> start_async(:load_timetable, fn ->
+            fetch_timetable(api_token, monday |> to_string())
+          end)
+
+        tt ->
+          socket
+          |> assign(:timetable, tt)
+          |> start_async(:get_indicator, fn -> get_indicator_position(tt) end)
+      end
 
     {:ok, socket}
   end
