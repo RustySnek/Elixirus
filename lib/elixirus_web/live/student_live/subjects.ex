@@ -235,21 +235,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           token |> hd() |> to_charlist()
       end
 
-    data =
-      case Cachex.ttl(:elixirus_cache, user_id <> "grades") do
-        {:ok, nil} ->
-          :load
-
-        {:ok, _} ->
-          case Cachex.get(:elixirus_cache, user_id <> "grades") do
-            {:ok, nil} -> :load
-            {:ok, data} -> data
-            _ -> :load
-          end
-
-        _ ->
-          :load
-      end
+    data = handle_cache_data(user_id, "grades")
 
     socket =
       socket
