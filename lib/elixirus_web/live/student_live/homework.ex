@@ -29,6 +29,8 @@ defmodule ElixirusWeb.StudentLive.Homework do
     socket =
       case homework do
         {:ok, homework} ->
+          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "homework", homework)
+          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "homework", :timer.minutes(5))
           assign(socket, :homework, homework |> Enum.reverse())
 
         _ ->
@@ -81,7 +83,7 @@ defmodule ElixirusWeb.StudentLive.Homework do
     Date.diff(date, today)
   end
 
-  def mount(_params, %{"token" => api_token}, socket) do
+  def mount(_params, %{"user_id" => user_id, "token" => api_token}, socket) do
     api_token =
       case api_token |> Map.keys() do
         [] -> ""
@@ -95,10 +97,22 @@ defmodule ElixirusWeb.StudentLive.Homework do
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:homework, [])
       |> assign(:details, %{})
-      |> start_async(:load_homework, fn -> fetch_homework(api_token, monday, next_monday) end)
+
+    homework = handle_cache_data(user_id, "homework")
+
+    socket =
+      case homework do
+        :load ->
+          socket
+          |> start_async(:load_homework, fn -> fetch_homework(api_token, monday, next_monday) end)
+
+        homework ->
+          socket |> assign(:homework, homework)
+      end
 
     {:ok, socket}
   end
