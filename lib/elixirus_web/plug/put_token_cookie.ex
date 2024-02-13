@@ -16,8 +16,16 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
     semester =
       case conn.cookies["semester"] do
-        nil -> 0
-        sem -> Plug.Conn.Query.decode(sem)
+        nil ->
+          {_, _, month} = Date.to_erl(Date.utc_today())
+
+          cond do
+            month >= 2 -> 1
+            true -> 0
+          end
+
+        sem ->
+          Plug.Conn.Query.decode(sem)
       end
 
     case {cookie, conn.cookies["username"]} do
