@@ -79,8 +79,16 @@ defmodule ElixirusWeb.StudentLive.Index do
 
     semester =
       case Map.get(params, "semester") do
-        nil -> 0
-        semester -> semester
+        nil ->
+          {_, _, month} = Date.to_erl(Date.utc_today())
+
+          cond do
+            month >= 2 -> 1
+            true -> 0
+          end
+
+        semester ->
+          semester
       end
 
     socket =
