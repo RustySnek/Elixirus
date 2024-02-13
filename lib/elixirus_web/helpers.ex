@@ -13,6 +13,8 @@ defmodule ElixirusWeb.Helpers do
   end
 
   def handle_cache_data(user_id, cache_type) do
+    Cachex.purge(:elixirus_cache)
+
     case Cachex.ttl(:elixirus_cache, user_id <> cache_type) do
       {:ok, nil} ->
         :load
