@@ -1,8 +1,7 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
 <div class="flex flex-col w-full h-full">
   <div :if={@timetable == []} class=" absolute flex items-center justify-center inset-0 -z-40">
-
-    <.spinner/>
+    <.spinner />
   </div>
   <div :if={@timetable != []} class="relative w-full  flex flex-col">
     <div class="flex -z-40 flex-col w-full  gap-y-4">
