@@ -1,0 +1,40 @@
+<div :if={@attendance == []}>123</div>
+<div class="flex flex-row gap-10 justify-center">
+  <div :for={freq <- @frequency}>
+    <%= freq %>%
+  </div>
+</div>
+<div :if={@attendance != []} class="mx-10 flex flex-col gap-y-2">
+  <div :for={day <- @attendance} class="flex gap-2 flex-col">
+    <p class="mr-1"><%= day |> hd |> stringify_value(~c"date") %></p>
+    <div class="flex flex-row gap-2">
+      <div
+        :for={att <- day}
+        data-tooltip-target={"#{day |> hd |> stringify_value(~c"date")}_#{att |> stringify_value(~c"period")}-tooltip"}
+        class={"flex h-14 justify-center items-center flex-row border #{att |> stringify_value(~c"symbol") |> attendance_color()} rounded-md text-center  h-14 w-14"}
+      >
+        <div>
+          <p class="text-xl"><%= att |> stringify_value(~c"symbol") %></p>
+        </div>
+        <div
+          id={"#{day |> hd |> stringify_value(~c"date")}_#{att |> stringify_value(~c"period")}-tooltip"}
+          class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700"
+        >
+          <p><%= att |> stringify_value(~c"period") %></p>
+          <div>
+            <p class="w-72">
+              <%= att |> stringify_value(~c"subject") %> - <%= att |> stringify_value(~c"topic") %>
+            </p>
+          </div>
+          <br />
+          <p>
+            <%= att |> stringify_value(~c"teacher") %> (<%= day |> hd |> stringify_value(~c"date") %>)
+          </p>
+          <p>Excursion: <%= att |> stringify_value(~c"excursion") %></p>
+          <p><%= att |> stringify_value(~c"type") %></p>
+          <div class="tooltip-arrow" data-popper-arrow></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
