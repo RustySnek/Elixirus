@@ -84,11 +84,7 @@ defmodule ElixirusWeb.StudentLive.Homework do
   end
 
   def mount(_params, %{"user_id" => user_id, "token" => api_token}, socket) do
-    api_token =
-      case api_token |> Map.keys() do
-        [] -> ""
-        token -> token |> hd() |> to_charlist()
-      end
+    api_token = handle_api_token(socket, api_token)
 
     monday = this_weeks_monday() |> Date.add(-14)
     next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")

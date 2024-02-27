@@ -12,6 +12,19 @@ defmodule ElixirusWeb.Helpers do
     date |> Date.beginning_of_week()
   end
 
+  def handle_api_token(socket, token) do
+    case token |> Map.keys() do
+      [] ->
+        case Map.get(socket.assigns, :token) do
+          nil -> ""
+          token -> token
+        end
+
+      token ->
+        token |> hd() |> to_charlist()
+    end
+  end
+
   def handle_cache_data(user_id, cache_type) do
     Cachex.purge(:elixirus_cache)
 

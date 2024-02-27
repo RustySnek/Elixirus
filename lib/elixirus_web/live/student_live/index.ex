@@ -3,6 +3,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   use ElixirusWeb, :live_view
   alias Phoenix.LiveView.AsyncResult
   import Heroicons
+  import ElixirusWeb.Helpers
 
   def handle_event("navigate_students", %{"token" => token}, socket) do
     socket =
@@ -71,11 +72,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   def mount(_params, %{"token" => api_token} = params, socket) do
     Cachex.purge(:elixirus_cache)
 
-    api_token =
-      case api_token |> Map.keys() do
-        [] -> ""
-        token -> token |> hd() |> to_charlist()
-      end
+    api_token = handle_api_token(socket, api_token)
 
     semester =
       case Map.get(params, "semester") do

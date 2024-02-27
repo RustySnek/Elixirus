@@ -107,18 +107,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
         %{"semester" => semester, "token" => api_token, "user_id" => user_id},
         socket
       ) do
-    api_token =
-      case api_token |> Map.keys() do
-        [] ->
-          case Map.get(socket.assigns, :token) do
-            nil -> ""
-            token -> token
-          end
-
-        token ->
-          token |> hd() |> to_charlist()
-      end
-
+    api_token = handle_api_token(socket, api_token)
     monday = this_weeks_monday()
 
     socket =
