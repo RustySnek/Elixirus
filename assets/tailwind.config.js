@@ -9,7 +9,8 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "../lib/elixirus_web.ex", 
-    "../lib/elixirus_web/**/*.*ex"
+    "../lib/elixirus_web/**/*.*ex",
+    "./node_modules/flowbite/**/*.js"
   ],
     theme: {
     extend: {
@@ -22,6 +23,8 @@ module.exports = {
     },
   },
   plugins: [
+
+        require('flowbite/plugin'),
  plugin(({ addVariant }) => {
         addVariant('child', '& > *');
         addVariant('child-hover', '& > *:hover');
