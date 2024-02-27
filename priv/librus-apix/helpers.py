@@ -1,4 +1,5 @@
 from erlport.erlterms import Atom
+from librus_apix.attendance import get_attendance, get_attendance_frequency
 from librus_apix.messages import get_recieved, message_content
 from librus_apix.homework import get_homework, homework_detail
 from librus_apix.get_token import get_token, Token
@@ -66,5 +67,22 @@ def fetch_homework_details(token, id):
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), details
+
+def fetch_attendance(token, semester):
+    token = create_token(token)
+    try:
+        attendance = get_attendance(token)
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), handle_attendance(attendance[int(semester)])
+
+def fetch_attendance_frequency(token):
+    token = create_token(token)
+    try:
+        frequency = get_attendance_frequency(token)
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), frequency
+
 
 
