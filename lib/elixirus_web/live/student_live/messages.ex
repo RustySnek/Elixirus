@@ -106,12 +106,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
   end
 
   def mount(_params, %{"token" => api_token, "user_id" => user_id}, socket) do
-    api_token =
-      case api_token |> Map.keys() do
-        [] -> ""
-        token -> token |> hd() |> to_charlist()
-      end
-
+    api_token = handle_api_token(socket, api_token)
     data = handle_cache_data(user_id, "messages")
 
     socket =
