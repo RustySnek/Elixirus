@@ -43,4 +43,8 @@ defmodule ElixirusWeb.Helpers do
         :load
     end
   end
+
+  def percentage_to_deg(percentage) do
+    "#{percentage * 3.6}deg"
+  end
 end

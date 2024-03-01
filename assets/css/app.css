@@ -5,4 +5,93 @@
 :root {
   color-scheme: dark;
 }
+
+.circle-container {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+  width: 100%;
+}
+.circle-container .circle {
+  margin: 20px;
+}
+
+/* configuration */
+/* mixin */
+/* placeholder */
+.circle.percentage-100 .percentage-bar:after, .circle.percentage-99 .percentage-bar:after, .circle.percentage-98 .percentage-bar:after, .circle.percentage-97 .percentage-bar:after, .circle.percentage-96 .percentage-bar:after, .circle.percentage-95 .percentage-bar:after, .circle.percentage-94 .percentage-bar:after, .circle.percentage-93 .percentage-bar:after, .circle.percentage-92 .percentage-bar:after, .circle.percentage-91 .percentage-bar:after, .circle.percentage-90 .percentage-bar:after, .circle.percentage-89 .percentage-bar:after, .circle.percentage-88 .percentage-bar:after, .circle.percentage-87 .percentage-bar:after, .circle.percentage-86 .percentage-bar:after, .circle.percentage-85 .percentage-bar:after, .circle.percentage-84 .percentage-bar:after, .circle.percentage-83 .percentage-bar:after, .circle.percentage-82 .percentage-bar:after, .circle.percentage-81 .percentage-bar:after, .circle.percentage-80 .percentage-bar:after, .circle.percentage-79 .percentage-bar:after, .circle.percentage-78 .percentage-bar:after, .circle.percentage-77 .percentage-bar:after, .circle.percentage-76 .percentage-bar:after, .circle.percentage-75 .percentage-bar:after, .circle.percentage-74 .percentage-bar:after, .circle.percentage-73 .percentage-bar:after, .circle.percentage-72 .percentage-bar:after, .circle.percentage-71 .percentage-bar:after, .circle.percentage-70 .percentage-bar:after, .circle.percentage-69 .percentage-bar:after, .circle.percentage-68 .percentage-bar:after, .circle.percentage-67 .percentage-bar:after, .circle.percentage-66 .percentage-bar:after, .circle.percentage-65 .percentage-bar:after, .circle.percentage-64 .percentage-bar:after, .circle.percentage-63 .percentage-bar:after, .circle.percentage-62 .percentage-bar:after, .circle.percentage-61 .percentage-bar:after, .circle.percentage-60 .percentage-bar:after, .circle.percentage-59 .percentage-bar:after, .circle.percentage-58 .percentage-bar:after, .circle.percentage-57 .percentage-bar:after, .circle.percentage-56 .percentage-bar:after, .circle.percentage-55 .percentage-bar:after, .circle.percentage-54 .percentage-bar:after, .circle.percentage-53 .percentage-bar:after, .circle.percentage-52 .percentage-bar:after, .circle.percentage-51 .percentage-bar:after {
+  position: absolute;
+  content: "";
+  -webkit-clip-path: inset(0 0 0 50%);
+          clip-path: inset(0 0 0 50%);
+  transform: rotate(0deg);
+  width: 120px;
+  height: 120px;
+  border: 20px solid #74B3CE;
+  background: transparent;
+  border-radius: 100%;
+  transition: width 0.2s ease-out, height 0.2s ease-out, border-width 0.2s ease-out;
+}
+
+.circle.percentage-100 .percentage-bar, .circle.percentage-99 .percentage-bar, .circle.percentage-98 .percentage-bar, .circle.percentage-97 .percentage-bar, .circle.percentage-96 .percentage-bar, .circle.percentage-95 .percentage-bar, .circle.percentage-94 .percentage-bar, .circle.percentage-93 .percentage-bar, .circle.percentage-92 .percentage-bar, .circle.percentage-91 .percentage-bar, .circle.percentage-90 .percentage-bar, .circle.percentage-89 .percentage-bar, .circle.percentage-88 .percentage-bar, .circle.percentage-87 .percentage-bar, .circle.percentage-86 .percentage-bar, .circle.percentage-85 .percentage-bar, .circle.percentage-84 .percentage-bar, .circle.percentage-83 .percentage-bar, .circle.percentage-82 .percentage-bar, .circle.percentage-81 .percentage-bar, .circle.percentage-80 .percentage-bar, .circle.percentage-79 .percentage-bar, .circle.percentage-78 .percentage-bar, .circle.percentage-77 .percentage-bar, .circle.percentage-76 .percentage-bar, .circle.percentage-75 .percentage-bar, .circle.percentage-74 .percentage-bar, .circle.percentage-73 .percentage-bar, .circle.percentage-72 .percentage-bar, .circle.percentage-71 .percentage-bar, .circle.percentage-70 .percentage-bar, .circle.percentage-69 .percentage-bar, .circle.percentage-68 .percentage-bar, .circle.percentage-67 .percentage-bar, .circle.percentage-66 .percentage-bar, .circle.percentage-65 .percentage-bar, .circle.percentage-64 .percentage-bar, .circle.percentage-63 .percentage-bar, .circle.percentage-62 .percentage-bar, .circle.percentage-61 .percentage-bar, .circle.percentage-60 .percentage-bar, .circle.percentage-59 .percentage-bar, .circle.percentage-58 .percentage-bar, .circle.percentage-57 .percentage-bar, .circle.percentage-56 .percentage-bar, .circle.percentage-55 .percentage-bar, .circle.percentage-54 .percentage-bar, .circle.percentage-53 .percentage-bar, .circle.percentage-52 .percentage-bar, .circle.percentage-51 .percentage-bar {
+  -webkit-clip-path: none;
+          clip-path: none;
+}
+
+/* percentage circle style */
+.circle {
+  width: 160px;
+  height: 160px;
+  cursor: default;
+  transform: rotate(180deg);
+}
+.circle span {
+  position: absolute;
+  display: block;
+  width: 160px;
+  height: 160px;
+  color: #74B3CE;
+}
+.circle:before {
+  position: absolute;
+  content: "";
+  background-color: transparent;
+  border: 20px solid rgb(192 38 211);
+  background: transparent;
+  border-radius: 100%;
+}
+.circle .percentage-bar {
+  width: 160px;
+  height: 160px;
+  position: absolute;
+          clip-path: inset(0 0 0 45%);
+}
+.circle .percentage-bar:before {
+  position: absolute;
+  content: "";
+  -webkit-clip-path: inset(0 50% 0 0);
+          clip-path: inset(0 50% 0 0);
+  transform: rotate(0deg);
+  width: 120px;
+  height: 120px;
+  border: 20px solid rgb(74 4 78);
+  background: transparent;
+  border-radius: 100%;
+  transition: width 0.2s ease-out, height 0.2s ease-out, border-width 0.2s ease-out;
+
+}
+.circle:before {
+  width: 140px;
+  height: 140px;
+  border-width: 10px;
+}
+.circle .percentage-bar:before, .circle .percentage-bar:after {
+  width: 140px;
+  height: 140px;
+  border-width: 10px;
+}
+.circle.percentage .percentage-bar:before {
+  transform: rotate(var(--progress-value));
+}
+
 /* This file is for your main application CSS */
