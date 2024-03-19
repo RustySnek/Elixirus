@@ -29,6 +29,15 @@ Hooks.focus_field = {
     this.el.focus()
   },
 }
+Hooks.frequency = {
+  mounted() {
+    const deg = this.el.getAttribute("name")
+    setTimeout(() => {
+    this.el.style.setProperty("--progress-value", deg)
+      
+    }, 50);
+  }
+}
 Hooks.highlight_grade = {
   
   mounted() {

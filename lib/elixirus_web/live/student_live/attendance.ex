@@ -2,6 +2,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
   use ElixirusWeb, :live_view
   import ElixirusWeb.Helpers
   import Elixirus.PythonWrapper
+  import ElixirusWeb.Components.Loadings
 
   def fetch_attendance(socket) do
     python(:helpers, :fetch_attendance, [socket.assigns.token, socket.assigns.semester])
