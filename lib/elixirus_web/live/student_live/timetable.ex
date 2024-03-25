@@ -33,6 +33,10 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     end
   end
 
+  def fetch_calendar_data(cal_id, date_from, date_to) do
+    python(:calendar_handler, :get_google_calendar_events, [cal_id, date_from, date_to])
+  end
+
   def fetch_timetable(token, monday) do
     python(:overview, :handle_overview_timetable, [token, monday])
   end
@@ -69,6 +73,19 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     {:noreply, assign(socket, :indicator, indicator)}
   end
 
+  def handle_async(:load_calendar_data, {:ok, events}, socket) do
+    Cachex.put(:elixirus_cache, socket.assigns.user_id <> "timetable_calendar", events)
+
+    Cachex.expire(
+      :elixirus_cache,
+      socket.assigns.user_id <> "timetable_calendar",
+      :timer.minutes(5)
+    )
+
+    socket = socket |> assign(:calendar_events, events)
+    {:noreply, socket}
+  end
+
   def handle_async(:load_timetable, {:ok, timetable}, socket) do
     socket =
       case timetable do
@@ -85,6 +102,35 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       end
 
     {:noreply, socket}
+  end
+
+  def handle_event(
+        "connect_calendar",
+        %{"calendar_id" => calendar_id},
+        socket
+      ) do
+    end_of_week = Date.add(socket.assigns.this_monday, 7)
+
+    socket =
+      socket
+      |> assign(:calendar_id, calendar_id)
+      |> start_async(:load_calendar_data, fn ->
+        fetch_calendar_data(
+          calendar_id,
+          socket.assigns.this_monday |> to_string(),
+          end_of_week |> to_string()
+        )
+      end)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("retrieve_local_storage", %{"calendar_id" => calendar_id}, socket) do
+    socket =
+      socket
+      |> assign(:calendar_id, calendar_id)
+
+    handle_event("connect_calendar", %{"calendar_id" => calendar_id}, socket)
   end
 
   def handle_event("navigate_students", %{"token" => token}, socket) do
@@ -120,8 +166,20 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       |> assign(:indicator, "hidden")
       |> assign(:timetable, [])
       |> assign(:show_period_modal, false)
+      |> assign(:calendar_events, %{})
+      |> assign(:calendar_id, "")
 
     timetable = handle_cache_data(user_id, "timetable")
+    calendar_data = handle_cache_data(user_id, "timetable_calendar")
+
+    socket =
+      case calendar_data do
+        :load ->
+          socket
+
+        cal_data ->
+          assign(socket, :calendar_events, cal_data)
+      end
 
     socket =
       case timetable do

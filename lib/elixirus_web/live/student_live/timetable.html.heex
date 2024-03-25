@@ -1,10 +1,29 @@
 <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
+<div class="flex flex-row gap-x-4 mb-6 justify-center">
+  <span class="self-center">Connect your school's google calendar!</span>
+  <form phx-submit="connect_calendar" class="flex flex-row gap-x-4">
+    <input
+      placeholder="calendar id / email"
+      class="bg-[#1f1f1f] rounded-2xl border-fuchsia-800 border-2"
+      type="text"
+      name="calendar_id"
+      value={@calendar_id}
+      id="calendar_id"
+      phx-hook="set_local_storage"
+    />
+    <button>
+      Connect
+    </button>
+  </form>
+</div>
 <div class="flex flex-col w-full h-full">
   <div :if={@timetable == []} class=" absolute flex items-center justify-center inset-0 -z-40">
     <.spinner />
   </div>
   <div :if={@timetable != []} class="relative w-full  flex flex-col">
     <div class="flex -z-40 flex-col w-full  gap-y-4">
+      <div class="opacity-0 h-12">Weekday</div>
       <div :for={period <- hd(@timetable)} class="w-full">
         <div class="h-[90px] text-gray-500  flex flex-col justify-between">
           <p class="border-t  border-dashed  border-gray-500 w-full">
@@ -19,8 +38,61 @@
       </div>
     </div>
     <div class="overflow-x-auto w-full absolute gap-x-10 justify-between snap-x snap-mandatory  pl-20  flex-row flex">
-      <div :for={weekday <- @timetable} class="w-auto snap-center">
+      <div :for={weekday <- @timetable} class="
+      w-auto snap-center relative
+       ">
         <div class="flex h-full gap-y-4 flex-col  ">
+          <div :if={
+            Enum.filter(weekday, fn period ->
+              period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
+            end)
+            |> length() > 0
+          }>
+            <.live_component
+              module={Modal}
+              id={"#{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"}
+            >
+              <div class="space-y-2">
+                <div
+                  :for={
+                    event <-
+                      @calendar_events
+                      |> events_inside_timeframe(
+                        weekday
+                        |> List.first()
+                        |> stringify_value(~c"date")
+                      )
+                  }
+                  class="bg-black rounded-2xl px-4 py-2"
+                >
+                  <span class="mb-2 text-lg font-bold">
+                    <%= event |> stringify_value(~c"summary") %>
+                  </span>
+                  <br />
+                  <span><%= event |> stringify_value(~c"description") |> raw %></span>
+                </div>
+              </div>
+            </.live_component>
+
+            <button
+              phx-click={
+                ElixirusWeb.Modal.show_modal_js(
+                  "#{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"
+                )
+              }
+              phx-target={"##{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"}
+              class={"text-center h-12 w-full rounded-2xl border-fuchsia-700 border-2 font-semibold flex flex-col items-center justify-center text-2xl
+#{ @calendar_events |>
+                    inside_event_timeframe?(
+                    weekday |> List.first() |> stringify_value(~c"date")
+                  
+                   ) && "!bg-orange-500/10"
+              }
+          "}
+            >
+              <%= weekday |> List.first([]) |> stringify_value(~c"weekday") %>
+            </button>
+          </div>
           <div
             :for={period <- weekday}
             :if={
@@ -83,7 +155,12 @@
                   )
                 }
                 phx-target={"##{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
-                class={" hover:brightness-125 transition h-[90px] w-full flex flex-col text-justify justify-between py-1 px-4 #{ period |> Map.get(~c"subject") == [] &&"!border-none !bg-inherit"}  duration-100 border-2 border-fuchsia-600 #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"} rounded-2xl"}
+                class={"
+                hover:brightness-125 transition h-[90px] w-full flex flex-col text-justify justify-between py-1 px-4
+                duration-100 border-2 border-fuchsia-600 rounded-2xl
+                #{ period |> Map.get(~c"subject") == [] &&"!border-none !bg-inherit"}
+                #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"}
+                               "}
               >
                 <span class="flex-shrink text-center font-bold text-red-600">
                   <%= period |> Map.get(~c"info") |> Map.keys() |> Enum.join(", ") |> to_string() %>
@@ -110,7 +187,7 @@
 
     <div
       style={@indicator}
-      class=" absolute right-0  bg-pink-700 opacity-50 h-[3px] z-30  w-full transform"
+      class=" absolute right-0 translate-y-12 bg-pink-700 opacity-50 h-[3px] z-30  w-full transform"
     >
     </div>
   </div>
