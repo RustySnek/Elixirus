@@ -12,8 +12,6 @@ defmodule ElixirusWeb.PageController do
   end
 
   def set_token(conn, %{"token" => token, "username" => username, "user_id" => user_id}) do
-    dbg(username)
-
     conn
     |> put_resp_cookie("api_token", token,
       secure: true,

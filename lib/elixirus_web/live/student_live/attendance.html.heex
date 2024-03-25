@@ -1,7 +1,7 @@
 <div :if={@attendance == []} class="flex items-center justify-center">
   <.spinner />
 </div>
-<div class="flex flex-col md:flex-row gap-10 justify-center items-center">
+<div :if={@attendance != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
   <div :for={freq <- @frequency} class="select-none">
     <div class="circle percentage">
       <div
