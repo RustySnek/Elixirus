@@ -12,8 +12,10 @@ def extract_grades(grades):
     return [grade for subject in list(grades.values()) for grade in subject]
 
 def create_token(token_charlist):
-    token = "".join([chr(n) for n in token_charlist])
-    return Token(token)
+    token_key = "".join([chr(n) for n in token_charlist])
+    if len(token_key.split(":")) != 2:
+        return Token("mal:formed")
+    return Token(token_key)
 
 def fetch_messages(token, page):
     token = create_token(token)
