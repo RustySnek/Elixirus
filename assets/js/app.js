@@ -24,6 +24,19 @@ import topbar from "../vendor/topbar"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let Hooks = {}
+Hooks.set_local_storage = {
+  updated() {
+    localStorage.setItem(this.el.name, this.el.value)
+  }
+}
+Hooks.retrieve_local_storage = {
+  mounted() {
+    let name = this.el.getAttribute("name")
+    let item = localStorage.getItem(name)
+    console.log(item, this.el.name)
+    this.pushEvent("retrieve_local_storage", {[name]: item === undefined | null ? "" : item})
+  }
+}
 Hooks.focus_field = {
   mounted() {
     this.el.focus()
@@ -37,6 +50,7 @@ Hooks.frequency = {
       
     }, 50);
   }
+
 }
 Hooks.highlight_grade = {
   
@@ -60,12 +74,15 @@ Hooks.slide_right = {
 }
 Hooks.store_token = {
   updated() {
+    if (this.el.value === "") {
+      return
+    }
     const {v4: uuidv4} = require("uuid");
     const user_id = uuidv4();
     fetch(`/set_token?token=${this.el.value}&username=${this.el.name}&user_id=${user_id}`).then((response) => {
       this.pushEvent("navigate_students", {token: this.el.value, username: this.el.name, user_id: user_id})
-    })
-  }
+      })
+    }
 }
 Hooks.store_semester = {
   updated() {
