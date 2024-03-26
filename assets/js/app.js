@@ -50,7 +50,6 @@ Hooks.frequency = {
       
     }, 50);
   }
-
 }
 Hooks.highlight_grade = {
   
