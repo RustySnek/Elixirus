@@ -1,6 +1,3 @@
 services:
-  elxirus:
-    environment:
-      - SECRET_KEY_BASE=key
-      - PHX_HOST=example.com
+  elixirus:
     build: .
