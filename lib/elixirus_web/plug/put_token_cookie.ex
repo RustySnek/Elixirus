@@ -12,7 +12,9 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
     conn = fetch_cookies(conn)
 
     cookie = conn.cookies["api_token"]
-    user_id = conn.cookies["user_id"]
+
+    user_id =
+      conn.cookies |> Map.get("user_id", make_ref() |> :erlang.ref_to_list() |> to_string())
 
     semester =
       case conn.cookies["semester"] do
@@ -30,7 +32,10 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
     case {cookie, conn.cookies["username"]} do
       {cookie, username} when cookie == nil or username == nil ->
-        conn |> put_session(:semester, semester) |> put_session(:token, %{"not:found": []})
+        conn
+        |> put_session(:semester, semester)
+        |> put_session(:token, %{"not:found": []})
+        |> put_session(:user_id, user_id)
 
       {cookie, username} ->
         conn
