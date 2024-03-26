@@ -50,19 +50,22 @@
   ### Todo
   - [ ] Overview Page 📄
   - [ ] Announcements Page 📯
-  - [ ] Schedule Page 📆
   - [ ] Think of some cool extras to include 😲
   - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
   
   ### In Progress
-  - [ ] Attendance Page ✔️
+  - [ ] Docker 🐳
+  - [ ] Schedule Page 📆
  
-  ### Done ✓
+  ### Done ✓ 
+  - [X] Attendance Page ✔️
+   - [X] Add frequency percentage 
   - [X] Grades Page 📑
     - [X] Add nice filtering for subjects and grades 🧐 
   - [X] Homework Page 📰
   - [x] Timetable page 🗓️
     - [x] Add timeline indicator 🕚
+    - [X] Add google calendar functionality 
     - [x] Add details modal 🔍
   - [x] Messages Page 📫
     - [x] Handle recieved messages 📩
