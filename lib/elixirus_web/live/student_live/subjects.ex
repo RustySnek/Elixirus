@@ -204,8 +204,6 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           shown = grades |> Map.take(keys)
           Cachex.put(:elixirus_cache, socket.assigns.user_id <> "grades", grades)
           Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "grades", :timer.minutes(5))
-          IO.inspect(Cachex.ttl(:elixirus_cache, socket.assigns.user_id))
-          IO.inspect(socket.assigns.user_id)
 
           socket
           |> assign(:grades, grades)
