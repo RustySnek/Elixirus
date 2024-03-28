@@ -29,6 +29,7 @@
   position: absolute;
   content: "";
   -webkit-clip-path: inset(0 50% 0 0);
+  clip-path: inset(0 50% 0 0);
   border: 20px solid rgb(74 4 78);
   border-radius: 100%;
 
@@ -43,10 +44,12 @@
   height: 140px;
   border-width: 18px;
   transform: rotate(0deg);
-  transition-duration: 1000ms;
+  transition-duration: 750ms;
 }
 .circle.percentage .percentage-bar:before {
   transform: rotate(var(--progress-value));
 }
-
+.percentage-bar:after {
+  transform: rotate(var(--progress-value));
+}
 /* This file is for your main application CSS */

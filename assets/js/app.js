@@ -49,7 +49,18 @@ Hooks.frequency = {
     this.el.style.setProperty("--progress-value", deg)
       
     }, 50);
+
+  },
+updated() {
+    const deg = this.el.getAttribute("name")
+    setTimeout(() => {
+    this.el.style.setProperty("--progress-value", deg)
+      
+    }, 50);
+
   }
+
+
 
 }
 Hooks.highlight_grade = {
@@ -80,13 +91,13 @@ Hooks.store_token = {
     const {v4: uuidv4} = require("uuid");
     const user_id = uuidv4();
     fetch(`/set_token?token=${this.el.value}&username=${this.el.name}&user_id=${user_id}`).then((response) => {
-      this.pushEvent("navigate_students", {token: this.el.value, username: this.el.name, user_id: user_id})
+      this.pushEvent("navigate_students", {return_url: this.el.getAttribute("return_url"),token: this.el.value, username: this.el.name, user_id: user_id})
       })
     }
 }
 Hooks.store_semester = {
   updated() {
-    fetch(`set_semester?semester=${this.el.value}`)
+    fetch(`/set_semester?semester=${this.el.value}`)
   }
 }
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks,params: {_csrf_token: csrfToken}})
