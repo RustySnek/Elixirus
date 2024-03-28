@@ -24,6 +24,7 @@ defmodule ElixirusWeb.Router do
   scope "/", ElixirusWeb do
     pipe_through :browser
     get "/set_token", PageController, :set_token
+    get "/set_semester", PageController, :set_semester
 
     scope "/student" do
       pipe_through :api_token

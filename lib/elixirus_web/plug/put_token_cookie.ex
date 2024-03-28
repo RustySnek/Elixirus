@@ -27,7 +27,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
           end
 
         sem ->
-          Plug.Conn.Query.decode(sem)
+          sem
       end
 
     case {cookie, conn.cookies["username"]} do

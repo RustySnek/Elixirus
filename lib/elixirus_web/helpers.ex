@@ -3,6 +3,14 @@ defmodule ElixirusWeb.Helpers do
     data |> Map.get(charlist_key) |> to_string()
   end
 
+  def switch_integer(val) do
+    case val do
+      0 -> 1
+      1 -> 0
+      _ -> 0
+    end
+  end
+
   defp inside_timeframe?(date, event_timeframe) do
     [event_from, event_to] =
       String.split(event_timeframe |> to_string(), "|")
