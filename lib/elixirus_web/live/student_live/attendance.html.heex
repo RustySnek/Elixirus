@@ -1,4 +1,10 @@
-<div :if={@attendance == []} class="flex items-center justify-center">
+<.live_component
+  module={LoginModal}
+  id="login_modal"
+  return_url="/student/attendance"
+  login_required={@login_required}
+/>
+<div :if={@attendance == [] && @login_required == false} class="flex items-center justify-center">
   <.spinner />
 </div>
 <div :if={@attendance != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
@@ -7,14 +13,14 @@
       <div
         class="percentage-bar"
         phx-hook="frequency"
-        id="test"
+        id={"#{make_ref() |> :erlang.ref_to_list() |> to_string()}"}
         name={percentage_to_deg(freq)}
         style="--progress-value: 360deg;"
       >
       </div>
     </div>
 
-    <span class="relative bottom-20 left-[42%]"><%= freq %>%</span>
+    <span class="relative bottom-20 left-[43%]"><%= freq %>%</span>
   </div>
 </div>
 <div :if={@attendance != []} class="mx-10 flex flex-col gap-y-2">

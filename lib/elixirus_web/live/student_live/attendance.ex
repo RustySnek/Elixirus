@@ -1,8 +1,10 @@
 defmodule ElixirusWeb.StudentLive.Attendance do
   use ElixirusWeb, :live_view
+  use ElixirusWeb.LoginHandler
   import ElixirusWeb.Helpers
   import Elixirus.PythonWrapper
   import ElixirusWeb.Components.Loadings
+  alias ElixirusWeb.LoginModal
 
   def fetch_attendance(socket) do
     python(:helpers, :fetch_attendance, [socket.assigns.token, socket.assigns.semester])
@@ -33,7 +35,8 @@ defmodule ElixirusWeb.StudentLive.Attendance do
             :timer.minutes(5)
           )
 
-          socket |> assign(:frequency, freq)
+          socket
+          |> assign(:frequency, freq)
 
         _ ->
           assign(socket, :login_required, true)
@@ -50,11 +53,15 @@ defmodule ElixirusWeb.StudentLive.Attendance do
             attendance
             |> Enum.chunk_by(&Map.get(&1, ~c"date"))
 
-          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "attendance", attendance)
+          Cachex.put(
+            :elixirus_cache,
+            socket.assigns.user_id <> "#{socket.assigns.semester}-attendance",
+            attendance
+          )
 
           Cachex.expire(
             :elixirus_cache,
-            socket.assigns.user_id <> "attendance",
+            socket.assigns.user_id <> "#{socket.assigns.semester}-attendance",
             :timer.minutes(5)
           )
 
@@ -62,6 +69,27 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
         _ ->
           assign(socket, :login_required, true)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("change_semester", %{"semester" => semester} = _params, socket) do
+    attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance")
+
+    socket =
+      socket
+      |> assign(:semester, semester)
+
+    socket =
+      case attendance do
+        :load ->
+          socket
+          |> assign(:attendance, [])
+          |> start_async(:load_attendance, fn -> fetch_attendance(socket) end)
+
+        attendance ->
+          assign(socket, :attendance, attendance)
       end
 
     {:noreply, socket}
@@ -79,11 +107,12 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> assign(:attendance, [])
       |> assign(:frequency, [])
       |> assign(:token, token)
-      |> assign(:semester, 1)
+      |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:visible, nil)
+      |> assign(:login_required, false)
 
-    attendance = handle_cache_data(user_id, "attendance")
+    attendance = handle_cache_data(user_id, "#{semester}-attendance")
     frequency = handle_cache_data(user_id, "frequency")
 
     socket =
