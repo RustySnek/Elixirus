@@ -53,6 +53,21 @@
     <button phx-click={JS.toggle(to: "#navigator")} class="z-20 sm:hidden">
       <Heroicons.bars_3 mini class="h-14 text-fuchsia-700" />
     </button>
+    <input hidden value={@semester} phx-hook="store_semester" id="selected_semester" />
+    <button
+      class="self-center ml-auto"
+      phx-click={
+        JS.push(
+          "change_semester",
+          value: %{
+            semester:
+              "#{@semester |> String.to_integer() |> ElixirusWeb.Helpers.switch_integer()}"
+          }
+        )
+      }
+    >
+      <%= @semester %>
+    </button>
   </div>
 </header>
 <main class="pt-10">

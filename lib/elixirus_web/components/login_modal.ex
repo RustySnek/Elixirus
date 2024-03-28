@@ -10,7 +10,7 @@ defmodule ElixirusWeb.LoginModal do
         <div class="fixed inset-0 overflow-y-auto" role="dialog" aria-modal="true" tabindex="0">
           <div class="flex min-h-full items-center justify-center">
             <div class="w-full flex items-center justify-center max-w-3xl p-4 sm:p-6 lg:py-8">
-              <.live_component module={LoginForm} id="login_form" />
+              <.live_component module={LoginForm} id="login_form" return_url={@return_url} />
             </div>
           </div>
         </div>
