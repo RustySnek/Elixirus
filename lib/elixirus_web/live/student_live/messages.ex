@@ -6,6 +6,8 @@ defmodule ElixirusWeb.StudentLive.Messages do
   import Heroicons
   alias ElixirusWeb.Modal
   import ElixirusWeb.Components.Loadings
+  use ElixirusWeb.LoginHandler
+  use ElixirusWeb.SetSemesterLive
 
   def fetch_messages(token, page) do
     python(:helpers, :fetch_messages, [token, page])
@@ -61,16 +63,6 @@ defmodule ElixirusWeb.StudentLive.Messages do
     {:noreply, socket}
   end
 
-  def handle_event("navigate_students", %{"token" => token}, socket) do
-    socket =
-      socket
-      |> assign(:token, token)
-      |> assign(:login_required, false)
-      |> start_async(:load_messages, fn -> fetch_messages(token, 0) end)
-
-    {:noreply, redirect(socket, to: "/student/messages")}
-  end
-
   def handle_async(:fetch_content, {:ok, content}, socket) do
     socket =
       case content do
@@ -105,13 +97,18 @@ defmodule ElixirusWeb.StudentLive.Messages do
     {:noreply, socket}
   end
 
-  def mount(_params, %{"token" => api_token, "user_id" => user_id}, socket) do
+  def mount(
+        _params,
+        %{"token" => api_token, "user_id" => user_id, "semester" => semester},
+        socket
+      ) do
     api_token = handle_api_token(socket, api_token)
     data = handle_cache_data(user_id, "messages")
 
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:show_message_modal, false)

@@ -1,5 +1,6 @@
 defmodule ElixirusWeb.StudentLive.Homework do
   use ElixirusWeb, :live_view
+  use ElixirusWeb.SetSemesterLive
   import Elixirus.PythonWrapper
   import ElixirusWeb.Helpers
   alias ElixirusWeb.LoginModal
@@ -52,15 +53,6 @@ defmodule ElixirusWeb.StudentLive.Homework do
     {:noreply, socket}
   end
 
-  def handle_event("navigate_students", %{"token" => token}, socket) do
-    socket =
-      socket
-      |> assign(:token, token)
-      |> assign(:login_required, false)
-
-    {:noreply, redirect(socket, to: "/student/homework")}
-  end
-
   defp days_to_color(days) do
     cond do
       days < 0 -> "text-red-600"
@@ -83,7 +75,11 @@ defmodule ElixirusWeb.StudentLive.Homework do
     Date.diff(date, today)
   end
 
-  def mount(_params, %{"user_id" => user_id, "token" => api_token}, socket) do
+  def mount(
+        _params,
+        %{"user_id" => user_id, "token" => api_token, "semester" => semester},
+        socket
+      ) do
     api_token = handle_api_token(socket, api_token)
 
     monday = this_weeks_monday() |> Date.add(-14)
@@ -93,6 +89,7 @@ defmodule ElixirusWeb.StudentLive.Homework do
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:homework, [])

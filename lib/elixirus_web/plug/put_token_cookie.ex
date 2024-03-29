@@ -22,8 +22,8 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
           {_, _, month} = Date.to_erl(Date.utc_today())
 
           cond do
-            month >= 2 and month <= 9 -> 1
-            true -> 0
+            month >= 2 and month <= 9 -> "1"
+            true -> "0"
           end
 
         sem ->

@@ -4,16 +4,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   alias Phoenix.LiveView.AsyncResult
   import Heroicons
   import ElixirusWeb.Helpers
-
-  def handle_event("navigate_students", %{"token" => token}, socket) do
-    socket =
-      socket
-      |> assign(:token, token)
-      |> assign(:login_required, false)
-      |> fetch_data(token, socket.assigns.semester)
-
-    {:noreply, redirect(socket, to: "/student")}
-  end
+  use ElixirusWeb.LoginHandler
 
   def fetch_data(socket, api_token, semester) do
     socket
@@ -35,6 +26,15 @@ defmodule ElixirusWeb.StudentLive.Index do
       :python.stop(pid)
       get_attendance
     end)
+  end
+
+  def handle_event("change_semester", %{"semester" => semester}, socket) do
+    socket =
+      socket
+      |> assign(:semester, semester)
+      |> fetch_data(socket.assigns.token, semester)
+
+    {:noreply, socket}
   end
 
   def handle_async(:load_attendance, {:ok, attendance}, socket) do
@@ -80,8 +80,8 @@ defmodule ElixirusWeb.StudentLive.Index do
           {_, _, month} = Date.to_erl(Date.utc_today())
 
           cond do
-            month >= 2 -> 1
-            true -> 0
+            month >= 2 -> "1"
+            true -> "0"
           end
 
         semester ->
@@ -98,11 +98,5 @@ defmodule ElixirusWeb.StudentLive.Index do
       |> fetch_data(api_token, semester)
 
     {:ok, socket}
-  end
-
-  defp login_modal(assigns) do
-    ~H"""
-    <.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
-    """
   end
 end

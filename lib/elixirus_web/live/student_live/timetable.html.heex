@@ -1,4 +1,9 @@
-<.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<.live_component
+  module={LoginModal}
+  id="login_modal"
+  login_required={@login_required}
+  return_url="/student/timetable"
+/>
 <div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
 <div class="flex flex-row gap-x-4 mb-6 justify-center">
   <span class="self-center">Connect your school's google calendar!</span>

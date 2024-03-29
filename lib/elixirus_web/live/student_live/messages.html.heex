@@ -1,4 +1,9 @@
-<.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<.live_component
+  module={LoginModal}
+  id="login_modal"
+  login_required={@login_required}
+  return_url="/student/messages"
+/>
 <.live_component module={Modal} id="message-modal">
   <div phx-click-away="wipe_content" class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50">
     <div class={"bg-[#121212] #{@author == "" && "!bg-transparent"} rounded-2xl"}>

@@ -5,6 +5,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
   alias ElixirusWeb.LoginModal
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
+  use ElixirusWeb.LoginHandler
 
   defp is_within_range?(current_time, time_range) do
     [time_from, time_to] = time_range
@@ -131,21 +132,6 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       |> assign(:calendar_id, calendar_id)
 
     handle_event("connect_calendar", %{"calendar_id" => calendar_id}, socket)
-  end
-
-  def handle_event("navigate_students", %{"token" => token}, socket) do
-    socket =
-      socket
-      |> assign(:token, token)
-      |> assign(:login_required, false)
-
-    socket =
-      socket
-      |> start_async(:load_timetable, fn ->
-        fetch_timetable(token, this_weeks_monday() |> to_string())
-      end)
-
-    {:noreply, redirect(socket, to: "/student/timetable")}
   end
 
   def mount(

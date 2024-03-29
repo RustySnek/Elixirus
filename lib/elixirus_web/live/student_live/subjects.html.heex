@@ -1,4 +1,9 @@
-<.live_component module={LoginModal} id="login_modal" login_required={@login_required} />
+<.live_component
+  module={LoginModal}
+  id="login_modal"
+  login_required={@login_required}
+  return_url="/student/grades"
+/>
 <div :if={@shown_grades == %{}} class="w-full h-96 flex -z-40 justify-center fixed items-center">
   <.spinner />
 </div>

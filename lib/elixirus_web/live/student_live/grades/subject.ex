@@ -1,6 +1,7 @@
 defmodule ElixirusWeb.StudentLive.Grades.Subject do
   use ElixirusWeb, :live_view
   import ElixirusWeb.Helpers
+  use ElixirusWeb.LoginHandler
 
   def mount(
         %{"subject" => subject} = params,

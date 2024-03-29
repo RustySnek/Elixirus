@@ -5,6 +5,14 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
   alias ElixirusWeb.LoginModal
+  use ElixirusWeb.LoginHandler
+
+  @default_params %{
+    query: "",
+    hide_empty: "false",
+    sort_grades: "newest",
+    grade_query: ""
+  }
 
   def handle_params(params, _uri, socket) do
     hide_empty =
@@ -23,7 +31,6 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       keys
       |> search_subjects(query)
 
-    # |> search_grades(grades_query)
     shown = grades |> Map.take(keys) |> search_grades(grades_query)
 
     socket =
@@ -136,15 +143,25 @@ defmodule ElixirusWeb.StudentLive.Subjects do
      push_navigate(socket, to: ~p"/student/grades/#{subject}?grade_id=#{id}", replace: true)}
   end
 
-  def handle_event("navigate_students", %{"token" => token, "user_id" => user_id}, socket) do
+  def handle_event("change_semester", %{"semester" => semester}, socket) do
+    data = handle_cache_data(socket.assigns.user_id, "#{semester}-grades")
+
     socket =
       socket
-      |> assign(:token, token)
-      |> assign(:login_required, false)
-      |> assign(:user_id, user_id)
-      |> start_async(:load_grades, fn -> fetch_all_grades(token, socket.assigns.semester) end)
+      |> assign(:semester, semester)
+      |> assign(:shown_grades, %{})
 
-    {:noreply, redirect(socket, to: "/student/grades")}
+    socket =
+      case data do
+        :load ->
+          socket
+          |> start_async(:load_grades, fn -> fetch_all_grades(socket.assigns.token, semester) end)
+
+        data ->
+          socket |> assign(:grades, data) |> assign(:shown_grades, data)
+      end
+
+    {:noreply, push_patch(socket, to: ~p"/student/grades?#{socket.assigns.query_params}")}
   end
 
   def handle_event(
@@ -167,14 +184,6 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
     shown = grades |> Map.take(keys) |> search_grades(grades_query)
 
-    socket =
-      socket
-      |> assign(:sort_grades, sort_grades)
-      |> assign(:query, query)
-      |> assign(:grade_query, grades_query)
-      |> assign(:hide_empty, hide_empty)
-      |> assign(:shown_grades, shown)
-
     query_params = %{
       query: query,
       hide_empty: hide_empty,
@@ -183,7 +192,10 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     }
 
     socket =
-      push_patch(socket, to: ~p"/student/grades?#{query_params}")
+      socket
+      |> assign(:shown_grades, shown)
+      |> assign(:query_params, query_params)
+      |> push_patch(to: ~p"/student/grades?#{query_params}")
 
     {:noreply, socket}
   end
@@ -202,8 +214,18 @@ defmodule ElixirusWeb.StudentLive.Subjects do
             keys |> search_subjects(socket.assigns.query)
 
           shown = grades |> Map.take(keys)
-          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "grades", grades)
-          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "grades", :timer.minutes(5))
+
+          Cachex.put(
+            :elixirus_cache,
+            socket.assigns.user_id <> "#{socket.assigns.semester}-grades",
+            grades
+          )
+
+          Cachex.expire(
+            :elixirus_cache,
+            socket.assigns.user_id <> "#{socket.assigns.semester}-grades",
+            :timer.minutes(5)
+          )
 
           socket
           |> assign(:grades, grades)
@@ -222,7 +244,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
         socket
       ) do
     api_token = handle_api_token(socket, api_token)
-    data = handle_cache_data(user_id, "grades")
+    data = handle_cache_data(user_id, "#{semester}-grades")
 
     socket =
       socket
@@ -232,6 +254,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       |> assign(:semester, semester)
       |> assign(:grades, %{})
       |> assign(:shown_grades, %{})
+      |> assign(:query_params, @default_params)
 
     socket =
       case data do
