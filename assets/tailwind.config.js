@@ -10,7 +10,7 @@ module.exports = {
     "./js/**/*.js",
     "../lib/elixirus_web.ex", 
     "../lib/elixirus_web/**/*.*ex",
-    "./node_modules/flowbite/**/*.js"
+    "../deps/phoenix_ui/**/*.*ex",
   ],
     theme: {
     extend: {
@@ -24,10 +24,10 @@ module.exports = {
   },
   plugins: [
 
-        require('flowbite/plugin'),
  plugin(({ addVariant }) => {
         addVariant('child', '& > *');
         addVariant('child-hover', '& > *:hover');
+        addVariant('invalid', '&.invalid:not(.phx-no-feedback)')
     }),
     require("@tailwindcss/forms"),
     // Allows prefixing tailwind classes with LiveView classes to add rules

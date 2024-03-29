@@ -3,7 +3,6 @@
     "deps/*"
   ],
   "dependencies": {
-    "flowbite": "^2.3.0",
     "heroicons": "^2.0.18",
     "phoenix": "workspace:*",
     "phoenix_html": "workspace:*",

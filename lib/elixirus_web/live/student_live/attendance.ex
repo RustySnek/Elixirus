@@ -5,6 +5,8 @@ defmodule ElixirusWeb.StudentLive.Attendance do
   import Elixirus.PythonWrapper
   import ElixirusWeb.Components.Loadings
   alias ElixirusWeb.LoginModal
+  import Phoenix.UI.Components.Tooltip
+  import Phoenix.UI.Components.Typography
 
   def fetch_attendance(socket) do
     python(:helpers, :fetch_attendance, [socket.assigns.token, socket.assigns.semester])
