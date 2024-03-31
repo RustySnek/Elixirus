@@ -3,6 +3,31 @@ defmodule ElixirusWeb.Helpers do
     data |> Map.get(charlist_key) |> to_string()
   end
 
+  def count_average(grades) do
+    if grades == [] do
+      0
+    else
+      {avg, divisor} =
+        grades
+        |> Enum.reduce({0, 1}, fn grade, {acc, divisor} ->
+          weight = stringify_value(grade, ~c"weight") |> String.to_integer()
+
+          if grade |> Map.get(~c"counts") == true do
+            {grade
+             |> stringify_value(~c"value")
+             |> String.to_float()
+             |> Kernel.*(weight)
+             |> Kernel.+(acc), divisor + weight}
+          else
+            {acc, divisor}
+          end
+        end)
+
+      avg
+      |> Kernel./(divisor - 1)
+    end
+  end
+
   def switch_integer(val) do
     case val do
       0 -> 1
