@@ -10,6 +10,9 @@ def handle_token(u, p):
     except Exception as ex:
         return Atom("error".encode("utf-8")), str(ex)
 
+def handle_semester_grades(avgs):
+    return {subject: list(map(lambda grade: grade.gpa, averages)) for subject, averages in avgs.items()}
+
 def handle_homework(homework):
     return [h.__dict__ for h in homework]
 

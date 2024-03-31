@@ -37,10 +37,10 @@ def fetch_message_content(token, id):
 
 def fetch_grades(token, semester, opt):
     try:
-        subjects, average_grades, descriptive = get_grades(token, opt)
+        subjects, semester_grades, descriptive = get_grades(token, opt)
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
-    return Atom("ok".encode('utf-8')), handle_grades(subjects[int(semester)])
+    return Atom("ok".encode('utf-8')), [handle_grades(subjects[int(semester)]), handle_semester_grades(semester_grades)]
 
 def fetch_all_grades(token, semester):
     token = create_token(token)
