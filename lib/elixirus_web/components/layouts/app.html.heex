@@ -1,64 +1,42 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex justify-between sm:justify-start items-center overflow-hidden h-24 flex-row border-b border-fuchsia-500 py-3 text-sm">
-    <.link navigate={~p"/student"}>
-      <div class="flex flex-row mr-0 sm:mr-20 gap-x-2 justify-center">
-        <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
-          Elixir<span class="text-fuchsia-900">us</span>
-        </h1>
-        <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
+<header
+  phx-hook="retrieve_local_storage"
+  name="semester"
+  id="main_header"
+  class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 mx-8 flex flex-row justify-between items-center"
+>
+  <.header>
+    <:logo>
+      <div class="flex flex-row space-x-4">
+        <.link navigate={~p"/student"} class="flex items-center">
+          <div class="flex flex-row mr-0 sm:mr-20 gap-x-2 justify-center">
+            <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
+              Elixir<span class="text-fuchsia-900">us</span>
+            </h1>
+            <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
+          </div>
+        </.link>
       </div>
-    </.link>
-
-    <div class="items-start gap-x-4 flex-row flex flex-wrap xl:flex md:grid grid-cols-2 hidden">
-      <.link navigate={~p"/student/grades"}>
-        <div class=" flex flex-row gap-x-2">
-          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
-            Grad<span class="text-fuchsia-900">es</span>
-          </h1>
-        </div>
-      </.link>
-      <.link navigate={~p"/student/attendance"}>
-        <div class=" flex flex-row gap-x-2">
-          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
-            Attend<span class="text-fuchsia-900">ance</span>
-          </h1>
-        </div>
-      </.link>
-
-      <.link navigate={~p"/student/timetable"}>
-        <div class=" flex flex-row gap-x-2">
-          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
-            Time<span class="text-fuchsia-900">table</span>
-          </h1>
-        </div>
-      </.link>
-      <.link navigate={~p"/student/messages"}>
-        <div class="flex flex-row gap-x-2">
-          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
-            Mess<span class="text-fuchsia-900">ages</span>
-          </h1>
-        </div>
-      </.link>
-      <.link navigate={~p"/student/homework"}>
-        <div class=" flex flex-row gap-x-2">
-          <h1 class="font-quicksand text-3xl font-extrabold text-fuchsia-700">
-            Home<span class="text-fuchsia-900">work</span>
-          </h1>
-        </div>
-      </.link>
-    </div>
-    <div class="w-full fixed">
-      <div id="navigator" class="sm:hidden w-full  fixed bg-fuchsia-950 h-20 ">123123123</div>
-    </div>
-    <button phx-click={JS.toggle(to: "#navigator")} class="z-20 sm:hidden">
-      <Heroicons.bars_3 mini class="h-14 text-fuchsia-700" />
-    </button>
-    <input hidden value={@semester} phx-hook="store_semester" id="selected_semester" />
+    </:logo>
+    <:link label="Grades" to="/student/grades" />
+    <:link label="Attendance" to="/student/attendance" />
+    <:link label="Timetable" to="/student/timetable" />
+    <:link label="Homework" to="/student/homework" />
+    <:link label="Messages" to="/student/messages" />
+    <:link label="Schedule" to="#" />
+  </.header>
+  <div class="hidden md:block scale-75 lg:scale-100 self-start mt-5 lg:self-center lg:mt-0">
+    <input
+      hidden
+      value={@semester}
+      phx-hook="set_local_storage"
+      name="semester"
+      id="selected_semester"
+    />
     <button
       class="self-center ml-auto"
       phx-click={
         JS.push(
-          "change_semester",
+          "retrieve_local_storage",
           value: %{
             semester:
               "#{@semester |> String.to_integer() |> ElixirusWeb.Helpers.switch_integer()}"
@@ -66,7 +44,15 @@
         )
       }
     >
-      <%= @semester %>
+      <div class=" select-none relative w-16 items-center flex justify-center">
+        <span class="font-quicksand text-fuchsia-200 text-3xl font-extrabold">
+          <%= @semester |> String.to_integer() |> Kernel.+(1) %>
+        </span>
+        <img
+          class="absolute top-1/2 -translate-y-1/2 hover:rotate-180 transition"
+          src={~p"/assets/icons/refresh.svg"}
+        />
+      </div>
     </button>
   </div>
 </header>
