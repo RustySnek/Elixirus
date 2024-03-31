@@ -33,7 +33,6 @@ Hooks.retrieve_local_storage = {
   mounted() {
     let name = this.el.getAttribute("name")
     let item = localStorage.getItem(name)
-    console.log(item, this.el.name)
     this.pushEvent("retrieve_local_storage", {[name]: item === undefined | null ? "" : item})
   }
 }

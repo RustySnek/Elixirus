@@ -70,8 +70,6 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def mount(_params, %{"token" => api_token} = params, socket) do
-    Cachex.purge(:elixirus_cache)
-
     api_token = handle_api_token(socket, api_token)
 
     semester =

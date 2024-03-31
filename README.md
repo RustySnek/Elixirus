@@ -1,6 +1,6 @@
 ![Elixirus](https://github.com/RustySnek/Elixirus/blob/master/images/elixirus_logo.png)
 
-### A better replacement for Librus Synergia frontend written in Elixir
+### A better replacement for Synergia Learning Managment System frontend
 
 ## Tech used
  * [Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view) -  Rich, real-time user experiences with server-rendered HTML 🐦
@@ -10,7 +10,7 @@
 
 ## Working with devenv
  Run `direnv allow` to allow .envrc execution
- 
+
 ## Prerequisites
  * bun
  * erlang
@@ -54,10 +54,12 @@
   - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
   
   ### In Progress
-  - [ ] Docker 🐳
   - [ ] Schedule Page 📆
  
   ### Done ✓ 
+  - [X] Host the application 🚀
+  - [X] Docker 🐳
+    - [X] Auto deploy 📦
   - [X] Attendance Page ✔️
    - [X] Add frequency percentage 
   - [X] Grades Page 📑
