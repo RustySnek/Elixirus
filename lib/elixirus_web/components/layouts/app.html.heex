@@ -48,10 +48,7 @@
         <span class="font-quicksand text-fuchsia-200 text-3xl font-extrabold">
           <%= @semester |> String.to_integer() |> Kernel.+(1) %>
         </span>
-        <img
-          class="absolute top-1/2 -translate-y-1/2 hover:rotate-180 transition"
-          src={~p"/assets/icons/refresh.svg"}
-        />
+        <.refresh_icon class="absolute top-1/2 -translate-y-1/2 hover:rotate-180 transition" />
       </div>
     </button>
   </div>

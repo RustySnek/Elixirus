@@ -72,18 +72,12 @@ defmodule ElixirusWeb.StudentLive.Index do
   def mount(_params, %{"token" => api_token} = params, socket) do
     api_token = handle_api_token(socket, api_token)
 
+    {_, _, month} = Date.to_erl(Date.utc_today())
+
     semester =
-      case Map.get(params, "semester") do
-        nil ->
-          {_, _, month} = Date.to_erl(Date.utc_today())
-
-          cond do
-            month >= 2 -> "1"
-            true -> "0"
-          end
-
-        semester ->
-          semester
+      cond do
+        month >= 2 and month < 9 -> "1"
+        true -> "0"
       end
 
     socket =
