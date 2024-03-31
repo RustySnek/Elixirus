@@ -16,26 +16,20 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
     user_id =
       conn.cookies |> Map.get("user_id", make_ref() |> :erlang.ref_to_list() |> to_string())
 
+    {_, _, month} = Date.to_erl(Date.utc_today())
+
     semester =
-      case conn.cookies["semester"] do
-        nil ->
-          {_, _, month} = Date.to_erl(Date.utc_today())
-
-          cond do
-            month >= 2 and month <= 9 -> "1"
-            true -> "0"
-          end
-
-        sem ->
-          sem
+      cond do
+        month >= 2 and month < 9 -> "1"
+        true -> "0"
       end
 
     case {cookie, conn.cookies["username"]} do
       {cookie, username} when cookie == nil or username == nil ->
         conn
-        |> put_session(:semester, semester)
         |> put_session(:token, %{"not:found": []})
         |> put_session(:user_id, user_id)
+        |> put_session(:semester, semester)
 
       {cookie, username} ->
         conn

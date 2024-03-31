@@ -76,7 +76,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     {:noreply, socket}
   end
 
-  def handle_event("change_semester", %{"semester" => semester} = _params, socket) do
+  def handle_event("retrieve_local_storage", %{"semester" => semester} = _params, socket) do
     attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance")
 
     socket =

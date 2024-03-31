@@ -6,6 +6,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
   use ElixirusWeb.LoginHandler
+  use ElixirusWeb.SetSemesterLive
 
   defp is_within_range?(current_time, time_range) do
     [time_from, time_to] = time_range

@@ -1,4 +1,7 @@
-<div class="flex gap-y-5 flex-col mx-10">
+<div :if={@grades == %{}} class="flex items-center justify-center">
+  <.spinner />
+</div>
+<div :if={@grades != %{}} class="flex gap-y-5 flex-col mx-10">
   <div
     :for={grade <- @grades |> Map.get(@subject |> to_charlist())}
     class={"rounded-2xl border-fuchsia-400 border #{grade |> Map.get(~c"counts") == false && "!border-red-600"}"}
@@ -12,8 +15,13 @@
       phx-hook="highlight_grade"
       class="flex rounded-2xl p-4 flex-col sm:flex-row gap-x-20 transition duration-1000 bg-white/50"
     >
-      <p class="text-4xl text-center w-20 font-bold self-center">
-        <%= grade |> Map.get(~c"grade") %>
+      <p class="text-4xl text-center w-24 font-bold self-center">
+        <span>
+          <%= grade |> Map.get(~c"grade") %>
+        </span>
+        <span class="text-sm font-normal bottom-7 right-2 relative">
+          <%= grade |> stringify_value(~c"weight") %>
+        </span>
       </p>
 
       <div class="flex flex-col justify-between w-full ">
@@ -38,8 +46,13 @@
       id={grade |> Map.get(~c"href") |> to_string}
       class=" flex flex-col sm:flex-row gap-x-20 rounded-2xl p-4 "
     >
-      <p class="text-4xl text-center w-20 font-bold self-center">
-        <%= grade |> Map.get(~c"grade") %>
+      <p class="text-4xl text-center w-24 font-bold self-center">
+        <span>
+          <%= grade |> Map.get(~c"grade") %>
+        </span>
+        <span class="text-sm font-normal bottom-7 right-2 relative">
+          <%= grade |> stringify_value(~c"weight") %>
+        </span>
       </p>
       <div class="flex flex-col justify-between w-full ">
         <p class="text-xl ml-2"><%= grade |> stringify_value(~c"category") %></p>

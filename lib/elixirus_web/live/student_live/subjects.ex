@@ -1,7 +1,6 @@
 defmodule ElixirusWeb.StudentLive.Subjects do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
-  import Heroicons
   import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
   alias ElixirusWeb.LoginModal
@@ -102,8 +101,6 @@ defmodule ElixirusWeb.StudentLive.Subjects do
         |> Enum.sort_by(
           fn grade ->
             if Map.get(grade, ~c"counts") == false do
-              0
-            else
               Map.get(grade, ~c"value") |> to_string |> String.to_float()
             end
           end,
@@ -140,16 +137,20 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
   def handle_event("view_grade", %{"grade_id" => id, "subject" => subject}, socket) do
     {:noreply,
-     push_navigate(socket, to: ~p"/student/grades/#{subject}?grade_id=#{id}", replace: true)}
+     push_navigate(socket,
+       to: ~p"/student/grades/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}",
+       replace: false
+     )}
   end
 
-  def handle_event("change_semester", %{"semester" => semester}, socket) do
+  def handle_event("retrieve_local_storage", %{"semester" => semester} = _params, socket) do
     data = handle_cache_data(socket.assigns.user_id, "#{semester}-grades")
 
     socket =
       socket
       |> assign(:semester, semester)
       |> assign(:shown_grades, %{})
+      |> assign(:grades, %{})
 
     socket =
       case data do
@@ -207,13 +208,25 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   def handle_async(:load_grades, {:ok, grades}, socket) do
     socket =
       case grades do
-        {:ok, grades} ->
+        {:ok, [grades, semester_grades]} ->
           keys = grades |> Map.keys()
 
           keys =
             keys |> search_subjects(socket.assigns.query)
 
           shown = grades |> Map.take(keys)
+
+          Cachex.put(
+            :elixirus_cache,
+            socket.assigns.user_id <> "semester_grades",
+            grades
+          )
+
+          Cachex.expire(
+            :elixirus_cache,
+            socket.assigns.user_id <> "semester_grades",
+            :timer.minutes(5)
+          )
 
           Cachex.put(
             :elixirus_cache,
@@ -230,6 +243,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           socket
           |> assign(:grades, grades)
           |> assign(:shown_grades, shown)
+          |> assign(:semester_grades, semester_grades)
 
         _ ->
           assign(socket, :login_required, true)
@@ -245,14 +259,15 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       ) do
     api_token = handle_api_token(socket, api_token)
     data = handle_cache_data(user_id, "#{semester}-grades")
+    semester_grades = handle_cache_data(user_id, "semester_grades")
 
     socket =
       socket
       |> assign(:token, api_token)
       |> assign(:user_id, user_id)
       |> assign(:login_required, false)
-      |> assign(:semester, semester)
       |> assign(:grades, %{})
+      |> assign(:semester_grades, %{})
       |> assign(:shown_grades, %{})
       |> assign(:query_params, @default_params)
 
@@ -265,6 +280,13 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           socket |> assign(:grades, data) |> assign(:shown_grades, data)
       end
 
-    {:ok, socket}
+    socket =
+      if semester_grades != :load do
+        assign(socket, :semester_grades, semester_grades)
+      else
+        socket
+      end
+
+    {:ok, assign(socket, :semester, semester)}
   end
 end

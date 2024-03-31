@@ -4,7 +4,7 @@
   login_required={@login_required}
   return_url="/student/grades"
 />
-<div :if={@shown_grades == %{}} class="w-full h-96 flex -z-40 justify-center fixed items-center">
+<div :if={@grades == %{}} class="w-full h-96 flex -z-40 justify-center fixed items-center">
   <.spinner />
 </div>
 
@@ -60,7 +60,12 @@
     :if={not ((@hide_empty || @grade_query != "") && Map.get(@shown_grades, subject) == [])}
     class="bg-[#121212] py-2 px-4 gap-y-4 flex flex-col"
   >
-    <%= subject |> to_string() %>
+    <div class="flex flex-row justify-between">
+      <span><%= subject |> to_string() %></span>
+      <span class="text-lg text-fuchsia-100">
+        <%= @grades |> Map.get(subject) |> count_average() |> to_string |> String.slice(0, 5) %>
+      </span>
+    </div>
     <div class="flex flex-row font-semibold text-xl gap-5 flex-wrap">
       <button
         :for={grade <- @shown_grades |> Map.get(subject) |> sort_grades_by(@sort_grades)}

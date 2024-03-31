@@ -28,7 +28,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     end)
   end
 
-  def handle_event("change_semester", %{"semester" => semester}, socket) do
+  def handle_event("retrieve_local_storage", %{"semester" => semester}, socket) do
     socket =
       socket
       |> assign(:semester, semester)
