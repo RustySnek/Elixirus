@@ -2,6 +2,7 @@ from erlport.erlterms import Atom
 from librus_apix.attendance import get_attendance, get_attendance_frequency
 from librus_apix.messages import get_recieved, message_content
 from librus_apix.homework import get_homework, homework_detail
+from librus_apix.schedule import get_schedule
 from librus_apix.get_token import AuthorizationError, Token
 from librus_apix.grades import TokenError
 from librus_apix.student_information import get_student_information
@@ -33,7 +34,13 @@ def fetch_message_content(token, id):
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), content 
 
-
+def fetch_schedule(token, year, month):
+    token = create_token(token)
+    try:
+        schedule = get_schedule(token, month, year, True)
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), handle_schedule(schedule)
 
 def fetch_grades(token, semester, opt):
     try:
