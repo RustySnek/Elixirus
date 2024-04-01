@@ -9,7 +9,8 @@ defmodule ElixirusWeb.StudentLive.Attendance do
   import Phoenix.UI.Components.Typography
 
   def fetch_attendance(socket) do
-    python(:helpers, :fetch_attendance, [socket.assigns.token, socket.assigns.semester])
+    {python(:helpers, :fetch_attendance, [socket.assigns.token, socket.assigns.semester]),
+     socket.assigns.semester}
   end
 
   def fetch_frequency(socket) do
@@ -47,7 +48,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     {:noreply, socket}
   end
 
-  def handle_async(:load_attendance, {:ok, attendance}, socket) do
+  def handle_async(:load_attendance, {:ok, {attendance, semester}}, socket) do
     socket =
       case attendance do
         {:ok, attendance} ->
@@ -57,13 +58,13 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
           Cachex.put(
             :elixirus_cache,
-            socket.assigns.user_id <> "#{socket.assigns.semester}-attendance",
+            socket.assigns.user_id <> "#{semester}-attendance",
             attendance
           )
 
           Cachex.expire(
             :elixirus_cache,
-            socket.assigns.user_id <> "#{socket.assigns.semester}-attendance",
+            socket.assigns.user_id <> "#{semester}-attendance",
             :timer.minutes(5)
           )
 
