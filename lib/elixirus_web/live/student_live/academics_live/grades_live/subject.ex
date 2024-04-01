@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.Grades.Subject do
+defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   use ElixirusWeb, :live_view
   import ElixirusWeb.Helpers
   use ElixirusWeb.LoginHandler

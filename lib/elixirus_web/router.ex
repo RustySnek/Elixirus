@@ -29,14 +29,24 @@ defmodule ElixirusWeb.Router do
     scope "/student" do
       pipe_through :api_token
       live "/", StudentLive.Index
-      live "/timetable", StudentLive.Timetable
-      live "/messages", StudentLive.Messages
-      live "/homework", StudentLive.Homework
-      live "/attendance", StudentLive.Attendance
 
-      scope "/grades" do
-        live "/", StudentLive.Subjects
-        live "/:subject", StudentLive.Grades.Subject
+      scope "/scheduling" do
+        live "/homework", StudentLive.SchedulingLive.Homework
+        live "/timetable", StudentLive.SchedulingLive.Timetable
+        live "/schedule", StudentLive.SchedulingLive.Schedule
+      end
+
+      scope "/messages" do
+        live "/", StudentLive.MessagesLive.Messages
+      end
+
+      scope "/academics" do
+        live "/attendance", StudentLive.AcademicsLive.Attendance
+
+        scope "/grades" do
+          live "/", StudentLive.AcademicsLive.Subjects
+          live "/:subject", StudentLive.AcademicsLive.GradesLive.Subject
+        end
       end
     end
   end

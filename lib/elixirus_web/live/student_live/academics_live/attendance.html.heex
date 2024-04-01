@@ -1,7 +1,7 @@
 <.live_component
   module={LoginModal}
   id="login_modal"
-  return_url="/student/attendance"
+  return_url="/student/academics/attendance"
   login_required={@login_required}
 />
 <div :if={@attendance == [] && @login_required == false} class="flex items-center justify-center">

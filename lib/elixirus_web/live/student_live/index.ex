@@ -69,7 +69,11 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
-  def mount(_params, %{"token" => api_token} = params, socket) do
+  def mount(
+        _params,
+        %{"token" => api_token, "user_id" => user_id, "semester" => semester},
+        socket
+      ) do
     api_token = handle_api_token(socket, api_token)
 
     {_, _, month} = Date.to_erl(Date.utc_today())

@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.Homework do
+defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
   use ElixirusWeb, :live_view
   use ElixirusWeb.SetSemesterLive
   import Elixirus.PythonWrapper
