@@ -30,13 +30,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
                 |> Kernel./(10))
             )
 
-          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "frequency", freq)
-
-          Cachex.expire(
-            :elixirus_cache,
-            socket.assigns.user_id <> "frequency",
-            :timer.minutes(5)
-          )
+          cache_and_ttl_data(socket.assigns.user_id, "frequency", freq)
 
           socket
           |> assign(:frequency, freq)
@@ -56,18 +50,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
             attendance
             |> Enum.chunk_by(&Map.get(&1, ~c"date"))
 
-          Cachex.put(
-            :elixirus_cache,
-            socket.assigns.user_id <> "#{semester}-attendance",
-            attendance
-          )
-
-          Cachex.expire(
-            :elixirus_cache,
-            socket.assigns.user_id <> "#{semester}-attendance",
-            :timer.minutes(5)
-          )
-
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance)
           socket |> assign(:attendance, attendance)
 
         _ ->

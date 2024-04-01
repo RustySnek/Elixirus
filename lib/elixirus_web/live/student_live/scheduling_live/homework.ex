@@ -30,8 +30,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
     socket =
       case homework do
         {:ok, homework} ->
-          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "homework", homework)
-          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "homework", :timer.minutes(5))
+          cache_and_ttl_data(socket.assigns.user_id, "homework", homework)
           assign(socket, :homework, homework |> Enum.reverse())
 
         _ ->

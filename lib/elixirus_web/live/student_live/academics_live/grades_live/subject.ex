@@ -6,24 +6,14 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   import ElixirusWeb.Components.Loadings
 
   def fetch_all_grades(token, semester) do
-    python(:helpers, :fetch_all_grades, [token, semester])
+    {python(:helpers, :fetch_all_grades, [token, semester]), semester}
   end
 
-  def handle_async(:load_grades, {:ok, grades}, socket) do
+  def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
     socket =
       case grades do
-        {:ok, [grades, _]} ->
-          Cachex.put(
-            :elixirus_cache,
-            socket.assigns.user_id <> "#{socket.assigns.semester}-grades",
-            grades
-          )
-
-          Cachex.expire(
-            :elixirus_cache,
-            socket.assigns.user_id <> "#{socket.assigns.semester}-grades",
-            :timer.minutes(5)
-          )
+        {:ok, [grades, _semester_grades]} ->
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades)
 
           socket
           |> assign(:grades, grades)

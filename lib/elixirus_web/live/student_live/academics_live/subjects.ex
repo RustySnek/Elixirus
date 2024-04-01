@@ -218,29 +218,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
 
           shown = grades |> Map.take(keys)
 
-          Cachex.put(
-            :elixirus_cache,
-            socket.assigns.user_id <> "semester_grades",
-            grades
-          )
-
-          Cachex.expire(
-            :elixirus_cache,
-            socket.assigns.user_id <> "semester_grades",
-            :timer.minutes(5)
-          )
-
-          Cachex.put(
-            :elixirus_cache,
-            socket.assigns.user_id <> "#{semester}-grades",
-            grades
-          )
-
-          Cachex.expire(
-            :elixirus_cache,
-            socket.assigns.user_id <> "#{semester}-grades",
-            :timer.minutes(5)
-          )
+          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades)
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades)
 
           socket
           |> assign(:grades, grades)

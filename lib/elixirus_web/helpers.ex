@@ -103,6 +103,11 @@ defmodule ElixirusWeb.Helpers do
     end
   end
 
+  def cache_and_ttl_data(user_id, cache_type, data) do
+    Cachex.put(:elixirus_cache, user_id <> cache_type, data)
+    Cachex.expire(:elixirus_cache, user_id <> cache_type, :timer.minutes(5))
+  end
+
   def handle_cache_data(user_id, cache_type) do
     Cachex.purge(:elixirus_cache)
 
