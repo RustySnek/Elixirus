@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.Timetable do
+defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   use ElixirusWeb, :live_view
   import ElixirusWeb.Components.Loadings
   import Elixirus.PythonWrapper

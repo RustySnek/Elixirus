@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.Subjects do
+defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
   import ElixirusWeb.Components.Loadings
@@ -138,7 +138,8 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   def handle_event("view_grade", %{"grade_id" => id, "subject" => subject}, socket) do
     {:noreply,
      push_navigate(socket,
-       to: ~p"/student/grades/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}",
+       to:
+         ~p"/student/academics/grades/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}",
        replace: false
      )}
   end
@@ -162,7 +163,8 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           socket |> assign(:grades, data) |> assign(:shown_grades, data)
       end
 
-    {:noreply, push_patch(socket, to: ~p"/student/grades?#{socket.assigns.query_params}")}
+    {:noreply,
+     push_patch(socket, to: ~p"/student/academics/grades?#{socket.assigns.query_params}")}
   end
 
   def handle_event(
@@ -196,7 +198,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       socket
       |> assign(:shown_grades, shown)
       |> assign(:query_params, query_params)
-      |> push_patch(to: ~p"/student/grades?#{query_params}")
+      |> push_patch(to: ~p"/student/academics/grades?#{query_params}")
 
     {:noreply, socket}
   end

@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.Attendance do
+defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   use ElixirusWeb, :live_view
   use ElixirusWeb.LoginHandler
   import ElixirusWeb.Helpers
