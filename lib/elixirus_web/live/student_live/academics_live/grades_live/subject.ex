@@ -60,6 +60,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
       |> assign(:grades, %{})
       |> assign(:shown_grade, grade_id)
       |> assign(:semester, semester)
+      |> assign(:page_title, subject)
 
     socket =
       case grades do

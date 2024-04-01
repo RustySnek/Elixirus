@@ -148,6 +148,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> assign(:show_period_modal, false)
       |> assign(:calendar_events, %{})
       |> assign(:calendar_id, "")
+      |> assign(:page_title, "Timetable")
 
     timetable = handle_cache_data(user_id, "timetable")
     calendar_data = handle_cache_data(user_id, "timetable_calendar")

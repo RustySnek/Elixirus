@@ -91,6 +91,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       |> assign(:login_required, false)
       |> assign(:grades, [])
       |> assign(:attendance, [])
+      |> assign(:page_title, "Home")
       |> fetch_data(api_token, semester)
 
     {:ok, socket}
