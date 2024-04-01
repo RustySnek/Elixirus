@@ -80,8 +80,7 @@ defmodule ElixirusWeb.StudentLive.MessagesLive.Messages do
           {unread, seen} =
             messages |> Enum.partition(fn msg -> msg |> Map.get(~c"unread") == true end)
 
-          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "messages", messages)
-          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "messages", :timer.minutes(5))
+          cache_and_ttl_data(socket.assigns.user_id, "messages", messages)
 
           socket
           |> assign(:loaded, true)

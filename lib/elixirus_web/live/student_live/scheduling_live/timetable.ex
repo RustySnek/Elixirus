@@ -76,13 +76,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def handle_async(:load_calendar_data, {:ok, events}, socket) do
-    Cachex.put(:elixirus_cache, socket.assigns.user_id <> "timetable_calendar", events)
-
-    Cachex.expire(
-      :elixirus_cache,
-      socket.assigns.user_id <> "timetable_calendar",
-      :timer.minutes(5)
-    )
+    cache_and_ttl_data(socket.assigns.user_id, "timetable_calendar", events)
 
     socket = socket |> assign(:calendar_events, events)
     {:noreply, socket}
@@ -92,8 +86,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     socket =
       case timetable do
         {:ok, t} ->
-          Cachex.put(:elixirus_cache, socket.assigns.user_id <> "timetable", t)
-          Cachex.expire(:elixirus_cache, socket.assigns.user_id <> "timetable", :timer.minutes(5))
+          cache_and_ttl_data(socket.assigns.user_id, "timetable", t)
 
           socket
           |> assign(:timetable, t)
