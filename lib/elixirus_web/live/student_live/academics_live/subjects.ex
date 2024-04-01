@@ -251,6 +251,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       |> assign(:semester_grades, %{})
       |> assign(:shown_grades, %{})
       |> assign(:query_params, @default_params)
+      |> assign(:page_title, "Subjects")
 
     socket =
       case data do

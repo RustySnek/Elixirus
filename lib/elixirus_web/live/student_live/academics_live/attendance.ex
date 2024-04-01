@@ -97,6 +97,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:user_id, user_id)
       |> assign(:visible, nil)
       |> assign(:login_required, false)
+      |> assign(:page_title, "Attendance")
 
     attendance = handle_cache_data(user_id, "#{semester}-attendance")
     frequency = handle_cache_data(user_id, "frequency")

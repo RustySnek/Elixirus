@@ -28,6 +28,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   def mount(_params, %{"token" => token, "user_id" => user_id, "semester" => semester}, socket) do
     token = handle_api_token(socket, token)
 
+    {{year, month, _day}, _time} = :calendar.local_time()
+
     socket =
       socket
       |> assign(:token, token)
@@ -35,8 +37,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
       |> assign(:semester, semester)
       |> assign(:schedule, %{})
       |> assign(:login_required, false)
+      |> assign(:page_title, "Schedule #{year}-#{month}")
 
-    {{year, month, _day}, _time} = :calendar.local_time()
     schedule = handle_cache_data(user_id, "#{year}-#{month}-schedule")
 
     socket =

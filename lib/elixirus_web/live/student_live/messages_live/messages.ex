@@ -121,6 +121,7 @@ defmodule ElixirusWeb.StudentLive.MessagesLive.Messages do
       |> assign(:date, "")
       |> assign(:author, "")
       |> assign(:content, "")
+      |> assign(:page_title, "Messages")
 
     socket =
       case data do

@@ -93,6 +93,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
       |> assign(:login_required, false)
       |> assign(:homework, [])
       |> assign(:details, %{})
+      |> assign(:page_title, "Homework")
 
     homework = handle_cache_data(user_id, "homework")
 
