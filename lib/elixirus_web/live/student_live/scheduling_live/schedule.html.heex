@@ -4,4 +4,24 @@
   login_required={@login_required}
   return_url="/student/scheduling/timetable"
 />
+<div :if={@schedule == %{}} class="flex justify-center items-center"><.spinner /></div>
 <div phx-hook="retrieve_local_storage" name="semester" id="retrieve_semester"></div>
+<div class="mx-4 mb-8 grid xl:grid-cols-7 md:grid-cols-3 grid-cols-2 place-items-center gap-y-4">
+  <div
+    :for={{day_num, day} <- @schedule |> Map.to_list()}
+    class="p-1 space-y-2 overflow-y-auto border border-fuchsia-600 w-40 2xl:w-56 xl:w-40 md:w-60  h-40"
+  >
+    <%= day_num %>
+    <div :for={event <- day} class="last:border-none h-14 bg-fuchsia-800/10 ">
+      <button class="w-full h-full ">
+        <span class="line-clamp-1"><%= event |> stringify_value(~c"title") %></span>
+        <span
+          :if={stringify_value(event, ~c"subject") != "unspecified"}
+          class="text-sm line-clamp-1"
+        >
+          <%= event |> stringify_value(~c"subject") %>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
