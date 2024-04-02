@@ -81,9 +81,6 @@ Hooks.highlight_grade = {
     }
 }
 Hooks.slide_right = {
-  mounted() {
-    this.el.classList.add("-translate-x-full")
-  },
  destroyed() {
     this.el.classList.add("-translate-x-full")
   },
