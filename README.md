@@ -54,7 +54,9 @@
   - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
   
   ### In Progress
-  - [ ] Schedule Page 📆
+  - [X] Schedule Page 📆
+    - [X] Add schedule page 📑
+    - [ ] Add schedule to Timetable 🗓️
  
   ### Done ✓ 
   - [X] Host the application 🚀
@@ -63,6 +65,7 @@
   - [X] Attendance Page ✔️
    - [X] Add frequency percentage 
   - [X] Grades Page 📑
+    - [X] Calculating averages 💯
     - [X] Add nice filtering for subjects and grades 🧐 
   - [X] Homework Page 📰
   - [x] Timetable page 🗓️
