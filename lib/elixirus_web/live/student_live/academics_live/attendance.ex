@@ -99,14 +99,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:login_required, false)
       |> assign(:page_title, "Attendance")
 
-    attendance = handle_cache_data(user_id, "#{semester}-attendance")
     frequency = handle_cache_data(user_id, "frequency")
-
-    socket =
-      case attendance do
-        :load -> socket |> start_async(:load_attendance, fn -> fetch_attendance(socket) end)
-        attendance -> socket |> assign(:attendance, attendance)
-      end
 
     socket =
       case frequency do
