@@ -4,6 +4,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   use ElixirusWeb.LoginHandler
   import Elixirus.PythonWrapper
   import ElixirusWeb.Components.Loadings
+  alias ElixirusWeb.LoginModal
 
   def fetch_all_grades(token, semester) do
     {python(:helpers, :fetch_all_grades, [token, semester]), semester}
@@ -61,6 +62,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
       |> assign(:shown_grade, grade_id)
       |> assign(:semester, semester)
       |> assign(:page_title, subject)
+      |> assign(:login_required, false)
 
     socket =
       case grades do

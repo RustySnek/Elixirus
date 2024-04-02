@@ -239,8 +239,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
         socket
       ) do
     api_token = handle_api_token(socket, api_token)
-    data = handle_cache_data(user_id, "#{semester}-grades")
-    semester_grades = handle_cache_data(user_id, "semester_grades")
 
     socket =
       socket
@@ -252,22 +250,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       |> assign(:shown_grades, %{})
       |> assign(:query_params, @default_params)
       |> assign(:page_title, "Subjects")
-
-    socket =
-      case data do
-        :load ->
-          socket |> start_async(:load_grades, fn -> fetch_all_grades(api_token, semester) end)
-
-        data ->
-          socket |> assign(:grades, data) |> assign(:shown_grades, data)
-      end
-
-    socket =
-      if semester_grades != :load do
-        assign(socket, :semester_grades, semester_grades)
-      else
-        socket
-      end
 
     {:ok, assign(socket, :semester, semester)}
   end
