@@ -68,7 +68,7 @@
                         |> stringify_value(~c"date")
                       )
                   }
-                  class="bg-black rounded-2xl px-4 py-2"
+                  class="bg-[#1E1E1E]  max-w-[360px] md:max-w-[500px] lg:max-w-[800px] rounded-2xl px-4 py-2"
                 >
                   <span class="mb-2 text-lg font-bold">
                     <%= event |> stringify_value(~c"summary") %>
@@ -114,8 +114,8 @@
                 module={Modal}
                 id={"#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
               >
-                <div class="bg-[#121212] mx-5 rounded-2xl absolute z-40">
-                  <div class="p-4 flex flex-col text-center max-w-xl gap-y-4">
+                <div class="bg-[#1E1E1E] mx-5 min-h-[300px] min-w-[300px] lg:min-w-[600px] rounded-2xl absolute z-40">
+                  <div class="p-4 flex flex-col text-center w-full items-center justify-center gap-y-4">
                     <span class="text-lg font-bold">
                       <%= period |> stringify_value(~c"weekday") %>
                     </span>
