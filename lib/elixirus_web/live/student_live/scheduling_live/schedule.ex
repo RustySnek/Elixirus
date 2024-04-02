@@ -5,6 +5,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   import Elixirus.PythonWrapper
   alias ElixirusWeb.LoginModal
   import ElixirusWeb.Helpers
+  alias ElixirusWeb.Modal
   import ElixirusWeb.Components.Loadings
 
   def fetch_schedule(token, year, month) do
@@ -37,6 +38,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
       |> assign(:semester, semester)
       |> assign(:schedule, %{})
       |> assign(:login_required, false)
+      |> assign(:year, year)
+      |> assign(:month, month)
       |> assign(:page_title, "Schedule #{year}-#{month}")
 
     schedule = handle_cache_data(user_id, "#{year}-#{month}-schedule")
