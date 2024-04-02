@@ -1,4 +1,10 @@
-<div :if={@grades == %{}} class="flex items-center justify-center">
+<.live_component
+  module={LoginModal}
+  id="login_modal"
+  login_required={@login_required}
+  return_url={~p"/student/academics/grades/#{@subject}?semester=#{@semester}"}
+/>
+<div :if={@grades == %{} && @login_required == false} class="flex items-center justify-center">
   <.spinner />
 </div>
 <div :if={@grades != %{}} class="flex gap-y-5 flex-col mx-10">

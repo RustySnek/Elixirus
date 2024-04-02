@@ -4,7 +4,7 @@
   login_required={@login_required}
   return_url="/student/academics/grades"
 />
-<div :if={@grades == %{}} class="flex justify-center items-center">
+<div :if={@grades == %{} && @login_required == false} class="flex justify-center items-center">
   <.spinner />
 </div>
 
