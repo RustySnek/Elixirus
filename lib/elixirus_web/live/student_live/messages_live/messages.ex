@@ -78,7 +78,8 @@ defmodule ElixirusWeb.StudentLive.MessagesLive.Messages do
       case messages do
         {:ok, messages} ->
           {unread, seen} =
-            messages |> Enum.partition(fn msg -> msg |> Map.get(~c"unread") == true end)
+            messages
+            |> Enum.split_with(fn msg -> Map.get(msg, ~c"unread") == true end)
 
           cache_and_ttl_data(socket.assigns.user_id, "messages", messages)
 
@@ -130,7 +131,7 @@ defmodule ElixirusWeb.StudentLive.MessagesLive.Messages do
 
         data ->
           {unread, seen} =
-            data |> Enum.partition(fn msg -> msg |> Map.get(~c"unread") == true end)
+            data |> Enum.split_with(fn msg -> Map.get(msg, ~c"unread") == true end)
 
           socket
           |> assign(:messages, data)
