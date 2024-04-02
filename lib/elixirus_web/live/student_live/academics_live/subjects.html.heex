@@ -55,6 +55,12 @@
       </label>
     </span>
   </form>
+  <span>
+    Semester average:
+    <span class="font-bold text-lg">
+      <%= @semester_average |> to_string() |> String.slice(0, 5) %>
+    </span>
+  </span>
   <div
     :for={subject <- @shown_grades |> Map.keys()}
     :if={not ((@hide_empty || @grade_query != "") && Map.get(@shown_grades, subject) == [])}
@@ -63,7 +69,7 @@
     <div class="flex flex-row justify-between">
       <span><%= subject |> to_string() %></span>
       <span class="text-lg text-fuchsia-100">
-        <%= @grades |> Map.get(subject) |> count_average() |> to_string |> String.slice(0, 5) %>
+        <%= @grade_averages |> Map.get(subject) |> to_string |> String.slice(0, 5) %>
       </span>
     </div>
     <div class="flex flex-row font-semibold text-xl gap-5 flex-wrap">

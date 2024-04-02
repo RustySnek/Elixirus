@@ -13,6 +13,24 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     grade_query: ""
   }
 
+  defp assign_averages(socket, grades) do
+    grade_averages =
+      Enum.map(grades, fn {subject, grades} ->
+        {subject, count_average(grades)}
+      end)
+      |> Map.new()
+
+    semester_average =
+      grade_averages
+      |> Map.values()
+      |> Enum.reduce(0, fn avg, acc -> acc + avg end)
+      |> Kernel./(Enum.reject(grade_averages |> Map.values(), &(&1 == 0)) |> Enum.count())
+
+    socket
+    |> assign(:grade_averages, grade_averages)
+    |> assign(:semester_average, semester_average)
+  end
+
   def handle_params(params, _uri, socket) do
     hide_empty =
       case params |> Map.get("hide_empty", false) do
@@ -160,7 +178,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> start_async(:load_grades, fn -> fetch_all_grades(socket.assigns.token, semester) end)
 
         data ->
-          socket |> assign(:grades, data) |> assign(:shown_grades, data)
+          socket |> assign(:grades, data) |> assign(:shown_grades, data) |> assign_averages(data)
       end
 
     {:noreply,
@@ -225,6 +243,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> assign(:grades, grades)
           |> assign(:shown_grades, shown)
           |> assign(:semester_grades, semester_grades)
+          |> assign_averages(grades)
 
         _ ->
           assign(socket, :login_required, true)
@@ -247,6 +266,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       |> assign(:login_required, false)
       |> assign(:grades, %{})
       |> assign(:semester_grades, %{})
+      |> assign(:semester_average, 0.0)
       |> assign(:shown_grades, %{})
       |> assign(:query_params, @default_params)
       |> assign(:page_title, "Subjects")
