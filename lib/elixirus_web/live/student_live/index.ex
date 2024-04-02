@@ -76,17 +76,10 @@ defmodule ElixirusWeb.StudentLive.Index do
       ) do
     api_token = handle_api_token(socket, api_token)
 
-    {_, _, month} = Date.to_erl(Date.utc_today())
-
-    semester =
-      cond do
-        month >= 2 and month < 9 -> "1"
-        true -> "0"
-      end
-
     socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:user_id, user_id)
       |> assign(:semester, semester)
       |> assign(:login_required, false)
       |> assign(:grades, [])

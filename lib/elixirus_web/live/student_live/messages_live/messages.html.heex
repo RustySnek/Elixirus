@@ -51,9 +51,10 @@
     <div
       :for={{message, idx} <- @shown_messages |> Enum.with_index()}
       phx-mounted={
-        JS.transition({"blur-sm", "-translate-x-full", "blur-none"},
+        JS.transition({"blur-sm", "", "blur-none"},
           time: 100 + 20 * (idx + 1)
         )
+        |> JS.transition({"translate-x-full", "", "translate-x-none"}, time: 500)
         |> JS.add_class("hover:rotate-1 hover:!duration-100")
       }
       phx-hook="slide_right"
