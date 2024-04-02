@@ -6,7 +6,7 @@
 />
 <.live_component module={Modal} id="homework_modal">
   <div phx-click-away="wipe_details">
-    <div class="flex flex-col w-fit bg-[#121212] text-center rounded-2xl">
+    <div class="flex flex-col w-fit bg-[#1E1E1E] text-center rounded-2xl">
       <div :for={detail <- @details |> Map.keys()} class=" py-2 px-6">
         <%= detail |> to_string() %>: <%= @details |> stringify_value(detail) %>
       </div>

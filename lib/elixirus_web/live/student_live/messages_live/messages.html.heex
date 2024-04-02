@@ -6,7 +6,7 @@
 />
 <.live_component module={Modal} id="message-modal">
   <div phx-click-away="wipe_content" class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50">
-    <div class={"bg-[#121212] #{@author == "" && "!bg-transparent"} rounded-2xl"}>
+    <div class={"bg-[#1E1E1E] #{@author == "" && "!bg-transparent"} rounded-2xl"}>
       <div class="flex px-5 flex-col gap-x-4">
         <p class="text-gray-400 text-center"><%= @author %></p>
         <p class="text-center text-lg"><%= @title %></p>
