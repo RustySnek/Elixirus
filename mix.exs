@@ -34,6 +34,7 @@ defmodule Elixirus.MixProject do
     [
       {:phoenix, "~> 1.7.10"},
       {:cachex, "~> 3.6"},
+      {:httpoison, "~> 2.2.1"},
       {:timex, "~> 3.7.11"},
       {:phoenix_html, "~> 3.3"},
       {:heroicons, "~> 0.5.3"},
