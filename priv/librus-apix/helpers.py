@@ -8,15 +8,20 @@ from librus_apix.grades import TokenError
 from librus_apix.student_information import get_student_information
 from handle_classes import *
 from librus_apix.exceptions import TokenError, ParseError
+import os
 
 def extract_grades(grades):
     return [grade for subject in list(grades.values()) for grade in subject]
 
 def create_token(token_charlist):
+    proxy = {}
+    elixirus_proxy = os.getenv("ELIXIRUS_PROXY")
+    if elixirus_proxy is not None and os.getenv("USE_PROXY") == "yes":
+        proxy = {"https": elixirus_proxy, "http": elixirus_proxy}
     token_key = "".join([chr(n) for n in token_charlist])
     if len(token_key.split(":")) != 2:
-        return Token("mal:formed")
-    return Token(token_key)
+        return Token("mal:formed", proxy=proxy)
+    return Token(token_key, proxy=proxy)
 
 def fetch_messages(token, page):
     token = create_token(token)
