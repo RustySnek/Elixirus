@@ -9,6 +9,7 @@ defmodule Elixirus.Application do
   def start(_type, _args) do
     children = [
       ElixirusWeb.Telemetry,
+      Elixirus.Healthcheck.HealthSupervisor,
       {DNSCluster, query: Application.get_env(:elixirus, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Elixirus.PubSub},
       # Start a worker by calling: Elixirus.Worker.start_link(arg)
