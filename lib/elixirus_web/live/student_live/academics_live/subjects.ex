@@ -24,7 +24,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       grade_averages
       |> Map.values()
       |> Enum.reduce(0, fn avg, acc -> acc + avg end)
-      |> Kernel./(Enum.reject(grade_averages |> Map.values(), &(&1 == 0)) |> Enum.count())
+      |> Kernel./(
+        Enum.reject(grade_averages |> Map.values(), &(&1 == 0))
+        |> Enum.count()
+        |> max(1)
+      )
 
     socket
     |> assign(:grade_averages, grade_averages)

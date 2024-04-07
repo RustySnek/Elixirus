@@ -23,8 +23,12 @@ defmodule ElixirusWeb.Helpers do
           end
         end)
 
-      avg
-      |> Kernel./(divisor - 1)
+      if divisor == 1 do
+        0.0
+      else
+        avg
+        |> Kernel./(divisor - 1)
+      end
     end
   end
 
