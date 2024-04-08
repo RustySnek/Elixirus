@@ -2,10 +2,15 @@ from librus_apix.get_token import get_token, Token
 from librus_apix.grades import get_grades
 from librus_apix.exceptions import TokenError
 from erlport.erlterms import Atom
+import os
 
 def handle_token(u, p):
+    proxy = {}
+    elixirus_proxy = os.getenv("ELIXIRUS_PROXY")
+    if elixirus_proxy is not None and os.getenv("USE_PROXY") == "yes":
+        proxy = {"https": elixirus_proxy, "http": elixirus_proxy}
     try:
-        token = get_token(u,p)
+        token = get_token(u,p, proxy=proxy)
         return Atom("ok".encode("utf-8")), token.API_Key
     except Exception as ex:
         return Atom("error".encode("utf-8")), str(ex)
