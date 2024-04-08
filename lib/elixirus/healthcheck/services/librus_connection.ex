@@ -3,7 +3,10 @@ defmodule Elixirus.Healthcheck.Services.LibrusConnection do
   import Elixirus.Healthcheck.Healthcheck
 
   def check_status() do
-    case get("https://synergia.librus.pl") do
+    case get("https://synergia.librus.pl", [],
+           timeout: 5_000,
+           recv_timeout: 5_000
+         ) do
       {:ok, _} ->
         if System.get_env("USE_PROXY") != "no" do
           System.put_env("USE_PROXY", "no")

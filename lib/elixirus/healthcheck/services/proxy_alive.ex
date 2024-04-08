@@ -6,8 +6,11 @@ defmodule Elixirus.Healthcheck.Services.ProxyAlive do
 
     if proxy != nil do
       case get(proxy) do
-        {:ok, _} -> :up
-        _ -> :down
+        {:ok, _} ->
+          :up
+
+        _ ->
+          :down
       end
     else
       :down

@@ -14,7 +14,9 @@ defmodule Elixirus.Healthcheck.HealthWorker do
     {:ok, state, {:continue, :init_status}}
   end
 
-  def handle_call({:get_status}, _from, state), do: execute_check_status(state)
+  def handle_call({:get_status}, _from, %{status: service_status} = state) do
+    {:reply, service_status, state}
+  end
 
   def handle_continue(:init_status, state), do: execute_check_status(state)
 
