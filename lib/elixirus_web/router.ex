@@ -31,6 +31,7 @@ defmodule ElixirusWeb.Router do
       live "/", StudentLive.Index
 
       scope "/scheduling" do
+        live "/", StudentLive.SchedulingLive.Index
         live "/homework", StudentLive.SchedulingLive.Homework
         live "/timetable", StudentLive.SchedulingLive.Timetable
         live "/schedule", StudentLive.SchedulingLive.Schedule
@@ -41,9 +42,10 @@ defmodule ElixirusWeb.Router do
       end
 
       scope "/academics" do
+        live "/", StudentLive.AcademicsLive.Index
         live "/attendance", StudentLive.AcademicsLive.Attendance
 
-        scope "/grades" do
+        scope "/subjects" do
           live "/", StudentLive.AcademicsLive.Subjects
           live "/:subject", StudentLive.AcademicsLive.GradesLive.Subject
         end
