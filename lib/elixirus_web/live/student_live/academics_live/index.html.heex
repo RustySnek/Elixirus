@@ -1,0 +1,116 @@
+<.live_component
+  module={LoginModal}
+  id="login_modal"
+  login_required={@login_required}
+  return_url="/student/academics/"
+/>
+<div class="flex flex-col md:mx-6 lg:mx-10 mx-2 gap-y-4 mb-6">
+  <div :if={@completed_lessons != []}>
+    <div class="text-center text-fuchsia-600 text-2xl mb-3">Today's lessons</div>
+    <div class="flex flex-row overflow-x-auto gap-x-4">
+      <div :for={lesson <- @completed_lessons} class="bg-[#1f1f1f] rounded-lg text-sm h-40">
+        <div class="w-56 px-2 flex flex-col justify-between h-full">
+          <div>
+            <div class="text-lg flex flex-row justify-between">
+              <span>
+                <%= lesson |> stringify_value(~c"lesson_number") %>
+              </span>
+
+              <span class="font-semibold text-cyan-500">
+                <%= lesson |> stringify_value(~c"attendance_symbol") %>
+              </span>
+            </div>
+            <div class="line-clamp-4">
+              <%= lesson |> stringify_value(~c"topic") %>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <span class="line-clamp-1"><%= lesson |> stringify_value(~c"subject") %></span>
+            <span class="line-clamp-1 text-gray-400">
+              <%= lesson |> stringify_value(~c"teacher") %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div :if={@week_grades != %{}}>
+    <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly grades</div>
+    <div class="flex flex-row overflow-x-auto gap-x-4">
+      <div
+        :for={grade <- @week_grades |> Map.values() |> List.flatten() |> dbg}
+        class="bg-[#1f1f1f] rounded-lg  text-sm h-40"
+      >
+        <div class="w-56 px-2 flex flex-col justify-between h-full">
+          <div>
+            <div class="text-lg flex flex-row justify-between">
+              <div class="flex flex-row">
+                <span>
+                  <%= grade |> stringify_value(~c"weight") %>
+                </span>
+                <.scale mini class="w-4 self-center" />
+              </div>
+
+              <span class="font-semibold text-purple-700 text-2xl pb-1">
+                <%= grade |> stringify_value(~c"grade") %>
+              </span>
+              <div>
+                <.link navigate={
+                  ~p"/student/academics/subjects/#{grade |> stringify_value(~c'title')}?grade_id=#{grade |> stringify_value(~c'href') |> String.split("/") |> List.last()}&semester=#{@semester}"
+                }>
+                  <.magnifying_glass class="w-6" />
+                </.link>
+              </div>
+            </div>
+            <div class="line-clamp-4">
+              <%= grade |> stringify_value(~c"category") %>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <span class="line-clamp-1"><%= grade |> stringify_value(~c"title") %></span>
+            <span class="line-clamp-1 text-gray-400">
+              <%= grade |> stringify_value(~c"teacher") %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div :if={@week_grades != %{}}>
+    <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly absence</div>
+    <div class="flex flex-row overflow-x-auto gap-x-4">
+      <div
+        :for={attendance <- @week_attendance |> dbg}
+        class="bg-[#1f1f1f] rounded-lg  text-sm h-40"
+      >
+        <div class="w-56 px-2 flex flex-col justify-between h-full">
+          <div>
+            <div class="text-lg flex flex-row justify-between">
+              <div class="flex flex-row">
+                <span class="text-base">
+                  <%= attendance |> stringify_value(~c"type") %>
+                </span>
+              </div>
+
+              <span class="font-semibold text-purple-700">
+                <%= attendance |> stringify_value(~c"symbol") %>
+              </span>
+            </div>
+            <div class="line-clamp-4">
+              <%= attendance |> stringify_value(~c"topic") %>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <span class="line-clamp-1">
+              <%= attendance |> stringify_value(~c"period") %> - <%= attendance
+              |> stringify_value(~c"date") %>
+            </span>
+            <span class="line-clamp-1 text-gray-400">
+              <%= attendance |> stringify_value(~c"teacher") %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
