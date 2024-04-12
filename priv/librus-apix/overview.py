@@ -16,7 +16,7 @@ from helpers import create_token, extract_grades
 def handle_overview_grades(token, semester):
     token = create_token(token)
     try:
-        subjects, average_grades, descriptive = get_grades(token, "all")
+        subjects, average_grades, descriptive = get_grades(token, "week")
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), extract_grades(handle_grades(subjects[int(semester)]))
@@ -78,7 +78,7 @@ def handle_overview_schedule(token, year, month):
 def handle_overview_attendance(token, semester):
     token = create_token(token)
     try:
-        attendance = get_attendance(token, "all")
+        attendance = get_attendance(token, "week")
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode("utf-8")), handle_attendance(attendance[int(semester)])

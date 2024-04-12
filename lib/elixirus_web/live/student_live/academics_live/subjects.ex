@@ -161,7 +161,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     {:noreply,
      push_navigate(socket,
        to:
-         ~p"/student/academics/grades/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}",
+         ~p"/student/academics/subjects/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}",
        replace: false
      )}
   end
@@ -186,7 +186,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       end
 
     {:noreply,
-     push_patch(socket, to: ~p"/student/academics/grades?#{socket.assigns.query_params}")}
+     push_patch(socket, to: ~p"/student/academics/subjects?#{socket.assigns.query_params}")}
   end
 
   def handle_event(
@@ -220,7 +220,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       socket
       |> assign(:shown_grades, shown)
       |> assign(:query_params, query_params)
-      |> push_patch(to: ~p"/student/academics/grades?#{query_params}")
+      |> push_patch(to: ~p"/student/academics/subjects?#{query_params}")
 
     {:noreply, socket}
   end

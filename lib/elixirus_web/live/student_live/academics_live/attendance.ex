@@ -9,7 +9,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   import Phoenix.UI.Components.Typography
 
   def fetch_attendance(socket) do
-    {python(:helpers, :fetch_attendance, [socket.assigns.token, socket.assigns.semester]),
+    {python(:helpers, :fetch_all_attendance, [socket.assigns.token, socket.assigns.semester]),
      socket.assigns.semester}
   end
 

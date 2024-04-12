@@ -38,7 +38,7 @@
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly grades</div>
     <div class="flex flex-row overflow-x-auto gap-x-4">
       <div
-        :for={grade <- @week_grades |> Map.values() |> List.flatten() |> dbg}
+        :for={grade <- @week_grades |> Map.values() |> List.flatten()}
         class="bg-[#1f1f1f] rounded-lg  text-sm h-40"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
@@ -79,10 +79,7 @@
   <div :if={@week_grades != %{}}>
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly absence</div>
     <div class="flex flex-row overflow-x-auto gap-x-4">
-      <div
-        :for={attendance <- @week_attendance |> dbg}
-        class="bg-[#1f1f1f] rounded-lg  text-sm h-40"
-      >
+      <div :for={attendance <- @week_attendance} class="bg-[#1f1f1f] rounded-lg  text-sm h-40">
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
             <div class="text-lg flex flex-row justify-between">

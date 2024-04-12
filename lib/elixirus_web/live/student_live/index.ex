@@ -5,26 +5,15 @@ defmodule ElixirusWeb.StudentLive.Index do
   import Heroicons
   import ElixirusWeb.Helpers
   use ElixirusWeb.LoginHandler
+  import Elixirus.PythonWrapper
 
   def fetch_data(socket, api_token, semester) do
     socket
-    |> assign(:loading_grades, AsyncResult.loading())
     |> start_async(:load_grades, fn ->
-      {:ok, pid} = :python.start()
-
-      get_grades = :python.call(pid, :overview, :handle_overview_grades, [api_token, semester])
-      :python.stop(pid)
-      get_grades
+      python(:overview, :handle_overview_grades, [api_token, semester])
     end)
-    |> assign(:loading_attendance, AsyncResult.loading())
     |> start_async(:load_attendance, fn ->
-      {:ok, pid} = :python.start()
-
-      get_attendance =
-        :python.call(pid, :overview, :handle_overview_attendance, [api_token, semester])
-
-      :python.stop(pid)
-      get_attendance
+      python(:overview, :handle_overview_attendance, [api_token, semester])
     end)
   end
 
@@ -42,8 +31,6 @@ defmodule ElixirusWeb.StudentLive.Index do
       case attendance do
         {:ok, attendance} ->
           socket
-          |> put_flash(:info, "Loaded attendance!")
-          |> assign(:loading_attendance, AsyncResult.ok(%AsyncResult{}, :ok))
           |> assign(:attendance, attendance)
 
         _ ->
@@ -58,8 +45,6 @@ defmodule ElixirusWeb.StudentLive.Index do
       case grades do
         {:ok, grades} ->
           socket
-          |> put_flash(:info, "Loaded grades!")
-          |> assign(:loading_grades, AsyncResult.ok(%AsyncResult{}, :ok))
           |> assign(:grades, grades)
 
         _ ->

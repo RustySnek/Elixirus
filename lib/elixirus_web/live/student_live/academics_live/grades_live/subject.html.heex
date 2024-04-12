@@ -2,7 +2,7 @@
   module={LoginModal}
   id="login_modal"
   login_required={@login_required}
-  return_url={~p"/student/academics/grades/#{@subject}?semester=#{@semester}"}
+  return_url={~p"/student/academics/subjects/#{@subject}?semester=#{@semester}"}
 />
 <div :if={@grades == %{} && @login_required == false} class="flex items-center justify-center">
   <.spinner />
