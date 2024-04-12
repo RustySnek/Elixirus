@@ -3,10 +3,12 @@ from librus_apix.attendance import get_attendance, get_attendance_frequency
 from librus_apix.messages import get_recieved, message_content
 from librus_apix.homework import get_homework, homework_detail
 from librus_apix.schedule import get_schedule
+from librus_apix.completed_lessons import get_completed, get_max_page_number
 from librus_apix.get_token import AuthorizationError, Token
 from librus_apix.grades import TokenError
 from librus_apix.student_information import get_student_information
 from handle_classes import *
+from datetime import datetime
 from librus_apix.exceptions import TokenError, ParseError
 import os
 
@@ -22,6 +24,18 @@ def create_token(token_charlist):
     if len(token_key.split(":")) != 2:
         return Token("mal:formed", proxy=proxy)
     return Token(token_key, proxy=proxy)
+
+def fetch_completed_lessons(token, date_from, date_to, page = 0):
+    token = create_token(token)
+    try:
+        completed_lessons = get_completed(token, date_from, date_to, page)
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), handle_completed_lessons(completed_lessons)
+
+def fetch_todays_completed_lessons(token):
+    today_date = datetime.now().strftime('%Y-%m-%d')
+    return fetch_completed_lessons(token, today_date, today_date)
 
 def fetch_messages(token, page):
     token = create_token(token)
@@ -82,13 +96,24 @@ def fetch_homework_details(token, id):
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), details
 
-def fetch_attendance(token, semester):
-    token = create_token(token)
+def fetch_attendance(token, semester, opt = "all"):
     try:
-        attendance = get_attendance(token)
+        attendance = get_attendance(token, opt)
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), handle_attendance(attendance[int(semester)])
+
+def fetch_all_attendance(token, semester):
+    token = create_token(token)
+    return fetch_attendance(token, semester, "all")
+
+def fetch_week_attendance(token, semester):
+    token = create_token(token)
+    return fetch_attendance(token, semester, "week")
+
+def fetch_new_attendance(token, semester):
+    token = create_token(token)
+    return fetch_attendance(token, semester, "last_login")
 
 def fetch_attendance_frequency(token):
     token = create_token(token)
