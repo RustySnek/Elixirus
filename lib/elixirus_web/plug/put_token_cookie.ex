@@ -16,7 +16,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
     user_id =
       conn.cookies |> Map.get("user_id", make_ref() |> :erlang.ref_to_list() |> to_string())
 
-    {_, _, month} = Date.to_erl(Date.utc_today())
+    {_, month, _} = Date.to_erl(Date.utc_today())
 
     semester =
       cond do
