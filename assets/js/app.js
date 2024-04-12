@@ -74,7 +74,7 @@ Hooks.highlight_grade = {
   
   mounted() {
     setTimeout(() => {
-     this.el.classList.add("!bg-inherit")
+      this.el.classList.add("!bg-inherit")
     this.el.scrollIntoView({behavior: "smooth", block: "start"});
    
     }, 200);
@@ -86,6 +86,21 @@ Hooks.slide_right = {
   },
   
 
+
+}
+
+Hooks.expand_links = {
+  mounted() {
+    this.el.addEventListener("mouseenter", () => {
+      let expand_div = document.getElementById(`expanded-${this.el.getAttribute('id')}`)
+      expand_div.classList.add("!block")
+    })
+this.el.addEventListener("mouseleave", () => {
+      let expand_div = document.getElementById(`expanded-${this.el.getAttribute('id')}`)
+      expand_div.classList.remove("!block")
+    })
+
+  }
 }
 Hooks.store_token = {
   updated() {

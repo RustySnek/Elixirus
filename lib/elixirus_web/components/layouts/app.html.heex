@@ -4,7 +4,7 @@
   id="main_header"
   class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 mx-8 flex flex-row justify-between items-center"
 >
-  <.header>
+  <.header links={links()}>
     <:logo>
       <div class="flex flex-row space-x-4">
         <.link navigate={~p"/student"} class="flex items-center">
@@ -17,12 +17,6 @@
         </.link>
       </div>
     </:logo>
-    <:link label="Grades" to="/student/academics/grades" />
-    <:link label="Attendance" to="/student/academics/attendance" />
-    <:link label="Timetable" to="/student/scheduling/timetable" />
-    <:link label="Homework" to="/student/scheduling/homework" />
-    <:link label="Messages" to="/student/messages" />
-    <:link label="Schedule" to="/student/scheduling/schedule" />
   </.header>
   <div class="hidden md:block scale-75 lg:scale-100 self-start mt-5 lg:self-center lg:mt-0">
     <input

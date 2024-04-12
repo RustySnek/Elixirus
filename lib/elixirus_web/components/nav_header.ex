@@ -32,10 +32,7 @@ defmodule ElixirusWeb.Components.NavHeader do
 
   slot :logo
 
-  slot :link, default: [%{__slot__: :link, inner_block: nil, label: "student", to: "/student"}] do
-    attr :label, :string, required: true
-    attr :to, :string, required: true
-  end
+  attr :links, :list, required: true
 
   def header(assigns) do
     ~H"""
@@ -67,13 +64,29 @@ defmodule ElixirusWeb.Components.NavHeader do
         </button>
         <div class="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul class="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-4 lg:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 ">
-            <%= for link <- @link do %>
-              <.link
-                navigate={link.to}
-                class="block hover:text-fuchsia-900 py-2 pl-3 pr-4 text-xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700 md:p-0 "
-              >
-                <%= link.label %>
-              </.link>
+            <%= for {title, href, nested_links, _text_classes} <- @links do %>
+              <div phx-hook="expand_links" class="flex relative flex-col w-full" id={title}>
+                <.link
+                  id={"link-#{title}"}
+                  navigate={href}
+                  class="block hover:text-fuchsia-900 py-2 pl-3 pr-4 text-3xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700 md:p-0 "
+                >
+                  <%= title %>
+                </.link>
+                <div
+                  id={"expanded-#{title}"}
+                  class="absolute z-20 top-full bg-[#1f1f1f] py-4 rounded-lg left-2 hidden"
+                >
+                  <%= for {title, href} <- nested_links do %>
+                    <.link
+                      class="block h-10 flex flex-col justify-center px-4 hover:bg-fuchsia-700/10 hover:text-fuchsia-900 text-2xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700"
+                      navigate={href}
+                    >
+                      <%= title %>
+                    </.link>
+                  <% end %>
+                </div>
+              </div>
             <% end %>
           </ul>
         </div>
