@@ -74,8 +74,9 @@ defmodule ElixirusWeb.Components.NavHeader do
                   <%= title %>
                 </.link>
                 <div
+                  :if={nested_links != []}
                   id={"expanded-#{title}"}
-                  class="absolute z-20 top-full bg-[#1f1f1f] py-4 rounded-lg left-2 hidden"
+                  class="md:absolute z-20 top-full md:bg-[#1f1f1f] md:py-4 rounded-lg left-2 sm:block md:hidden"
                 >
                   <%= for {title, href} <- nested_links do %>
                     <.link

@@ -12,15 +12,15 @@ defmodule ElixirusWeb.Layouts do
         ~p"/student/academics",
         [
           {"Subjects", ~p"/student/academics/subjects"},
-          {"Attendance", ~p"/student/academics/attendance"}
+          {"Attendance", ~p"/student/academics/attendance"},
+          {"Homework", ~p"/student/academics/homework"}
         ],
         []
       },
       {"Scheduling", ~p"/student/scheduling",
        [
          {"Timetable", ~p"/student/scheduling/timetable"},
-         {"Schedule", ~p"/student/scheduling/schedule"},
-         {"Homework", ~p"/student/scheduling/homework"}
+         {"Schedule", ~p"/student/scheduling/schedule"}
        ], []},
       {"Messages", ~p"/student/messages", [], []}
     ]
