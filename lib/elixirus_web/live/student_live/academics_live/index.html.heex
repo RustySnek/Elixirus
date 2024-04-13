@@ -5,6 +5,7 @@
   return_url="/student/academics/"
 />
 <div class="flex flex-col md:mx-6 lg:mx-10 mx-2 gap-y-4 mb-6">
+  <div :for={_ <- @loadings} class="animate-pulse w-full h-40 bg-[#121212]"></div>
   <div :if={@completed_lessons != []} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Today's lessons</div>
     <div class="flex flex-row overflow-x-auto gap-x-4">
@@ -76,7 +77,7 @@
       </div>
     </div>
   </div>
-  <div :if={@week_attendance != %{}} class="border-fuchsia-700 border p-4">
+  <div :if={@week_attendance != []} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly absence</div>
     <div class="flex flex-row overflow-x-auto gap-x-4">
       <div :for={attendance <- @week_attendance} class="bg-[#1f1f1f] rounded-lg  text-sm h-40">
