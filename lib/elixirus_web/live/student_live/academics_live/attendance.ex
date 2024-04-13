@@ -109,14 +109,4 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
 
     {:ok, socket}
   end
-
-  defp attendance_color(symbol) do
-    case symbol do
-      "nb" -> "border-red-500"
-      "u" -> "border-fuchsia-600"
-      "sp" -> "border-amber-600"
-      "zw" -> "border-zinc-700"
-      _ -> "border-fuchsia-600"
-    end
-  end
 end

@@ -3,6 +3,17 @@ defmodule ElixirusWeb.Helpers do
     data |> Map.get(charlist_key) |> to_string()
   end
 
+  def attendance_color(symbol) do
+    case symbol do
+      "nb" -> "red-500"
+      "u" -> "fuchsia-600"
+      "sp" -> "amber-600"
+      "zw" -> "zinc-700"
+      "ob" -> "cyan-500"
+      _ -> "fuchsia-600"
+    end
+  end
+
   def count_average(grades) do
     if grades == [] do
       0
