@@ -11,9 +11,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     todays_lessons = handle_cache_data(socket.assigns.user_id, "todays_completed_lessons")
     grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades-last_login")
     attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance-last_login")
-    todays_lessons = :load
-    grades = :load
-    attendance = :load
+    homework = handle_cache_data(socket.assigns.user_id, "homework")
 
     socket =
       socket
@@ -21,6 +19,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
       |> assign(:completed_lessons, [])
       |> assign(:week_grades, %{})
       |> assign(:week_attendance, [])
+      |> assign(:homework, [])
 
     socket =
       case grades do
@@ -46,6 +45,23 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
 
         lessons ->
           assign(socket, :completed_lessons, lessons)
+      end
+
+    socket =
+      case homework do
+        :load ->
+          socket
+          |> assign(:loadings, [:homework | socket.assigns.loadings])
+          |> start_async(:load_homework, fn ->
+            monday = this_weeks_monday() |> Date.add(-14)
+            next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
+            monday = monday |> Calendar.strftime("%Y-%m-%d")
+
+            python(:helpers, :fetch_homework, [token, monday, next_monday])
+          end)
+
+        homework ->
+          assign(socket, :homework, homework)
       end
 
     socket =
@@ -77,6 +93,23 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           socket
           |> assign(:completed_lessons, lessons)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :completed_lessons))
+
+        _ ->
+          assign(socket, :login_required, true)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_homework, {:ok, homework}, socket) do
+    socket =
+      case homework do
+        {:ok, homework} ->
+          cache_and_ttl_data(socket.assigns.user_id, "homework", homework)
+
+          socket
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :homework))
+          |> assign(:homework, homework |> Enum.reverse())
 
         _ ->
           assign(socket, :login_required, true)

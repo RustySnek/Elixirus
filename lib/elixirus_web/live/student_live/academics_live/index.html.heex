@@ -8,8 +8,11 @@
   <div :for={_ <- @loadings} class="animate-pulse w-full h-40 bg-[#121212]"></div>
   <div :if={@completed_lessons != []} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Today's lessons</div>
-    <div class="flex flex-row overflow-x-auto gap-x-4">
-      <div :for={lesson <- @completed_lessons} class="bg-[#1f1f1f] rounded-lg text-sm h-40">
+    <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
+      <div
+        :for={lesson <- @completed_lessons}
+        class="snap-center bg-[#1f1f1f] rounded-lg text-sm h-40"
+      >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
             <div class="text-lg flex flex-row justify-between">
@@ -17,7 +20,7 @@
                 <%= lesson |> stringify_value(~c"lesson_number") %>
               </span>
 
-              <span class="font-semibold text-cyan-500">
+              <span class={"font-semibold text-#{lesson |> stringify_value(~c"attendance_symbol") |> attendance_color()}"}>
                 <%= lesson |> stringify_value(~c"attendance_symbol") %>
               </span>
             </div>
@@ -37,10 +40,10 @@
   </div>
   <div :if={@week_grades != %{}} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly grades</div>
-    <div class="flex flex-row overflow-x-auto gap-x-4">
+    <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
       <div
         :for={grade <- @week_grades |> Map.values() |> List.flatten()}
-        class="bg-[#1f1f1f] rounded-lg  text-sm h-40"
+        class="bg-[#1f1f1f] snap-center rounded-lg  text-sm h-40"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
@@ -77,10 +80,41 @@
       </div>
     </div>
   </div>
+  <div :if={@homework != []} class="border-fuchsia-700 border p-4">
+    <div class="text-center text-fuchsia-600 text-2xl mb-3">Homework</div>
+    <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
+      <div :for={hw <- @homework |> dbg} class="bg-[#1f1f1f] snap-center rounded-lg  text-sm h-40">
+        <div class="w-56 px-2 flex flex-col justify-between h-full">
+          <div class="pt-1">
+            <%= hw |> stringify_value(~c"category") %>
+            <div class="text-lg flex flex-row justify-between">
+              <span class="line-clamp-1">
+                <%= hw |> stringify_value(~c"lesson") %>
+              </span>
+            </div>
+            <div class="line-clamp-4">
+              <%= hw |> stringify_value(~c"subject") %>
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <span class="line-clamp-1">
+              until: <%= hw |> stringify_value(~c"completion_date") %>
+            </span>
+            <span class="line-clamp-1 text-gray-400">
+              <%= hw |> stringify_value(~c"teacher") %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div :if={@week_attendance != []} class="border-fuchsia-700 border p-4">
-    <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly absence</div>
-    <div class="flex flex-row overflow-x-auto gap-x-4">
-      <div :for={attendance <- @week_attendance} class="bg-[#1f1f1f] rounded-lg  text-sm h-40">
+    <div class="text-center text-fuchsia-600 text-2xl mb-3">Semesteral absence</div>
+    <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
+      <div
+        :for={attendance <- @week_attendance}
+        class="bg-[#1f1f1f] rounded-lg  text-sm h-40 snap-center"
+      >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
             <div class="text-lg flex flex-row justify-between">
@@ -90,7 +124,7 @@
                 </span>
               </div>
 
-              <span class="font-semibold text-purple-700">
+              <span class={"font-semibold text-#{attendance |> stringify_value(~c"symbol") |> attendance_color()}"}>
                 <%= attendance |> stringify_value(~c"symbol") %>
               </span>
             </div>
