@@ -6,6 +6,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   import ElixirusWeb.Helpers
   use ElixirusWeb.LoginHandler
   import Elixirus.PythonWrapper
+  import Heroicons, only: [chevron_right: 1]
 
   def fetch_data(socket, api_token, semester) do
     socket
