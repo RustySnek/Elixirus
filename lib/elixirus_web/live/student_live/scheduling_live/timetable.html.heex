@@ -21,10 +21,42 @@
       Connect
     </button>
   </form>
+  <div class="flex flex-row justify-between mx-4 mt-2 items-center">
+    <button
+      :if={(:timetable in @loadings) |> Kernel.!()}
+      phx-click="change_week"
+      phx-value-days="-7"
+    >
+      <.chevron_left class="w-10" />
+    </button>
+    <button
+      :if={(:timetable in @loadings) |> Kernel.!() && @current_monday != @this_monday}
+      phx-click="change_week"
+      phx-value-days={@this_monday |> Date.diff(@current_monday)}
+    >
+      <span class="font-semibold text-fuchsia-500 hover:text-purple-700">
+        <%= @current_monday |> Date.to_iso8601() %>
+      </span>
+    </button>
+    <span :if={:timetable in @loadings || @current_monday == @this_monday}>
+      <%= @current_monday |> Date.to_iso8601() %>
+    </span>
+    <button
+      :if={(:timetable in @loadings) |> Kernel.!()}
+      phx-click="change_week"
+      phx-value-days="7"
+    >
+      <.chevron_right class="w-10" />
+    </button>
+  </div>
 </div>
 <div class="flex flex-col w-full h-full">
-  <div :if={@timetable == []} class=" absolute flex items-center justify-center inset-0 -z-40">
-    <.spinner />
+  <div :if={@timetable == []} class="mt-16 flex flex-col items-center justify-center space-y-8">
+    <div
+      :for={_ <- 0..12}
+      class="bg-fuchsia-600/5 rounded-lg animate-pulse w-full border-dashed border-t border-b border-gray-500 h-[90px]"
+    >
+    </div>
   </div>
   <div :if={@timetable != []} class="relative w-full  flex flex-col">
     <div class="flex -z-40 flex-col w-full  gap-y-4">

@@ -7,6 +7,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   import ElixirusWeb.Helpers
   use ElixirusWeb.LoginHandler
   use ElixirusWeb.SetSemesterLive
+  import Heroicons, only: [chevron_right: 1, chevron_left: 1]
 
   defp is_within_range?(current_time, time_range) do
     [time_from, time_to] = time_range
@@ -76,7 +77,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def handle_async(:load_calendar_data, {:ok, events}, socket) do
-    cache_and_ttl_data(socket.assigns.user_id, "timetable_calendar", events)
+    cache_and_ttl_data(
+      socket.assigns.user_id,
+      "#{socket.assigns.current_monday}-timetable_calendar",
+      events
+    )
 
     socket = socket |> assign(:calendar_events, events)
     {:noreply, socket}
@@ -86,14 +91,76 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     socket =
       case timetable do
         {:ok, t} ->
-          cache_and_ttl_data(socket.assigns.user_id, "timetable", t)
+          if socket.assigns.current_monday == socket.assigns.this_monday do
+            cache_and_ttl_data(socket.assigns.user_id, "timetable", t)
+          else
+            cache_and_ttl_data(
+              socket.assigns.user_id,
+              "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable",
+              t
+            )
+          end
 
           socket
           |> assign(:timetable, t)
+          |> assign(:loadings, socket.assigns.loadings |> List.delete(:timetable))
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
         _ ->
           assign(socket, :login_required, true)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("change_week", %{"days" => days}, socket) do
+    current_monday = socket.assigns.current_monday |> Date.add(days |> String.to_integer())
+    socket = socket |> assign(:current_monday, current_monday) |> assign(:timetable, [])
+
+    timetable =
+      if current_monday == socket.assigns.this_monday do
+        handle_cache_data(socket.assigns.user_id, "timetable")
+      else
+        handle_cache_data(
+          socket.assigns.user_id,
+          "#{current_monday |> Date.to_iso8601()}-timetable"
+        )
+      end
+
+    calendar_data =
+      handle_cache_data(
+        socket.assigns.user_id,
+        "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable_calendar"
+      )
+
+    socket =
+      if calendar_data == :load do
+        if socket.assigns.calendar_id != "" do
+          start_async(socket, :load_calendar_data, fn ->
+            fetch_calendar_data(
+              socket.assigns.calendar_id,
+              current_monday |> to_string(),
+              current_monday |> Date.add(7) |> to_string()
+            )
+          end)
+        else
+          socket
+        end
+      else
+        assign(socket, :calendar_events, calendar_data)
+      end
+
+    socket =
+      case timetable do
+        :load ->
+          socket
+          |> assign(:loadings, [:timetable | socket.assigns.loadings])
+          |> start_async(:load_timetable, fn ->
+            fetch_timetable(socket.assigns.api_token, current_monday |> to_string())
+          end)
+
+        timetable ->
+          assign(socket, :timetable, timetable)
       end
 
     {:noreply, socket}
@@ -104,7 +171,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
         %{"calendar_id" => calendar_id},
         socket
       ) do
-    end_of_week = Date.add(socket.assigns.this_monday, 7)
+    end_of_week = Date.add(socket.assigns.current_monday, 7)
 
     socket =
       socket
@@ -112,7 +179,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> start_async(:load_calendar_data, fn ->
         fetch_calendar_data(
           calendar_id,
-          socket.assigns.this_monday |> to_string(),
+          socket.assigns.current_monday |> to_string(),
           end_of_week |> to_string()
         )
       end)
@@ -143,15 +210,22 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> assign(:semester, semester)
       |> assign(:api_token, api_token)
       |> assign(:this_monday, monday)
+      |> assign(:current_monday, monday)
       |> assign(:indicator, "hidden")
       |> assign(:timetable, [])
+      |> assign(:loadings, [])
       |> assign(:show_period_modal, false)
       |> assign(:calendar_events, %{})
       |> assign(:calendar_id, "")
       |> assign(:page_title, "Timetable")
 
     timetable = handle_cache_data(user_id, "timetable")
-    calendar_data = handle_cache_data(user_id, "timetable_calendar")
+
+    calendar_data =
+      handle_cache_data(
+        user_id,
+        "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable_calendar"
+      )
 
     socket =
       case calendar_data do
@@ -166,6 +240,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       case timetable do
         :load ->
           socket
+          |> assign(:loadings, [:timetable | socket.assigns.loadings])
           |> start_async(:load_timetable, fn ->
             fetch_timetable(api_token, monday |> to_string())
           end)
