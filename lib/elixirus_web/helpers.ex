@@ -1,4 +1,6 @@
 defmodule ElixirusWeb.Helpers do
+  use Phoenix.LiveView
+
   def stringify_value(data, charlist_key) do
     data |> Map.get(charlist_key) |> to_string()
   end
@@ -144,5 +146,17 @@ defmodule ElixirusWeb.Helpers do
 
   def percentage_to_deg(percentage) do
     "#{percentage * 3.6}deg"
+  end
+
+  def create_fetcher(socket, cache_data, name, func) do
+    case cache_data do
+      :load ->
+        socket
+        |> assign(:loadings, [name | socket.assigns.loadings])
+        |> start_async(:"load_#{name}", func)
+
+      data ->
+        assign(socket, name, data)
+    end
   end
 end
