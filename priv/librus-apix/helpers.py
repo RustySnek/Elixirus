@@ -1,6 +1,6 @@
 from erlport.erlterms import Atom
 from librus_apix.attendance import get_attendance, get_attendance_frequency
-from librus_apix.messages import get_recieved, message_content
+from librus_apix.messages import get_recieved, message_content, get_max_page_number as get_max_page_messages
 from librus_apix.homework import get_homework, homework_detail
 from librus_apix.schedule import get_schedule
 from librus_apix.completed_lessons import get_completed, get_max_page_number
@@ -25,6 +25,16 @@ def create_token(token_charlist):
         return Token("mal:formed", proxy=proxy)
     return Token(token_key, proxy=proxy)
 
+def fetch_student_data(token):
+    token = create_token(token)
+    try:
+        student_data = get_student_information(token)
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), student_data.__dict__
+
+
+
 def fetch_completed_lessons(token, date_from, date_to, page = 0):
     token = create_token(token)
     try:
@@ -45,6 +55,18 @@ def fetch_messages(token, page):
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), handle_messages(messages)
 
+def fetch_all_messages(token):
+    token = create_token(token)
+    pages = get_max_page_messages(token)
+    messages = []
+    try:
+        for page in range(0, pages +1):
+            messages += get_recieved(token, page)
+    except (TokenError, ParseError) as err:
+        return Atom("error".encode("utf-8")), str(err)
+    return Atom("ok".encode('utf-8')), handle_messages(messages)
+
+
 def fetch_message_content(token, id):
     token = create_token(token)
     try:
@@ -60,7 +82,6 @@ def fetch_schedule(token, year, month):
     except (TokenError, ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), handle_schedule(schedule)
-
 def fetch_grades(token, semester, opt):
     try:
         subjects, semester_grades, descriptive = get_grades(token, opt)
