@@ -7,7 +7,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   import Elixirus.PythonWrapper
   import Heroicons, only: [chevron_right: 1, inbox: 1]
 
-  defp handle_timetable_events(timetable, schedule, calendar, day) do
+  defp handle_timetable_events(timetable, schedule, _calendar, day) do
     now = warsaw_now()
 
     weekday =
@@ -42,26 +42,25 @@ defmodule ElixirusWeb.StudentLive.Index do
         acc |> Map.put(number, update_events)
       end)
 
-    todays_schedule =
-      schedule[day]
-      |> Enum.reduce(todays_lessons, fn event, acc ->
-        number = event |> stringify_value(~c"number")
+    schedule[day]
+    |> Enum.reduce(todays_lessons, fn event, acc ->
+      number = event |> stringify_value(~c"number")
 
-        event_map = %{
-          title: event |> stringify_value(~c"title"),
-          subject: event |> stringify_value(~c"subject"),
-          timeframe: event |> stringify_value(~c"hour"),
-          data: event |> Map.get(~c"data")
-        }
+      event_map = %{
+        title: event |> stringify_value(~c"title"),
+        subject: event |> stringify_value(~c"subject"),
+        timeframe: event |> stringify_value(~c"hour"),
+        data: event |> Map.get(~c"data")
+      }
 
-        update_events =
-          case acc |> Map.get(number) do
-            nil -> [event_map]
-            events -> [event_map | events]
-          end
+      update_events =
+        case acc |> Map.get(number) do
+          nil -> [event_map]
+          events -> [event_map | events]
+        end
 
-        acc |> Map.put(number, update_events)
-      end)
+      acc |> Map.put(number, update_events)
+    end)
   end
 
   def calculate_gpa_from_averages(averages) do

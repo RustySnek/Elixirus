@@ -1,6 +1,6 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Index do
   use ElixirusWeb, :live_view
-  import Elixirus.PythonWrapper
+  # import Elixirus.PythonWrapper
   import ElixirusWeb.Helpers
   use ElixirusWeb.SetSemesterLive
   use ElixirusWeb.LoginHandler
