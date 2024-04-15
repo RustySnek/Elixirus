@@ -4,14 +4,14 @@
   login_required={@login_required}
   return_url="/student/academics/"
 />
+<div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
 <div class="flex flex-col md:mx-6 lg:mx-10 mx-2 gap-y-4 mb-6">
-  <div :for={_ <- @loadings} class="animate-pulse w-full h-40 bg-[#121212]"></div>
   <div :if={@completed_lessons != []} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Today's lessons</div>
     <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
       <div
         :for={lesson <- @completed_lessons}
-        class="snap-center bg-[#1f1f1f] rounded-lg text-sm h-40"
+        class="snap-center bg-[ border border-purple-700 rounded-lg text-sm h-40"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
@@ -43,7 +43,7 @@
     <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
       <div
         :for={grade <- @week_grades |> Map.values() |> List.flatten()}
-        class="bg-[#1f1f1f] snap-center rounded-lg  text-sm h-40"
+        class="bg-[ border border-purple-700 snap-center rounded-lg  text-sm h-40"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
@@ -83,7 +83,10 @@
   <div :if={@homework != []} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Homework</div>
     <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
-      <div :for={hw <- @homework |> dbg} class="bg-[#1f1f1f] snap-center rounded-lg  text-sm h-40">
+      <div
+        :for={hw <- @homework |> dbg}
+        class="bg-[ border border-purple-700 snap-center rounded-lg  text-sm h-40"
+      >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div class="pt-1">
             <%= hw |> stringify_value(~c"category") %>
@@ -113,7 +116,7 @@
     <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
       <div
         :for={attendance <- @week_attendance}
-        class="bg-[#1f1f1f] rounded-lg  text-sm h-40 snap-center"
+        class="bg-[ border border-purple-700 rounded-lg  text-sm h-40 snap-center"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div>
@@ -145,4 +148,5 @@
       </div>
     </div>
   </div>
+  <div :for={_ <- @loadings} class="animate-pulse w-full h-40 bg-[#121212]"></div>
 </div>

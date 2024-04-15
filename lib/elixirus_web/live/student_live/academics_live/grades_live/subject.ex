@@ -13,8 +13,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
     socket =
       case grades do
-        {:ok, [grades, _semester_grades]} ->
+        {:ok, [grades, semester_grades]} ->
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades)
+          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades)
 
           socket
           |> assign(:grades, grades)

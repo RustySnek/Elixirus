@@ -8,7 +8,7 @@
   <.spinner />
 </div>
 <div :if={@attendance != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
-  <div :for={freq <- @frequency} class="select-none">
+  <div :for={freq <- @frequency} class="select-none relative">
     <div class="circle percentage">
       <div
         class="percentage-bar"
@@ -20,10 +20,10 @@
       </div>
     </div>
 
-    <span class="relative bottom-20 left-[43%]"><%= freq %>%</span>
+    <span class="top-2/3 left-1/3 -translate-y-[140%] absolute"><%= freq %>%</span>
   </div>
 </div>
-<div :if={@attendance != []} id="initer" class="mx-10 flex flex-col gap-y-2">
+<div :if={@attendance != []} id="initer" class="mt-8 mx-10 flex flex-col gap-y-2">
   <div :for={day <- @attendance} class="flex gap-2 flex-col items-center">
     <p class="mr-1"><%= day |> hd |> stringify_value(~c"date") %></p>
     <div class="flex flex-row gap-2 w-full md:w-max flex-wrap">

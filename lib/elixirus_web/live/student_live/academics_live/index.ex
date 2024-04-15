@@ -9,7 +9,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
 
   def fetch_data(socket, token, semester) do
     todays_lessons = handle_cache_data(socket.assigns.user_id, "todays_completed_lessons")
-    grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades-last_login")
+    grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades-week")
     attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance-last_login")
     homework = handle_cache_data(socket.assigns.user_id, "homework")
 
@@ -143,7 +143,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     socket =
       case grades do
         {:ok, [grades, _semester_grades]} ->
-          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades-last_login", grades)
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades-week", grades)
 
           socket
           |> assign(:week_grades, grades)
