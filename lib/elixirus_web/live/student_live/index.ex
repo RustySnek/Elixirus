@@ -5,7 +5,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   import ElixirusWeb.Helpers
   use ElixirusWeb.LoginHandler
   import Elixirus.PythonWrapper
-  import Heroicons, only: [chevron_right: 1]
+  import Heroicons, only: [chevron_right: 1, inbox: 1]
 
   defp handle_timetable_events(timetable, schedule, calendar, day) do
     now = warsaw_now()

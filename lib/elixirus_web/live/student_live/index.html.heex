@@ -57,6 +57,7 @@
       />
     </div>
     <div class="space-y-4 mt-4 lg:block hidden lg:h-[370px] overflow-y-auto" id="overview-events">
+      
       <div
         :if={
           [:timetable, :schedule, :timetable_calendar]
@@ -144,7 +145,12 @@
     </div>
 
     <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-48 lg:block" id="unread-messages">
-      <div
+     <div class="flex fond-quicksand text-3xl font-bold text-gray-500/25 flex-col justify-center items-center h-full" :if={:unread_messages in @loadings |> Kernel.not() && @unread_messages == []}>
+        You've read them all! 
+      </div>
+
+
+     <div
         :for={_ <- 0..5}
         :if={:unread_messages in @loadings}
         class="rounded-xl animate-pulse bg-purple-800/50 h-14"
@@ -172,12 +178,16 @@
       />
     </div>
     <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-[370px] lg:block" id="new-grades">
+<div class="flex flex-col justify-center items-center h-full" :if={:new_grades in @loadings |> Kernel.not() && @new_grades |> Map.values() |> List.flatten() == []}>
+        <.inbox class="w-48 text-gray-500/10"/>
+      </div>
+
       <div :if={:new_grades in @loadings} class="space-y-4 animate-pulse">
         <div :for={_ <- 0..5} class="h-20 rounded-xl bg-purple-800/50"></div>
       </div>
 
       <div
-        :for={grade <- @new_grades |> Map.values() |> List.flatten() |> dbg}
+        :for={grade <- @new_grades |> Map.values() |> List.flatten()}
         class=" h-20 rounded-xl border-purple-800 border-2 p-2"
       >
         <div class="flex flex-row gap-x-2">
@@ -206,7 +216,10 @@
       />
     </div>
     <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-[370px] lg:block" id="latest-absence">
-      <div :if={:attendance in @loadings} class="space-y-4 animate-pulse">
+      <div class="flex flex-col justify-center items-center h-full" :if={:new_attendance in @loadings |> Kernel.not() && @new_attendance == []}>
+        <.inbox class="w-48 text-gray-500/10"/>
+      </div>
+      <div :if={:new_attendance in @loadings} class="space-y-4 animate-pulse">
         <div :for={_ <- 0..5} class="h-20 rounded-xl bg-purple-800/50"></div>
       </div>
 

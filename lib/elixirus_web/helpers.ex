@@ -148,12 +148,12 @@ defmodule ElixirusWeb.Helpers do
     "#{percentage * 3.6}deg"
   end
 
-  def create_fetcher(socket, cache_data, name, func) do
+  def create_fetcher(socket, cache_data, name, load_func) do
     case cache_data do
       :load ->
         socket
         |> assign(:loadings, [name | socket.assigns.loadings])
-        |> start_async(:"load_#{name}", func)
+        |> start_async(:"load_#{name}", load_func)
 
       data ->
         assign(socket, name, data)

@@ -4,7 +4,6 @@
   login_required={@login_required}
   return_url="/student/academics/"
 />
-<div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
 <div class="flex flex-col md:mx-6 lg:mx-10 mx-2 gap-y-4 mb-6">
   <div :if={@completed_lessons != []} class="border-fuchsia-700 border p-4">
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Today's lessons</div>
@@ -84,7 +83,7 @@
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Homework</div>
     <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
       <div
-        :for={hw <- @homework |> dbg}
+        :for={hw <- @homework}
         class="bg-[ border border-purple-700 snap-center rounded-lg  text-sm h-40"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
