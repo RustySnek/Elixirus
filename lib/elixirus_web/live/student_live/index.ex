@@ -126,7 +126,7 @@ defmodule ElixirusWeb.StudentLive.Index do
        nil}
     end)
     |> create_fetcher(frequency, :frequency, fn ->
-      {python(:helpers, :fetch_attendance_frequency, [socket.assigns.token]), nil}
+      python(:helpers, :fetch_attendance_frequency, [socket.assigns.token])
     end)
   end
 
@@ -205,10 +205,9 @@ defmodule ElixirusWeb.StudentLive.Index do
 
           cache_and_ttl_data(socket.assigns.user_id, "frequency", frequency)
 
-          socket =
-            socket
-            |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
-            |> assign(:frequency, frequency)
+          socket
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
+          |> assign(:frequency, frequency)
 
         _ ->
           assign(socket, :login_required, true)
@@ -223,10 +222,9 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:ok, schedule} ->
           cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule)
 
-          socket =
-            socket
-            |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
-            |> assign(:schedule, schedule)
+          socket
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
+          |> assign(:schedule, schedule)
 
         _ ->
           assign(socket, :login_required, true)
