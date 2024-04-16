@@ -113,9 +113,13 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> create_fetcher(new_grades, :new_grades, fn ->
       {python(:helpers, :fetch_new_grades, [token, semester]), semester}
     end)
-    |> create_fetcher(student_data, :student_data, fn ->
-      {python(:helpers, :fetch_student_data, [token]), nil}
-    end)
+    |> create_fetcher(
+      student_data,
+      :student_data,
+      fn ->
+        {python(:helpers, :fetch_student_data, [token]), nil}
+      end
+    )
     |> create_fetcher(schedule, :schedule, fn ->
       {python(:helpers, :fetch_schedule, [token, socket.assigns.year, socket.assigns.month]),
        socket.assigns.year, socket.assigns.month}
