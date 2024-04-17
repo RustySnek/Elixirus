@@ -41,7 +41,7 @@
     <div class="text-center text-fuchsia-600 text-2xl mb-3">Weekly grades</div>
     <div class="flex flex-row overflow-x-auto snap-x snap-mandatory gap-x-4">
       <div
-        :for={grade <- @week_grades |> Map.values() |> List.flatten()}
+        :for={grade <- @week_grades |> Map.values() |> List.flatten() |> sort_grades_by_date()}
         class="bg-[ border border-purple-700 snap-center rounded-lg  text-sm h-40"
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">

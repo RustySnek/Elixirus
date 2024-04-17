@@ -8,15 +8,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   import Phoenix.UI.Components.Tooltip
   import Phoenix.UI.Components.Typography
 
-  def fetch_attendance(socket) do
-    {python(:helpers, :fetch_all_attendance, [socket.assigns.token, socket.assigns.semester]),
-     socket.assigns.semester}
-  end
-
-  def fetch_frequency(socket) do
-    python(:helpers, :fetch_attendance_frequency, [socket.assigns.token])
-  end
-
   def handle_async(:load_frequency, {:ok, frequency}, socket) do
     socket =
       case frequency do
@@ -30,7 +21,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
                 |> Kernel./(10))
             )
 
-          cache_and_ttl_data(socket.assigns.user_id, "frequency", freq)
+          cache_and_ttl_data(socket.assigns.user_id, "frequency", freq, 10)
 
           socket
           |> assign(:frequency, freq)
@@ -50,7 +41,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
             attendance
             |> Enum.chunk_by(&Map.get(&1, ~c"date"))
 
-          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance)
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance, 10)
           socket |> assign(:attendance, attendance)
 
         _ ->
@@ -66,17 +57,10 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
     socket =
       socket
       |> assign(:semester, semester)
-
-    socket =
-      case attendance do
-        :load ->
-          socket
-          |> assign(:attendance, [])
-          |> start_async(:load_attendance, fn -> fetch_attendance(socket) end)
-
-        attendance ->
-          assign(socket, :attendance, attendance)
-      end
+      |> assign(:attendance, [])
+      |> create_fetcher(attendance, :attendance, fn ->
+        {python(:helpers, :fetch_all_attendance, [socket.assigns.token, semester]), semester}
+      end)
 
     {:noreply, socket}
   end
@@ -88,24 +72,22 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   def mount(_params, %{"user_id" => user_id, "token" => token, "semester" => semester}, socket) do
     token = handle_api_token(socket, token)
 
+    frequency = handle_cache_data(user_id, "frequency")
+
     socket =
       socket
       |> assign(:attendance, [])
       |> assign(:frequency, [])
+      |> assign(:loadings, [])
       |> assign(:token, token)
       |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:visible, nil)
       |> assign(:login_required, false)
       |> assign(:page_title, "Attendance")
-
-    frequency = handle_cache_data(user_id, "frequency")
-
-    socket =
-      case frequency do
-        :load -> socket |> start_async(:load_frequency, fn -> fetch_frequency(socket) end)
-        freq -> socket |> assign(:frequency, freq)
-      end
+      |> create_fetcher(frequency, :frequency, fn ->
+        python(:helpers, :fetch_attendance_frequency, [token])
+      end)
 
     {:ok, socket}
   end

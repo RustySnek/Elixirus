@@ -6,11 +6,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
   alias ElixirusWeb.LoginModal
   import Heroicons
   alias ElixirusWeb.Modal
+  use ElixirusWeb.LoginHandler
   import ElixirusWeb.Components.Loadings
-
-  def fetch_homework(token, start_date, end_date) do
-    python(:helpers, :fetch_homework, [token, start_date, end_date])
-  end
 
   def fetch_homework_details(token, id) do
     python(:helpers, :fetch_homework_details, [token, id])
@@ -30,7 +27,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
     socket =
       case homework do
         {:ok, homework} ->
-          cache_and_ttl_data(socket.assigns.user_id, "homework", homework)
+          cache_and_ttl_data(socket.assigns.user_id, "homework", homework, 15)
           assign(socket, :homework, homework |> Enum.reverse())
 
         _ ->
@@ -85,6 +82,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
     next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
     monday = monday |> Calendar.strftime("%Y-%m-%d")
 
+    homework = handle_cache_data(user_id, "homework")
+
     socket =
       socket
       |> assign(:token, api_token)
@@ -92,20 +91,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
       |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:homework, [])
+      |> assign(:loadings, [])
       |> assign(:details, %{})
       |> assign(:page_title, "Homework")
-
-    homework = handle_cache_data(user_id, "homework")
-
-    socket =
-      case homework do
-        :load ->
-          socket
-          |> start_async(:load_homework, fn -> fetch_homework(api_token, monday, next_monday) end)
-
-        homework ->
-          socket |> assign(:homework, homework)
-      end
+      |> create_fetcher(homework, :homework, fn ->
+        python(:helpers, :fetch_homework, [api_token, monday, next_monday])
+      end)
 
     {:ok, socket}
   end
