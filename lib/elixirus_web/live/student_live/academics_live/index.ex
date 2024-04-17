@@ -7,77 +7,43 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
   alias ElixirusWeb.LoginModal
   import Heroicons, only: [scale: 1, magnifying_glass: 1]
 
+  defp sort_grades_by_date(grades) do
+    grades
+    |> Enum.sort_by(
+      &(&1 |> Map.get(~c"date") |> to_string() |> Date.from_iso8601!() |> dbg),
+      :desc
+    )
+    |> dbg
+  end
+
   def fetch_data(socket, token, semester) do
     todays_lessons = handle_cache_data(socket.assigns.user_id, "todays_completed_lessons")
     grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades-week")
     attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance-last_login")
     homework = handle_cache_data(socket.assigns.user_id, "homework")
 
-    socket =
-      socket
-      |> assign(:loadings, [])
-      |> assign(:completed_lessons, [])
-      |> assign(:week_grades, %{})
-      |> assign(:week_attendance, [])
-      |> assign(:homework, [])
-
-    socket =
-      case grades do
-        :load ->
-          socket
-          |> assign(:loadings, [:grades | socket.assigns.loadings])
-          |> start_async(:load_grades, fn ->
-            {python(:helpers, :fetch_week_grades, [token, semester]), semester}
-          end)
-
-        grades ->
-          assign(socket, :week_grades, grades)
-      end
-
-    socket =
-      case todays_lessons do
-        :load ->
-          socket
-          |> assign(:loadings, [:completed_lessons | socket.assigns.loadings])
-          |> start_async(:load_completed_lessons, fn ->
-            python(:helpers, :fetch_todays_completed_lessons, [token])
-          end)
-
-        lessons ->
-          assign(socket, :completed_lessons, lessons)
-      end
-
-    socket =
-      case homework do
-        :load ->
-          socket
-          |> assign(:loadings, [:homework | socket.assigns.loadings])
-          |> start_async(:load_homework, fn ->
-            monday = this_weeks_monday() |> Date.add(-14)
-            next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
-            monday = monday |> Calendar.strftime("%Y-%m-%d")
-
-            python(:helpers, :fetch_homework, [token, monday, next_monday])
-          end)
-
-        homework ->
-          assign(socket, :homework, homework)
-      end
-
-    socket =
-      case attendance do
-        :load ->
-          socket
-          |> assign(:loadings, [:attendance | socket.assigns.loadings])
-          |> start_async(:load_attendance, fn ->
-            {python(:helpers, :fetch_week_attendance, [token, semester]), semester}
-          end)
-
-        attendance ->
-          assign(socket, :week_attendance, attendance)
-      end
-
     socket
+    |> assign(:loadings, [])
+    |> assign(:completed_lessons, [])
+    |> assign(:week_grades, %{})
+    |> assign(:week_attendance, [])
+    |> assign(:homework, [])
+    |> create_fetcher(grades, :week_grades, fn ->
+      {python(:helpers, :fetch_week_grades, [token, semester]), semester}
+    end)
+    |> create_fetcher(todays_lessons, :completed_lessons, fn ->
+      python(:helpers, :fetch_todays_completed_lessons, [token])
+    end)
+    |> create_fetcher(homework, :homework, fn ->
+      monday = this_weeks_monday() |> Date.add(-14)
+      next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
+      monday = monday |> Calendar.strftime("%Y-%m-%d")
+
+      python(:helpers, :fetch_homework, [token, monday, next_monday])
+    end)
+    |> create_fetcher(attendance, :week_attendance, fn ->
+      {python(:helpers, :fetch_week_attendance, [token, semester]), semester}
+    end)
   end
 
   def handle_async(:load_completed_lessons, {:ok, completed_lessons}, socket) do
@@ -105,7 +71,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     socket =
       case homework do
         {:ok, homework} ->
-          cache_and_ttl_data(socket.assigns.user_id, "homework", homework)
+          cache_and_ttl_data(socket.assigns.user_id, "homework", homework, 15)
 
           socket
           |> assign(:loadings, List.delete(socket.assigns.loadings, :homework))
@@ -118,7 +84,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     {:noreply, socket}
   end
 
-  def handle_async(:load_attendance, {:ok, {attendance, semester}}, socket) do
+  def handle_async(:load_week_attendance, {:ok, {attendance, semester}}, socket) do
     socket =
       case attendance do
         {:ok, attendance} ->
@@ -130,7 +96,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
 
           socket
           |> assign(:week_attendance, attendance)
-          |> assign(:loadings, List.delete(socket.assigns.loadings, :attendance))
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :week_attendance))
 
         _ ->
           assign(socket, :login_required, true)
@@ -139,7 +105,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     {:noreply, socket}
   end
 
-  def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
+  def handle_async(:load_week_grades, {:ok, {grades, semester}}, socket) do
     socket =
       case grades do
         {:ok, [grades, _semester_grades]} ->
@@ -147,7 +113,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
 
           socket
           |> assign(:week_grades, grades)
-          |> assign(:loadings, List.delete(socket.assigns.loadings, :grades))
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :week_grades))
 
         _ ->
           assign(socket, :login_required, true)

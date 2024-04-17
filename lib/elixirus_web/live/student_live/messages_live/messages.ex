@@ -81,7 +81,7 @@ defmodule ElixirusWeb.StudentLive.MessagesLive.Messages do
             messages
             |> Enum.split_with(fn msg -> Map.get(msg, ~c"unread") == true end)
 
-          cache_and_ttl_data(socket.assigns.user_id, "messages", messages)
+          cache_and_ttl_data(socket.assigns.user_id, "messages", messages, 15)
 
           socket
           |> assign(:loaded, true)

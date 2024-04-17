@@ -87,17 +87,6 @@ defmodule ElixirusWeb.Helpers do
     |> Kernel.!=([])
   end
 
-  # def inside_event_timeframe?(events, date, time_from, time_to) do
-  # case events |> 
-  #    Enum.filter(
-  #   fn key, _val -> inside_timeframe?(date, key) == true end
-  # ) do
-  #   [] -> false
-  #   events -> Enum.filter(
-  #   fn _, val -> inside_hour_timeframe?(time_from, time_to, val |> stringify_value(~c"time_from"))
-  # )
-  # end
-  # end
   def warsaw_now() do
     timezone = "Europe/Warsaw"
     DateTime.now!(timezone)

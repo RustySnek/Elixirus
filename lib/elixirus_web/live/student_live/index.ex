@@ -171,8 +171,8 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def handle_async(:load_semester_grades, {:ok, {{:ok, [grades, averages]}, semester}}, socket) do
-    cache_and_ttl_data(socket.assigns.user_id, "semester_grades", averages)
-    cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades)
+    cache_and_ttl_data(socket.assigns.user_id, "semester_grades", averages, 15)
+    cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
 
     socket =
       socket
@@ -206,7 +206,7 @@ defmodule ElixirusWeb.StudentLive.Index do
                 |> Kernel./(10))
             )
 
-          cache_and_ttl_data(socket.assigns.user_id, "frequency", frequency)
+          cache_and_ttl_data(socket.assigns.user_id, "frequency", frequency, 10)
 
           socket
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
@@ -223,7 +223,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     socket =
       case schedule do
         {:ok, schedule} ->
-          cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule)
+          cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule, 10)
 
           socket
           |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
@@ -237,12 +237,12 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def handle_async(:load_unread_messages, {:ok, {{:ok, unread_messages}, _}}, socket) do
-    cache_and_ttl_data(socket.assigns.user_id, "messages", unread_messages |> Enum.take(50))
+    cache_and_ttl_data(socket.assigns.user_id, "messages", unread_messages |> Enum.take(50), 10)
 
     unread =
       unread_messages |> Enum.filter(fn msg -> msg |> Map.get(~c"unread") |> Kernel.==(true) end)
 
-    cache_and_ttl_data(socket.assigns.user_id, "unread_messages", unread)
+    cache_and_ttl_data(socket.assigns.user_id, "unread_messages", unread, 15)
 
     socket =
       socket

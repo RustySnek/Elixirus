@@ -91,7 +91,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       case timetable do
         {:ok, t} ->
           if socket.assigns.current_monday == socket.assigns.this_monday do
-            cache_and_ttl_data(socket.assigns.user_id, "timetable", t)
+            cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
           else
             cache_and_ttl_data(
               socket.assigns.user_id,
@@ -160,6 +160,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
 
         timetable ->
           assign(socket, :timetable, timetable)
+          |> start_async(:get_indicator, fn -> get_indicator_position(timetable) end)
       end
 
     {:noreply, socket}

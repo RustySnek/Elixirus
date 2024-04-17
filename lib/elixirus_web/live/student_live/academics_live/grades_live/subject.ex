@@ -14,8 +14,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
     socket =
       case grades do
         {:ok, [grades, semester_grades]} ->
-          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades)
-          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades)
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
+          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades, 15)
 
           socket
           |> assign(:grades, grades)
@@ -29,18 +29,14 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
 
   def handle_event("retrieve_local_storage", %{"semester" => semester}, socket) do
     grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades")
-    socket = socket |> assign(:semester, semester) |> assign(:grades, %{})
 
     socket =
-      case grades do
-        :load ->
-          socket
-          |> start_async(:load_grades, fn -> fetch_all_grades(socket.assigns.token, semester) end)
-
-        _ ->
-          socket
-          |> assign(:grades, grades)
-      end
+      socket
+      |> assign(:semester, semester)
+      |> assign(:grades, %{})
+      |> create_fetcher(grades, :grades, fn ->
+        {python(:helpers, :fetch_all_grades, [socket.assigns.token, semester]), semester}
+      end)
 
     {:noreply, socket}
   end
@@ -52,7 +48,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
       ) do
     api_token = handle_api_token(socket, api_token)
     grade_id = Map.get(params, "grade_id", nil)
-    grades = handle_cache_data(user_id, "#{semester}-grades")
 
     socket =
       socket
@@ -60,20 +55,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
       |> assign(:user_id, user_id)
       |> assign(:subject, subject)
       |> assign(:grades, %{})
+      |> assign(:loadings, [])
       |> assign(:shown_grade, grade_id)
       |> assign(:semester, semester)
       |> assign(:page_title, subject)
       |> assign(:login_required, false)
-
-    socket =
-      case grades do
-        :load ->
-          socket |> start_async(:load_grades, fn -> fetch_all_grades(api_token, semester) end)
-
-        _ ->
-          socket
-          |> assign(:grades, grades)
-      end
 
     {:ok, socket}
   end
