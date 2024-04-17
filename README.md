@@ -48,7 +48,6 @@
 
 ## Tasks
   ### Todo
-  - [ ] Overview Page 📄
   - [ ] Announcements Page 📯
   - [ ] Think of some cool extras to include 😲
   - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
@@ -59,6 +58,7 @@
     - [ ] Add schedule to Timetable 🗓️
  
   ### Done ✓ 
+  - [X] Overview Page 📄
   - [X] Host the application 🚀
   - [X] Docker 🐳
     - [X] Auto deploy 📦
