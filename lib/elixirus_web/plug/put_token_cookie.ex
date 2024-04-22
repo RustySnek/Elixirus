@@ -24,17 +24,16 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
         true -> "0"
       end
 
-    case {cookie, conn.cookies["username"]} do
-      {cookie, username} when cookie == nil or username == nil ->
+    case cookie do
+      nil ->
         conn
         |> put_session(:token, %{"not:found": []})
         |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
 
-      {cookie, username} ->
+      cookie ->
         conn
         |> put_session(:token, Plug.Conn.Query.decode(cookie))
-        |> put_session(:username, username)
         |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
     end
