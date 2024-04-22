@@ -159,7 +159,6 @@ this.el.addEventListener("mouseleave", () => {
 }
 Hooks.store_token = {
   updated() {
-    console.log("STORIGN TOKEN: ", this.el.value)
     if (this.el.value === "") {
       return
     }
