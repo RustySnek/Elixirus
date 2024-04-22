@@ -29,6 +29,7 @@ Hooks.set_local_storage = {
     localStorage.setItem(this.el.name, this.el.value)
   }
 }
+
 Hooks.retrieve_local_storage = {
   mounted() {
     let name = this.el.getAttribute("name")
@@ -42,10 +43,66 @@ Hooks.retrieve_local_storage = {
     }
   }
 }
-Hooks.focus_field = {
-  mounted() {
-    this.el.focus()
+Hooks.login_form = {
+  updated() {
+
+  let username = localStorage.getItem("username") || "";
+  let username_input = this.el.querySelector('#form-username');
+  username_input.value = username
   },
+  mounted() {
+    let username = localStorage.getItem("username") || "";
+    let username_input = this.el.querySelector('#form-username');
+    username_input.addEventListener('input', () => {
+        localStorage.setItem("username", username_input.value);
+    }); 
+    let password_input = this.el.querySelector('#form-password');
+    if (username !== "") {
+      username_input.value = username
+      setTimeout(() => {
+        
+      password_input.focus()
+      }, 500);
+    }
+    else{
+      setTimeout(() => {
+        
+      username_input.focus()
+      }, 500);
+    }
+  }
+}
+
+Hooks.new_page_link = {
+  mounted() {
+  if (this.el.tagName.toLowerCase() === 'a') {
+    this.el.setAttribute('target', '_blank');
+    this.el.setAttribute('rel', 'noopener noreferrer');
+    } else {
+
+  const links = this.el.querySelectorAll('a');
+  links.forEach(link => {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+  });
+
+    }
+  },
+  updated() {
+    if (this.el.tagName.toLowerCase() === 'a') {
+    this.el.setAttribute('target', '_blank');
+    this.el.setAttribute('rel', 'noopener noreferrer');
+    } else {
+
+  const links = this.el.querySelectorAll('a');
+  links.forEach(link => {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+  });
+
+    }
+
+  }
 }
 Hooks.frequency = {
   mounted() {
@@ -102,13 +159,14 @@ this.el.addEventListener("mouseleave", () => {
 }
 Hooks.store_token = {
   updated() {
+    console.log("STORIGN TOKEN: ", this.el.value)
     if (this.el.value === "") {
       return
     }
     const {v4: uuidv4} = require("uuid");
     const user_id = uuidv4();
-    fetch(`/set_token?token=${this.el.value}&username=${this.el.name}&user_id=${user_id}`).then((response) => {
-      this.pushEvent("navigate_students", {return_url: this.el.getAttribute("return_url"),token: this.el.value, username: this.el.name, user_id: user_id})
+    fetch(`/set_token?token=${this.el.value}&user_id=${user_id}`).then((response) => {
+      this.pushEvent("navigate_students", {return_url: this.el.getAttribute("return_url"),token: this.el.value, user_id: user_id})
       })
     }
 }

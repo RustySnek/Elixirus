@@ -6,14 +6,12 @@ defmodule ElixirusWeb.LoginHandler do
             %{
               "return_url" => return_url,
               "token" => token,
-              "user_id" => user_id,
-              "username" => username
+              "user_id" => user_id
             } = _params,
             socket
           ) do
         socket =
           socket
-          |> assign(:username, username)
           |> assign(:token, token)
           |> assign(:user_id, user_id)
           |> assign(:login_required, false)

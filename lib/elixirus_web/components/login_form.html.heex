@@ -5,18 +5,26 @@
     </h1>
     <.beaker mini class="h-14 text-fuchsia-700 self-end" />
   </div>
-  <form phx-target={@myself} phx-submit="login" class="flex text-xl flex-col gap-y-6 items-center">
+  <form
+    phx-target={@myself}
+    id="elixirus-login-form"
+    phx-hook="login_form"
+    phx-submit="login"
+    class="flex text-xl flex-col gap-y-6 items-center"
+  >
     <input
       class="bg-[#121212] w-4/5 text-xl rounded border-none"
       placeholder="username"
       type="text"
+      id="form-username"
       value=""
       name="username"
+      autocomplete="username"
     />
     <input
       class="bg-[#121212] w-4/5 text-xl rounded border-none"
-      phx-hook="focus_field"
       id="form-password"
+      autocomplete="current-password"
       placeholder="password"
       type="password"
       value=""
