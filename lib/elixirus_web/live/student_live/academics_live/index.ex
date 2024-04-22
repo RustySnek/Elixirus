@@ -10,10 +10,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
   defp sort_grades_by_date(grades) do
     grades
     |> Enum.sort_by(
-      &(&1 |> Map.get(~c"date") |> to_string() |> Date.from_iso8601!() |> dbg),
+      &(&1 |> Map.get(~c"date") |> to_string() |> Date.from_iso8601!()),
       :desc
     )
-    |> dbg
   end
 
   def fetch_data(socket, token, semester) do

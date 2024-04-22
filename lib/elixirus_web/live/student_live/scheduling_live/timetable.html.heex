@@ -74,7 +74,7 @@
         </div>
       </div>
     </div>
-    <div class="overflow-x-auto w-full absolute gap-x-10 justify-between snap-x snap-mandatory  pl-20  flex-row flex">
+    <div class="overflow-x-auto w-full absolute gap-x-10 justify-between md:snap-none snap-x snap-mandatory  pl-20  flex-row flex">
       <div :for={weekday <- @timetable} class="
       w-auto snap-center relative
        ">
@@ -100,14 +100,14 @@
                         |> stringify_value(~c"date")
                       )
                   }
-                  class="bg-[#121212] px-4 py-2"
+                  class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
                 >
-                  <div class="flex flex-col text-center space-y-3 mb-3">
-                    <span class="text-lg font-bold">
-                      <%= event |> stringify_value(~c"subject") %>
-                    </span>
-                    <span class="text-lg text-center">
+                  <div class="flex flex-col text-center space-y-2 mb-3">
+                    <span class="text-lg text-center text-fuchsia-700 font-bold">
                       <%= event |> stringify_value(~c"title") %>
+                    </span>
+                    <span class="text-lg">
+                      <%= event |> stringify_value(~c"subject") %>
                     </span>
                   </div>
                   <div class="flex flex-col text-center">
@@ -185,20 +185,23 @@
                 module={Modal}
                 id={"#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
               >
-                <div class="bg-[#1E1E1E] mx-5 min-h-[300px] min-w-[300px] lg:min-w-[600px] rounded-2xl absolute z-40">
+                <div class="bg-[#1E1E1E] mx-5 min-h-[300px] min-w-[300px] lg:min-w-[600px] overflow-y-auto rounded-2xl absolute z-40">
                   <div
-                    :for={event <- get_events_inside_period(@schedule, period)}
-                    class="bg-[#121212] px-4 py-2 rounded-lg"
+                    :for={
+                      event <-
+                        get_events_inside_period(@schedule, period)
+                    }
+                    class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
                   >
-                    <div class="flex flex-col text-center space-y-3 mb-3">
-                      <span class="text-2xl font-bold">
-                        <%= event |> stringify_value(~c"subject") %>
-                      </span>
-                      <span class="text-2xl text-center">
+                    <div class="flex flex-col text-center space-y-2 mb-3">
+                      <span class="text-lg text-center text-fuchsia-700 font-bold">
                         <%= event |> stringify_value(~c"title") %>
                       </span>
+                      <span class="text-lg">
+                        <%= event |> stringify_value(~c"subject") %>
+                      </span>
                     </div>
-                    <div class="flex flex-col text-xl text-center">
+                    <div class="flex flex-col text-center">
                       <span :for={
                         item <-
                           event
@@ -258,7 +261,7 @@
                 }
                 phx-target={"##{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
                 class={"
-                hover:brightness-125 transition h-[90px] w-full flex flex-col text-justify justify-between py-1 px-4
+                hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
                 duration-100 border-2 border-fuchsia-600 rounded-2xl
                 #{ period |> Map.get(~c"subject") == [] &&"!border-none !bg-inherit"}
                 #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"}
