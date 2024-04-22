@@ -93,8 +93,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
         false
 
       events ->
-        numbers =
-          events |> Enum.any?(&(&1 |> stringify_value(~c"number") |> Kernel.==(period_number)))
+        events |> Enum.any?(&(&1 |> stringify_value(~c"number") |> Kernel.==(period_number)))
     end
   end
 

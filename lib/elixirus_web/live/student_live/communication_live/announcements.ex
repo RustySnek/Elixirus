@@ -4,7 +4,6 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
   use ElixirusWeb.SetSemesterLive
   import ElixirusWeb.Helpers
   import Elixirus.PythonWrapper
-  import ElixirusWeb.Components.Loadings
   alias ElixirusWeb.LoginModal
   import Earmark, only: [as_html!: 1]
 
