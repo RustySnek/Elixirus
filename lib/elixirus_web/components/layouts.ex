@@ -22,7 +22,11 @@ defmodule ElixirusWeb.Layouts do
          {"Timetable", ~p"/student/scheduling/timetable"},
          {"Schedule", ~p"/student/scheduling/schedule"}
        ], []},
-      {"Messages", ~p"/student/messages", [], []}
+      {"Communication", ~p"/student/communication/messages",
+       [
+         {"Announcements", ~p"/student/communication/announcements"},
+         {"Messages", ~p"/student/communication/messages"}
+       ], []}
     ]
   end
 end

@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
+defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   use ElixirusWeb, :live_view
   use ElixirusWeb.SetSemesterLive
   import Elixirus.PythonWrapper
@@ -16,8 +16,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Homework do
   def handle_async(:load_details, {:ok, details}, socket) do
     socket =
       case details do
-        {:ok, details} -> assign(socket, :details, details)
-        _ -> assign(socket, :login_required, true)
+        {:ok, details} ->
+          assign(socket, :details, details)
+
+        _ ->
+          assign(socket, :login_required, true)
       end
 
     {:noreply, socket}

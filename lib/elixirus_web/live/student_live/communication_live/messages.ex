@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.MessagesLive.Messages do
+defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
   alias ElixirusWeb.LoginModal
