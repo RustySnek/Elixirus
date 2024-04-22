@@ -5,6 +5,16 @@
 :root {
   color-scheme: dark;
 }
+
+.announcement_link a {
+  color: fuchsia;
+  overflow-wrap: break-word;
+}
+
+.announcement_link a:hover {
+  color: white; 
+}
+
 .circle {
   width: 140px;
   height: 140px;
