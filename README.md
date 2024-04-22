@@ -48,16 +48,16 @@
 
 ## Tasks
   ### Todo
-  - [ ] Announcements Page 📯
   - [ ] Think of some cool extras to include 😲
   - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
   
   ### In Progress
+  - [ ] Announcements Page 📯
+
+  ### Done ✓ 
   - [X] Schedule Page 📆
     - [X] Add schedule page 📑
-    - [ ] Add schedule to Timetable 🗓️
- 
-  ### Done ✓ 
+    - [X] Add schedule to Timetable 🗓️ 
   - [X] Overview Page 📄
   - [X] Host the application 🚀
   - [X] Docker 🐳
