@@ -45,4 +45,3 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
     {:ok, socket}
   end
 end
-
