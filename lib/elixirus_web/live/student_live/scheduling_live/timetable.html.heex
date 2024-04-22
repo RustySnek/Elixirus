@@ -93,6 +93,39 @@
                 <div
                   :for={
                     event <-
+                      @schedule
+                      |> get_events_inside_day(
+                        weekday
+                        |> List.first()
+                        |> stringify_value(~c"date")
+                      )
+                  }
+                  class="bg-[#121212] px-4 py-2"
+                >
+                  <div class="flex flex-col text-center space-y-3 mb-3">
+                    <span class="text-lg font-bold">
+                      <%= event |> stringify_value(~c"subject") %>
+                    </span>
+                    <span class="text-lg text-center">
+                      <%= event |> stringify_value(~c"title") %>
+                    </span>
+                  </div>
+                  <div class="flex flex-col text-center">
+                    <span :for={
+                      item <-
+                        event
+                        |> Map.get(~c"data")
+                        |> Map.values()
+                        |> Enum.map(&to_string(&1))
+                        |> Enum.reverse()
+                    }>
+                      <%= item %>
+                    </span>
+                  </div>
+                </div>
+                <div
+                  :for={
+                    event <-
                       @calendar_events
                       |> events_inside_timeframe(
                         weekday
@@ -140,6 +173,12 @@
             }
             class="w-72 text-justify"
           >
+            <div :if={is_event_inside_period?(@schedule, period)} class="absolute">
+              <.information_circle
+                outline
+                class="w-10 text-red-800 translate-y-11 translate-x-60"
+              />
+            </div>
             <div class="w-full overflow-x-hidden">
               <.live_component
                 :if={period |> Map.get(~c"subject") != []}
@@ -147,6 +186,32 @@
                 id={"#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
               >
                 <div class="bg-[#1E1E1E] mx-5 min-h-[300px] min-w-[300px] lg:min-w-[600px] rounded-2xl absolute z-40">
+                  <div
+                    :for={event <- get_events_inside_period(@schedule, period)}
+                    class="bg-[#121212] px-4 py-2 rounded-lg"
+                  >
+                    <div class="flex flex-col text-center space-y-3 mb-3">
+                      <span class="text-2xl font-bold">
+                        <%= event |> stringify_value(~c"subject") %>
+                      </span>
+                      <span class="text-2xl text-center">
+                        <%= event |> stringify_value(~c"title") %>
+                      </span>
+                    </div>
+                    <div class="flex flex-col text-xl text-center">
+                      <span :for={
+                        item <-
+                          event
+                          |> Map.get(~c"data")
+                          |> Map.values()
+                          |> Enum.map(&to_string(&1))
+                          |> Enum.reverse()
+                      }>
+                        <%= item %>
+                      </span>
+                    </div>
+                  </div>
+
                   <div class="p-4 flex flex-col text-center w-full items-center justify-center gap-y-4">
                     <span class="text-lg font-bold">
                       <%= period |> stringify_value(~c"weekday") %>
