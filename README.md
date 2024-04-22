@@ -49,12 +49,13 @@
 ## Tasks
   ### Todo
   - [ ] Think of some cool extras to include 😲
-  - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
   
   ### In Progress
-  - [ ] Announcements Page 📯
+  - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
 
   ### Done ✓ 
+ - [X] Announcements Page 📯
+    - [X] Parse descriptions properly 📯
   - [X] Schedule Page 📆
     - [X] Add schedule page 📑
     - [X] Add schedule to Timetable 🗓️ 
