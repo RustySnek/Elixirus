@@ -57,7 +57,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           assign(
             socket,
             :schedule,
-            socket.assigns.schedule |> Map.put_new(second, schedule) |> dbg
+            socket.assigns.schedule |> Map.put_new(second, schedule)
           )
       end
     end
