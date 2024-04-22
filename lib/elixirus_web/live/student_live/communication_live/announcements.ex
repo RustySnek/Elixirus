@@ -24,9 +24,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
     {:noreply, socket}
   end
 
-  def mount(_params, %{"user_id" => user_id, "token" => token, "semester" => semester}, socket) do
+  def mount(
+        _params,
+        %{"user_id" => user_id, "token" => token, "semester" => semester},
+        socket
+      ) do
     token = handle_api_token(socket, token)
-
     announcements = handle_cache_data(user_id, "announcements")
 
     socket =

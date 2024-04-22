@@ -8,6 +8,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   import ElixirusWeb.Components.Loadings
   use ElixirusWeb.LoginHandler
   use ElixirusWeb.SetSemesterLive
+  import Earmark, only: [as_html!: 1]
 
   def fetch_messages(token, page) do
     python(:helpers, :fetch_messages, [token, page])

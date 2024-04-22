@@ -13,9 +13,15 @@
 
         <p class="text-gray-400 text-end"><%= @date %></p>
       </div>
-      <div class="px-4 pb-4 overflow-y-auto max-h-[40vh]">
+      <div
+        class="px-4 pb-4 overflow-y-auto max-h-[40vh] announcement_link"
+        phx-hook="new_page_link"
+        id="content-holder"
+      >
         <%= @content
-        |> Phoenix.HTML.Format.text_to_html() %>
+        |> as_html!()
+        |> String.replace("pre", "p")
+        |> Phoenix.HTML.raw() %>
       </div>
     </div>
   </div>
