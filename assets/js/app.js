@@ -43,15 +43,18 @@ Hooks.retrieve_local_storage = {
     }
   }
 }
+
 Hooks.login_form = {
   updated() {
-
   let username = localStorage.getItem("username") || "";
   let username_input = this.el.querySelector('#form-username');
   username_input.value = username
   },
   mounted() {
-    let username = localStorage.getItem("username") || "";
+    let renderer = document.getElementById("login-modal-renderer")
+    const observer = new MutationObserver((mutations, observer) => {
+ let username = localStorage.getItem("username") || "";
+
     let username_input = this.el.querySelector('#form-username');
     username_input.addEventListener('input', () => {
         localStorage.setItem("username", username_input.value);
@@ -59,17 +62,17 @@ Hooks.login_form = {
     let password_input = this.el.querySelector('#form-password');
     if (username !== "") {
       username_input.value = username
-      setTimeout(() => {
         
       password_input.focus()
-      }, 500);
-    }
-    else{
-      setTimeout(() => {
+      } else {
+              username_input.focus()
+
+      }
+    })
+    let config = { attributes: true, attributeFilter: ['class'] };
+    observer.observe(renderer, config)
+    
         
-      username_input.focus()
-      }, 500);
-    }
   }
 }
 

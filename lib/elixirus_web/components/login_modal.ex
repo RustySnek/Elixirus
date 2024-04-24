@@ -4,7 +4,7 @@ defmodule ElixirusWeb.LoginModal do
 
   def render(assigns) do
     ~H"""
-    <div class={"z-[99] fixed #{!@login_required && 'hidden'}"}>
+    <div id="login-modal-renderer" class={"z-[99] fixed #{!@login_required && 'hidden'}"}>
       <div>
         <div class=" fixed bg-blue-500/10  inset-0 transition-opacity" aria-hidden="true" />
         <div class="fixed inset-0 overflow-y-auto" role="dialog" aria-modal="true" tabindex="0">
