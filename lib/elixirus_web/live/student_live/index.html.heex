@@ -5,11 +5,10 @@
   return_url="/student"
 />
 
-<div class="flex lg:grid grid-cols-4 gap-x-4 lg
-:order-1 flex-col mx-4 gap-y-12">
-  <div class="flex flex-row lg:scale-125 lg:place-self-center col-span-2 justify-between lg:space-x-6 lg:justify-start lg:w-1/2 items-center">
+<div class="flex lg:grid grid-cols-4 gap-x-4 lg:order-1 flex-col mx-4 gap-y-12">
+  <div class="min-w-full flex md:flex-row gap-y-4 flex-col lg:place-self-center col-span-2 justify-between lg:space-x-6 xl:justify-center xl:gap-x-8 lg:w-1/2 items-center">
     <div :if={@frequency == []} class="circle animate-pulse"></div>
-    <div :if={@frequency != []} class="relative">
+    <div :if={@frequency != []} class="relative xs:scale-90 xl:scale-125">
       <div class="circle percentage w-full">
         <div
           class="percentage-bar"
@@ -25,7 +24,7 @@
       </span>
     </div>
     <!-- End attendance circle -->
-    <div class="flex flex-col text-xl">
+    <div class="flex flex-col text-lg md:text-xl xl:text-2xl">
       <p>
         <%= @student_data |> stringify_value(~c"name") %> Semester: <%= @semester
         |> String.to_integer()
@@ -45,15 +44,18 @@
     </div>
   </div>
   <!-- End of the first block-->
-  <div class="space-y-4 p-4 lg:order-3 rounded-xl border-fuchsia-600 border-2">
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#events-chevron")
+      |> JS.toggle_class("hidden", to: "#overview-events")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-3 rounded-xl border-fuchsia-600 border-2"
+  >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Events</span>
       <.chevron_right
-        phx-click={
-          JS.toggle_class("rotate-90")
-          |> JS.toggle_class("hidden", to: "#overview-events")
-        }
-        class="cursor-pointer w-8 lg:hidden inline absolute transition right-0 self-center"
+        id="events-chevron"
+        class="w-8 lg:hidden inline absolute transition right-0 self-center"
       />
     </div>
     <div class="space-y-4 mt-4 lg:block hidden lg:h-[370px] overflow-y-auto" id="overview-events">

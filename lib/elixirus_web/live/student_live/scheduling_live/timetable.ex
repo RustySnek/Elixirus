@@ -8,6 +8,16 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   use ElixirusWeb.SetSemesterLive
   import Heroicons, only: [chevron_right: 1, chevron_left: 1, information_circle: 1]
 
+  defp exclude_empty_days(timetable) do
+    timetable
+    |> Enum.filter(fn weekday ->
+      Enum.filter(weekday, fn period ->
+        period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
+      end)
+      |> Kernel.!=([])
+    end)
+  end
+
   defp load_schedule(socket, month_year) do
     [year, month] = month_year |> String.split("-")
 
@@ -199,26 +209,18 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       case timetable do
         {:ok, t} ->
           t =
-            t
-            |> Enum.filter(fn weekday ->
-              Enum.filter(weekday, fn period ->
-                period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
-              end)
-              |> Kernel.!=([])
-            end)
-
-          if socket.assigns.current_monday == socket.assigns.this_monday do
-            cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
-          else
-            cache_and_ttl_data(
-              socket.assigns.user_id,
-              "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable",
-              t
-            )
-          end
+            if socket.assigns.current_monday == socket.assigns.this_monday do
+              cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
+            else
+              cache_and_ttl_data(
+                socket.assigns.user_id,
+                "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable",
+                t
+              )
+            end
 
           socket
-          |> assign(:timetable, t)
+          |> assign(:timetable, exclude_empty_days(t))
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:timetable))
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
@@ -276,7 +278,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           end)
 
         timetable ->
-          assign(socket, :timetable, timetable)
+          assign(socket, :timetable, exclude_empty_days(timetable))
           |> start_async(:get_indicator, fn -> get_indicator_position(timetable) end)
       end
 
@@ -365,7 +367,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
 
         tt ->
           socket
-          |> assign(:timetable, tt)
+          |> assign(:timetable, exclude_empty_days(tt))
           |> start_async(:get_indicator, fn -> get_indicator_position(tt) end)
       end
 
