@@ -51,8 +51,9 @@
   - [ ] Think of some cool extras to include 😲
   
   ### In Progress
-  - [ ] Make stuff more appealing to user's eye (difficulty: hard 💀) 🎨
-
+  - [ ] Make stuff more appealing to user's eye
+    - [X] Mobile scalibility down to 320px
+  - [ ] Sending messages
   ### Done ✓ 
  - [X] Announcements Page 📯
     - [X] Parse descriptions properly 📯
