@@ -14,6 +14,9 @@ module.exports = {
   ],
     theme: {
     extend: {
+      screens: {
+        xs: {"max": "400px"}
+      },
       fontFamily: {
         quicksand: ["QuickSand"]
       },
