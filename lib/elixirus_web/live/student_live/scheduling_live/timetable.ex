@@ -198,6 +198,15 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     socket =
       case timetable do
         {:ok, t} ->
+          t =
+            t
+            |> Enum.filter(fn weekday ->
+              Enum.filter(weekday, fn period ->
+                period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
+              end)
+              |> Kernel.!=([])
+            end)
+
           if socket.assigns.current_monday == socket.assigns.this_monday do
             cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
           else
@@ -329,6 +338,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> fetch_schedule(monday)
 
     timetable = handle_cache_data(user_id, "timetable")
+    timetable = :load
 
     calendar_data =
       handle_cache_data(
