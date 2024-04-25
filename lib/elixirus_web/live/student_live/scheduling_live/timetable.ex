@@ -208,16 +208,15 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     socket =
       case timetable do
         {:ok, t} ->
-          t =
-            if socket.assigns.current_monday == socket.assigns.this_monday do
-              cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
-            else
-              cache_and_ttl_data(
-                socket.assigns.user_id,
-                "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable",
-                t
-              )
-            end
+          if socket.assigns.current_monday == socket.assigns.this_monday do
+            cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
+          else
+            cache_and_ttl_data(
+              socket.assigns.user_id,
+              "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable",
+              t
+            )
+          end
 
           socket
           |> assign(:timetable, exclude_empty_days(t))
