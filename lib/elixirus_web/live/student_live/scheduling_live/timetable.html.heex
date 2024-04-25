@@ -6,8 +6,11 @@
 />
 <div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
 <div class="flex flex-col md:flex-row gap-x-4 mb-6 justify-center">
-  <span class="self-center">Connect your school's google calendar!</span>
-  <form phx-submit="connect_calendar" class="flex flex-row gap-x-4 self-center md:mt-0 mt-2">
+  <span class="self-center text-center">Connect your school's google calendar!</span>
+  <form
+    phx-submit="connect_calendar"
+    class="flex flex-row xs:flex-col gap-4 self-center md:mt-0 mt-2"
+  >
     <input
       placeholder="calendar id / email"
       class="bg-[#1f1f1f] rounded-2xl border-fuchsia-800 border-2"
@@ -59,7 +62,7 @@
     <div class="flex -z-40 flex-col w-full  gap-y-4">
       <div class="opacity-0 h-12">Weekday</div>
       <div :for={period <- hd(@timetable)} class="w-full">
-        <div class="h-[90px] text-gray-500  flex flex-col justify-between">
+        <div class="h-[90px] text-gray-500 xs:tracking-tight xs:text-xs  flex flex-col justify-between">
           <p class="w-full">
             <%= period |> Map.get(~c"date_from") %>
           </p>
@@ -75,13 +78,13 @@
       <div :for={weekday <- @timetable} class="
       w-auto snap-center relative
        ">
-        <div class="flex h-full gap-y-4 flex-col  ">
+        <div class="flex h-full gap-y-4 flex-col ">
           <div>
             <.live_component
               module={Modal}
               id={"#{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"}
             >
-              <div class="space-y-2">
+              <div class="gap-y-2 flex flex-col items-center md:max-w-3xl max-w-xs xs:max-w-[250px]">
                 <div
                   :for={
                     event <-
@@ -92,13 +95,13 @@
                         |> stringify_value(~c"date")
                       )
                   }
-                  class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
+                  class="bg-[#1E1E1E] rounded-2xl px-4 py-2 md:max-w-3xl max-w-xs xs:max-w-[250px]"
                 >
                   <div class="flex flex-col text-center space-y-2 mb-3">
                     <span class="text-lg text-center text-fuchsia-700 font-bold">
                       <%= event |> stringify_value(~c"title") %>
                     </span>
-                    <span class="text-lg">
+                    <span class="text-lg break-words">
                       <%= event |> stringify_value(~c"subject") %>
                     </span>
                   </div>
@@ -125,7 +128,7 @@
                         |> stringify_value(~c"date")
                       )
                   }
-                  class="bg-[#1E1E1E]  max-w-[360px] md:max-w-[500px] lg:max-w-[800px] rounded-2xl px-4 py-2"
+                  class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
                 >
                   <span class="mb-2 text-lg font-bold">
                     <%= event |> stringify_value(~c"summary") %>
@@ -155,20 +158,11 @@
               <%= weekday |> List.first([]) |> stringify_value(~c"weekday") %>
             </button>
           </div>
-          <div
-            :for={period <- weekday}
-            :if={
-              Enum.filter(weekday, fn period ->
-                period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
-              end)
-              |> length() > 0
-            }
-            class="w-72 text-justify"
-          >
+          <div :for={period <- weekday} class="w-72 xs:w-60 text-justify">
             <div :if={is_event_inside_period?(@schedule, period)} class="absolute">
               <.information_circle
                 outline
-                class="w-10 text-red-800 translate-y-11 translate-x-60"
+                class="w-10 text-red-800 translate-y-11 xs:translate-x-48 translate-x-60"
               />
             </div>
             <div class="w-full overflow-x-hidden">
@@ -177,7 +171,7 @@
                 module={Modal}
                 id={"#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
               >
-                <div class="bg-[#1E1E1E] mx-5 min-h-[300px] min-w-[300px] lg:min-w-[600px] overflow-y-auto rounded-2xl absolute z-40">
+                <div class="bg-[#1E1E1E] mx-5 md:max-w-3xl max-w-xs xs:max-w-[250px] overflow-y-auto rounded-2xl absolute z-40">
                   <div
                     :for={
                       event <-
@@ -189,7 +183,13 @@
                       <span class="text-lg text-center text-fuchsia-700 font-bold">
                         <%= event |> stringify_value(~c"title") %>
                       </span>
-                      <span class="text-lg">
+                      <span
+                        :if={
+                          event |> stringify_value(~c"subject") !=
+                            event |> stringify_value(~c"title")
+                        }
+                        class="text-lg"
+                      >
                         <%= event |> stringify_value(~c"subject") %>
                       </span>
                     </div>
@@ -207,12 +207,12 @@
                     </div>
                   </div>
 
-                  <div class="p-4 flex flex-col text-center w-full items-center justify-center gap-y-4">
-                    <span class="text-lg font-bold">
+                  <div class="p-4 flex flex-col text-center items-center justify-center gap-y-1 lg:gap-y-4">
+                    <span class="text-base lg:text-lg font-bold">
                       <%= period |> stringify_value(~c"weekday") %>
                     </span>
 
-                    <span class="text-lg font-bold">
+                    <span class="break-words lg:text-lg font-bold w-full">
                       <%= period |> stringify_value(~c"subject") %>
                     </span>
                     <div

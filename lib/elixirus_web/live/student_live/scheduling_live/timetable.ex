@@ -338,7 +338,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> fetch_schedule(monday)
 
     timetable = handle_cache_data(user_id, "timetable")
-    timetable = :load
 
     calendar_data =
       handle_cache_data(
