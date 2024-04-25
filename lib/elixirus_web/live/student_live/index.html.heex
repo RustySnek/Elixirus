@@ -98,15 +98,18 @@
     </div>
   </div>
   <!-- end of events -->
-  <div class="space-y-4 lg:order-4 p-4 rounded-xl border-fuchsia-600 border-2">
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#grades-chevron")
+      |> JS.toggle_class("hidden", to: "#avg-grades-events")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer lg:order-4 p-4 rounded-xl border-fuchsia-600 border-2"
+  >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Average grades</span>
       <.chevron_right
-        phx-click={
-          JS.toggle_class("rotate-90")
-          |> JS.toggle_class("hidden", to: "#avg-grades-events")
-        }
-        class="cursor-pointer w-8 inline absolute transition lg:hidden right-0 self-center"
+        id="grades-chevron"
+        class="w-8 inline absolute transition lg:hidden right-0 self-center"
       />
     </div>
     <div
@@ -133,15 +136,18 @@
     </div>
   </div>
   <!-- End of grades -->
-  <div class="space-y-4 p-4 col-span-2 lg:order-2 rounded-xl border-fuchsia-600 border-2">
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#message-chevron")
+      |> JS.toggle_class("hidden", to: "#unread-messages")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 col-span-2 lg:order-2 rounded-xl border-fuchsia-600 border-2"
+  >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Unread messages</span>
       <.chevron_right
-        phx-click={
-          JS.toggle_class("rotate-90")
-          |> JS.toggle_class("hidden", to: "#unread-messages")
-        }
-        class="cursor-pointer lg:hidden w-8 inline absolute transition right-0 self-center"
+        id="message-chevron"
+        class="lg:hidden w-8 inline absolute transition right-0 self-center"
       />
     </div>
 
@@ -169,15 +175,18 @@
     </div>
   </div>
   <!-- End of messages -->
-  <div class="space-y-4 p-4 lg:order-5 rounded-xl border-fuchsia-600 border-2">
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#new-grades-chevron")
+      |> JS.toggle_class("hidden", to: "#new-grades")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-5 rounded-xl border-fuchsia-600 border-2"
+  >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">New grades</span>
       <.chevron_right
-        phx-click={
-          JS.toggle_class("rotate-90")
-          |> JS.toggle_class("hidden", to: "#new-grades")
-        }
-        class="cursor-pointer lg:hidden w-8 inline absolute transition right-0 self-center"
+        id="new-grades-chevron"
+        class="lg:hidden w-8 inline absolute transition right-0 self-center"
       />
     </div>
     <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-[370px] lg:block" id="new-grades">
@@ -213,15 +222,18 @@
     </div>
   </div>
   <!-- End of new grades-->
-  <div class="space-y-4 p-4 lg:order-6 rounded-xl border-fuchsia-600 border-2">
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#absence-chevron")
+      |> JS.toggle_class("hidden", to: "#latest-absence")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-6 rounded-xl border-fuchsia-600 border-2"
+  >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Latest absence</span>
       <.chevron_right
-        phx-click={
-          JS.toggle_class("rotate-90")
-          |> JS.toggle_class("hidden", to: "#latest-absence")
-        }
-        class="cursor-pointer lg:hidden w-8 inline absolute transition right-0 self-center"
+        id="absence-chevron"
+        class="lg:hidden w-8 inline absolute transition right-0 self-center"
       />
     </div>
     <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-[370px] lg:block" id="latest-absence">
