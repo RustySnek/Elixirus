@@ -36,7 +36,7 @@ defmodule ElixirusWeb.Components.NavHeader do
 
   def header(assigns) do
     ~H"""
-    <nav class=" border-gray-200 px-2 sm:px-4 py-2.5 rounded w-full">
+    <nav class=" border-gray-200 px-2 xs:px-0 sm:px-4 py-2.5 rounded w-full">
       <div class="container flex flex-wrap items-center justify-between mx-auto">
         <%= render_slot(@logo) %>
         <button
@@ -69,7 +69,7 @@ defmodule ElixirusWeb.Components.NavHeader do
                 <.link
                   id={"link-#{title}"}
                   navigate={href}
-                  class="block hover:text-fuchsia-900 py-2 pl-3 pr-4 text-3xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700 md:p-0 "
+                  class="block hover:text-fuchsia-900 py-2 pl-3 pr-4 text-3xl xs:text-2xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700 md:p-0 "
                 >
                   <%= title %>
                 </.link>
@@ -80,7 +80,7 @@ defmodule ElixirusWeb.Components.NavHeader do
                 >
                   <%= for {title, href} <- nested_links do %>
                     <.link
-                      class="block h-10 flex flex-col justify-center px-4 hover:bg-fuchsia-700/10 hover:text-fuchsia-900 text-2xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700"
+                      class="h-10 flex flex-col justify-center px-4 hover:bg-fuchsia-700/10 hover:text-fuchsia-900 xs:text-xl text-2xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700"
                       navigate={href}
                     >
                       <%= title %>

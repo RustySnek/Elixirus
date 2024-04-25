@@ -2,17 +2,17 @@
   phx-hook="retrieve_local_storage"
   name="semester"
   id="main_header"
-  class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 mx-8 flex flex-row justify-between items-center"
+  class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 lg:mx-8 flex flex-row justify-between items-center"
 >
   <.header links={links()}>
     <:logo>
       <div class="flex flex-row space-x-4">
         <.link navigate={~p"/student"} class="flex items-center">
           <div class="flex flex-row mr-0 sm:mr-20 gap-x-2 justify-center">
-            <h1 class="font-quicksand text-6xl font-extrabold text-fuchsia-700">
+            <h1 class="font-quicksand text-6xl xs:text-5xl font-extrabold text-fuchsia-700">
               Elixir<span class="text-fuchsia-900">us</span>
             </h1>
-            <Heroicons.beaker mini class="h-14 text-fuchsia-700 self-end" />
+            <Heroicons.beaker mini class="h-14 xs:h-10 text-fuchsia-700 self-end" />
           </div>
         </.link>
       </div>
@@ -47,6 +47,6 @@
     </button>
   </div>
 </header>
-<main class="pt-10">
+<main class="pt-10 xs:pt-6">
   <%= @inner_content %>
 </main>
