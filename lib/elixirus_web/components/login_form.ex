@@ -2,6 +2,8 @@ defmodule ElixirusWeb.LoginForm do
   @moduledoc false
   use ElixirusWeb, :live_component
   import Heroicons
+  alias GenServer
+  alias Elixirus.TokenWorker
 
   def mount(socket) do
     socket =
@@ -17,12 +19,12 @@ defmodule ElixirusWeb.LoginForm do
     {:ok, pid} = :python.start()
 
     get_token = :python.call(pid, :handle_classes, :handle_token, [username, password])
-
     :python.stop(pid)
 
     socket =
       case get_token do
         {:ok, token} ->
+          GenServer.call(TokenWorker, {:add_token, token, 6})
           socket |> assign(:token, token |> to_string()) |> assign(:username, username)
 
         {:error, error_message} ->

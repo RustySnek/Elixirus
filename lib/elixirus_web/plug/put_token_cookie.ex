@@ -2,6 +2,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
   @moduledoc """
   Reads a user_details cookie and puts user_details into session
   """
+  alias Elixirus.TokenWorker
   import Plug.Conn
 
   def init(_) do
@@ -32,8 +33,12 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
         |> put_session(:semester, semester)
 
       cookie ->
+        token = Plug.Conn.Query.decode(cookie)
+
+        GenServer.call(TokenWorker, {:extend_lifetime, token |> Map.keys() |> hd(), 6})
+
         conn
-        |> put_session(:token, Plug.Conn.Query.decode(cookie))
+        |> put_session(:token, token)
         |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
     end
