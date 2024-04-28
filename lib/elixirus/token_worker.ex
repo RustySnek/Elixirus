@@ -1,6 +1,5 @@
 defmodule Elixirus.TokenWorker do
   use GenServer
-  use HTTPoison.Base
   alias Timex
   import Elixirus.PythonWrapper
 
