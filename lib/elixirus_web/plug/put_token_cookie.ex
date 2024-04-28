@@ -35,7 +35,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
       cookie ->
         token = Plug.Conn.Query.decode(cookie)
 
-        GenServer.call(TokenWorker, {:extend_lifetime, token |> Map.keys() |> hd(), 6})
+        GenServer.call(TokenWorker, {:extend_lifetime, token |> Map.keys() |> Enum.at(0), 6})
 
         conn
         |> put_session(:token, token)

@@ -15,7 +15,8 @@ defmodule ElixirusWeb.LoginForm do
     {:ok, socket}
   end
 
-  def handle_event("login", %{"username" => username, "password" => password}, socket) do
+  def handle_event("login", %{"username" => username, "password" => password} = params, socket) do
+    keep_alive? = "save_token" |> Kernel.in(params |> Map.keys())
     {:ok, pid} = :python.start()
 
     get_token = :python.call(pid, :handle_classes, :handle_token, [username, password])
@@ -24,7 +25,7 @@ defmodule ElixirusWeb.LoginForm do
     socket =
       case get_token do
         {:ok, token} ->
-          GenServer.call(TokenWorker, {:add_token, token, 6})
+          unless(keep_alive? == false, do: GenServer.call(TokenWorker, {:add_token, token, 6}))
           socket |> assign(:token, token |> to_string()) |> assign(:username, username)
 
         {:error, error_message} ->

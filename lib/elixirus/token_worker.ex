@@ -19,7 +19,10 @@ defmodule Elixirus.TokenWorker do
   end
 
   def handle_call({:extend_lifetime, token, ttl}, _from, table) do
-    :ets.insert(table, {token, ttl, DateTime.now("Europe/Warsaw")})
+    unless(:ets.lookup(table, token) == [],
+      do: :ets.insert(table, {token, ttl, DateTime.now("Europe/Warsaw")})
+    )
+
     {:reply, :ok, table}
   end
 
