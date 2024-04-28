@@ -31,21 +31,19 @@ def fetch_student_data(token):
     try:
         student_data = get_student_information(token)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), student_data.__dict__
-
-
 
 def fetch_completed_lessons(token, date_from, date_to, page = 0):
     token = create_token(token)
     try:
         completed_lessons = get_completed(token, date_from, date_to, page)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_completed_lessons(completed_lessons)
 
 def fetch_todays_completed_lessons(token):
@@ -57,9 +55,9 @@ def fetch_announcements(token):
     try:
         announcements = get_announcements(token)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_announcements(announcements)
 
 
@@ -68,22 +66,22 @@ def fetch_messages(token, page):
     try:
         messages = get_recieved(token, int(page))
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_messages(messages)
 
 def fetch_all_messages(token):
     token = create_token(token)
-    pages = get_max_page_messages(token)
-    messages = []
     try:
+        pages = get_max_page_messages(token)
+        messages = []
         for page in range(0, pages +1):
             messages += get_recieved(token, page)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_messages(messages)
 
 
@@ -92,9 +90,9 @@ def fetch_message_content(token, id):
     try:
         content = message_content(token, id.decode('utf-8'))
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), content 
 
 def fetch_schedule(token, year, month):
@@ -102,17 +100,17 @@ def fetch_schedule(token, year, month):
     try:
         schedule = get_schedule(token, month, year, True)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_schedule(schedule)
 def fetch_grades(token, semester, opt):
     try:
         subjects, semester_grades, descriptive = get_grades(token, opt)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), [handle_grades(subjects[int(semester)]), handle_semester_grades(semester_grades)]
 
 def fetch_all_grades(token, semester):
@@ -132,28 +130,28 @@ def fetch_homework(token, start, end):
     try:
         homework = get_homework(token, start.decode("utf-8"), end.decode("utf-8"))
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_homework(homework)
 
 def fetch_homework_details(token, id):
     token = create_token(token)
     try:
-        details = homework_detail(token, id.decode("utf-8"))
+        details = homework_detail(token, id.decode("utf-8")),
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), details
 
 def fetch_attendance(token, semester, opt = "all"):
     try:
         attendance = get_attendance(token, opt)
     except TokenError as token_err:
-		return Atom("token_error".encode("utf-8")), str(token_err)
-	except ParseError as parse_err:
-		return Atom("error"), str(parse_err)
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_attendance(attendance[int(semester)])
 
 def fetch_all_attendance(token, semester):
@@ -172,9 +170,9 @@ def fetch_attendance_frequency(token):
     token = create_token(token)
     try:
         frequency = get_attendance_frequency(token)
-    except TokenError as token_err:
+    except (TokenError, AuthorizationError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
-    except (ParseError, AuthorizationError) as err:
+    except (ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), frequency
 
