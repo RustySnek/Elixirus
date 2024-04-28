@@ -2,6 +2,7 @@ defmodule Elixirus.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
+  alias Elixirus.TokenWorker
 
   use Application
 
@@ -10,6 +11,9 @@ defmodule Elixirus.Application do
     children = [
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
+      Supervisor.child_spec({TokenWorker, [:token_storage, :bag, :private]},
+        id: TokenWorker
+      ),
       {DNSCluster, query: Application.get_env(:elixirus, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Elixirus.PubSub},
       # Start a worker by calling: Elixirus.Worker.start_link(arg)
