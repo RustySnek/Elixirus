@@ -59,7 +59,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:completed_lessons, lessons)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :completed_lessons))
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
@@ -76,7 +76,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :homework))
           |> assign(:homework, homework |> Enum.reverse())
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
@@ -97,7 +97,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:week_attendance, attendance)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :week_attendance))
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
@@ -114,7 +114,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:week_grades, grades)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :week_grades))
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 

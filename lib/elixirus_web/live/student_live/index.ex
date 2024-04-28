@@ -212,7 +212,7 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
           |> assign(:frequency, frequency)
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
@@ -229,7 +229,7 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
           |> assign(:schedule, schedule)
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
@@ -274,7 +274,7 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(name, data)
           |> assign(:loadings, List.delete(socket.assigns.loadings, name))
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 

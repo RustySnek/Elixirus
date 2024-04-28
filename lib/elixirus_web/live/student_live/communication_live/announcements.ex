@@ -17,7 +17,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :announcements))
           |> assign(:announcements, announcements)
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 

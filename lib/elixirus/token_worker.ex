@@ -48,7 +48,7 @@ defmodule Elixirus.TokenWorker do
     if Timex.diff(now, last_update) > Timex.shift(last_update, hours: ttl) do
       case python(:helpers, :refresh_oauth, [token]) do
         :ok -> :ets.insert(table, {token, ttl, now})
-        {:error, _message} -> :ets.delete(table, token)
+        {:error, __message} -> :ets.delete(table, token)
       end
     else
       :ets.delete(table, token)

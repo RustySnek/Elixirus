@@ -70,7 +70,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
         {:ok, content} ->
           assign(socket, :content, content |> to_string())
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
@@ -94,7 +94,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:seen_messages, seen)
           |> assign(:unread_messages, unread)
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 

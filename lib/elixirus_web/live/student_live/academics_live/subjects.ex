@@ -249,7 +249,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> assign(:semester_grades, semester_grades)
           |> assign_averages(grades)
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 

@@ -20,7 +20,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
           socket
           |> assign(:grades, grades)
 
-        {:token_error, message} ->
+        {:token_error, _message} ->
           assign(socket, :login_required, true)
       end
 
