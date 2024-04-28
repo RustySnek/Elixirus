@@ -176,5 +176,12 @@ def fetch_attendance_frequency(token):
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), frequency
 
+def refresh_oauth(token):
+    token = create_token(token)
+    try:
+        token.refresh_oauth()
+        return Atom("ok".encode('utf-8')) 
+    except AuthorizationError:
+        return Atom("error".encode("utf-8")), str(err)
 
-
+ 
