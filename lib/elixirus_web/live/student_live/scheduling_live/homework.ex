@@ -19,7 +19,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
         {:ok, details} ->
           assign(socket, :details, details)
 
-        _ ->
+        {:token_error, message} ->
           assign(socket, :login_required, true)
       end
 
@@ -33,7 +33,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
           cache_and_ttl_data(socket.assigns.user_id, "homework", homework, 15)
           assign(socket, :homework, homework |> Enum.reverse())
 
-        _ ->
+        {:token_error, message} ->
           assign(socket, :login_required, true)
       end
 

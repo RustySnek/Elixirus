@@ -67,8 +67,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   def handle_async(:fetch_content, {:ok, content}, socket) do
     socket =
       case content do
-        {:ok, content} -> assign(socket, :content, content |> to_string())
-        _ -> assign(socket, :login_required, true)
+        {:ok, content} ->
+          assign(socket, :content, content |> to_string())
+
+        {:token_error, message} ->
+          assign(socket, :login_required, true)
       end
 
     {:noreply, socket}
@@ -91,7 +94,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:seen_messages, seen)
           |> assign(:unread_messages, unread)
 
-        _ ->
+        {:token_error, message} ->
           assign(socket, :login_required, true)
       end
 

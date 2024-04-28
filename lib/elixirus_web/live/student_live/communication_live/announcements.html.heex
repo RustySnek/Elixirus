@@ -12,7 +12,7 @@
   >
   </div>
   <div
-    :for={announcement <- @announcements}
+    :for={{announcement, idx} <- @announcements |> Enum.with_index()}
     class="border-fuchsia-600 border rounded py-1 px-4 mx-4 lg:mx-0"
   >
     <div class="text-center text-xl font-semibold">
@@ -20,7 +20,7 @@
     </div>
     <div
       class="lg:text-lg child:whitespace-break-spaces announcement_link"
-      id="announcement-wrapper"
+      id={"#{idx}announcement-wrapper"}
       phx-hook="new_page_link"
     >
       <%= announcement

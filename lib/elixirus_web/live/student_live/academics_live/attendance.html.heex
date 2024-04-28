@@ -8,12 +8,12 @@
   <.spinner />
 </div>
 <div :if={@attendance != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
-  <div :for={freq <- @frequency} class="select-none relative">
+  <div :for={{freq, idx} <- @frequency |> Enum.with_index()} class="select-none relative">
     <div class="circle percentage">
       <div
         class="percentage-bar"
         phx-hook="frequency"
-        id={"#{make_ref() |> :erlang.ref_to_list() |> to_string()}"}
+        id={"percentage-#{idx}"}
         name={percentage_to_deg(freq)}
         style="--progress-value: 360deg;"
       >
