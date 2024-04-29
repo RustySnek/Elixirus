@@ -5,6 +5,7 @@ defmodule ElixirusWeb.PageController do
     conn
     |> put_resp_cookie("semester", semester,
       http_only: true,
+      max_age: 3_600 * 24 * 7,
       same_site: "strict",
       path: "/"
     )
@@ -14,6 +15,7 @@ defmodule ElixirusWeb.PageController do
   def set_token(conn, %{"token" => token, "user_id" => user_id}) do
     conn
     |> put_resp_cookie("api_token", token,
+      max_age: 3_600 * 24 * 7,
       secure: true,
       http_only: true,
       same_site: "strict",
