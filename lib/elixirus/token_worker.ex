@@ -12,21 +12,34 @@ defmodule Elixirus.TokenWorker do
     {:ok, table, {:continue, :init_status}}
   end
 
-  def handle_call({:add_token, token, ttl}, _from, table) do
-    :ets.insert(table, {token, ttl, DateTime.now("Europe/Warsaw")})
+  def handle_call({:add_token, username, token, ttl}, _from, table) do
+    :ets.insert(table, {username, token, ttl, DateTime.now!("Europe/Warsaw")})
     {:reply, :ok, table}
   end
 
   def handle_call({:extend_lifetime, token, ttl}, _from, table) do
-    unless(:ets.lookup(table, token) == [],
-      do: :ets.insert(table, {token, ttl, DateTime.now("Europe/Warsaw")})
-    )
+    case :ets.match(table, {:"$1", token, :_, :_}) do
+      [] ->
+        :ok
+
+      [name | _] ->
+        name = name |> Enum.at(0)
+
+        unless(name == nil,
+          do: :ets.insert(table, {name, token, ttl, DateTime.now!("Europe/Warsaw")})
+        )
+    end
 
     {:reply, :ok, table}
   end
 
-  def handle_cast({:remove_token, token}, table) do
-    :ets.delete(table, token)
+  def handle_cast({:remove_token, username, token}, table) do
+    [{_username, lookup_token, _ttl, _last_update} | _] = :ets.lookup(table, username)
+
+    if lookup_token == token do
+      :ets.delete(table, username)
+    end
+
     {:noreply, table}
   end
 
@@ -42,16 +55,16 @@ defmodule Elixirus.TokenWorker do
     {:noreply, table}
   end
 
-  defp refresh_token(table, {token, ttl, last_update}) do
-    now = DateTime.now("Europe/Warsaw")
+  defp refresh_token(table, {username, token, ttl, last_update}) do
+    now = DateTime.now!("Europe/Warsaw")
 
     if Timex.diff(now, last_update) > Timex.shift(last_update, hours: ttl) do
-      case python(:helpers, :refresh_oauth, [token]) do
-        :ok -> :ets.insert(table, {token, ttl, now})
-        {:error, __message} -> :ets.delete(table, token)
+      case python(:helpers, :keep_token_alive, [token]) do
+        :ok -> :ets.insert(table, {username, token, ttl, now})
+        {:error, __message} -> :ets.delete(table, username)
       end
     else
-      :ets.delete(table, token)
+      :ets.delete(table, username)
     end
   end
 end

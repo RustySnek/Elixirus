@@ -25,7 +25,10 @@ defmodule ElixirusWeb.LoginForm do
     socket =
       case get_token do
         {:ok, token} ->
-          unless(keep_alive? == false, do: GenServer.call(TokenWorker, {:add_token, token, 6}))
+          unless(keep_alive? == false,
+            do: GenServer.call(TokenWorker, {:add_token, username, token, 6})
+          )
+
           socket |> assign(:token, token |> to_string()) |> assign(:username, username)
 
         {:error, error_message} ->
