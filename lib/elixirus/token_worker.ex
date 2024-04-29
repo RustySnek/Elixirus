@@ -50,6 +50,7 @@ defmodule Elixirus.TokenWorker do
   defp execute_token_refresh(table) do
     :ets.tab2list(table)
     |> Task.async_stream(fn token -> refresh_token(table, token) end)
+    |> Enum.to_list()
 
     Process.send_after(self(), :refresh, 15_000 * 60)
     {:noreply, table}
@@ -58,10 +59,13 @@ defmodule Elixirus.TokenWorker do
   defp refresh_token(table, {username, token, ttl, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
-    if Timex.diff(now, last_update) > Timex.shift(last_update, hours: ttl) do
-      case python(:helpers, :keep_token_alive, [token]) do
-        :ok -> :ets.insert(table, {username, token, ttl, now})
-        {:error, __message} -> :ets.delete(table, username)
+    if now <= Timex.shift(last_update, hours: ttl) do
+      case python(:helpers, :refresh_oauth, [token]) do
+        :ok ->
+          :ets.insert(table, {username, token, ttl, now})
+
+        {:error, __message} ->
+          :ets.delete(table, username)
       end
     else
       :ets.delete(table, username)
