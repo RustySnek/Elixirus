@@ -182,8 +182,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
             Map.put(socket.assigns.schedule, "#{year}-#{month}", schedule)
           )
 
-        {:token_error, _message} ->
-          assign(socket, :login_required, true)
+        {:token_error, message} ->
+          assign(socket, :login_required, true) |> put_flash(:error, message)
+
+        {:error, message} ->
+          put_flash(socket, :error, message)
       end
 
     {:noreply, socket}
@@ -223,8 +226,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:timetable))
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
-        {:token_error, _message} ->
-          assign(socket, :login_required, true)
+        {:token_error, message} ->
+          assign(socket, :login_required, true) |> put_flash(:error, message)
+
+        {:error, message} ->
+          put_flash(socket, :error, message)
       end
 
     {:noreply, socket}
