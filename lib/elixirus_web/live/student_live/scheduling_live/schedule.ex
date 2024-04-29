@@ -15,8 +15,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
           cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule, 15)
           assign(socket, :schedule, schedule)
 
-        {:token_error, _message} ->
-          assign(socket, :login_required, true)
+        {:token_error, message} ->
+          assign(socket, :login_required, true) |> put_flash(:error, message)
+
+        {:error, message} ->
+          put_flash(socket, :error, message)
       end
 
     {:noreply, socket}

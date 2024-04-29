@@ -26,8 +26,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           socket
           |> assign(:frequency, freq)
 
-        {:token_error, _message} ->
-          assign(socket, :login_required, true)
+        {:token_error, message} ->
+          assign(socket, :login_required, true) |> put_flash(:error, message)
+
+        {:error, message} ->
+          put_flash(socket, :error, message)
       end
 
     {:noreply, socket}
@@ -44,8 +47,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance, 10)
           socket |> assign(:attendance, attendance)
 
-        {:token_error, _message} ->
-          assign(socket, :login_required, true)
+        {:token_error, message} ->
+          assign(socket, :login_required, true) |> put_flash(:error, message)
+
+        {:error, message} ->
+          put_flash(socket, :error, message)
       end
 
     {:noreply, socket}
