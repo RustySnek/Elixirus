@@ -11,7 +11,7 @@ defmodule Elixirus.Application do
     children = [
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
-      Supervisor.child_spec({TokenWorker, [:token_storage, :set, :private]},
+      Supervisor.child_spec({TokenWorker, [:token_storage, :set, :public]},
         id: TokenWorker
       ),
       {DNSCluster, query: Application.get_env(:elixirus, :dns_cluster_query) || :ignore},
