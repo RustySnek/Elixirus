@@ -1,6 +1,6 @@
 from erlport.erlterms import Atom
 from librus_apix.attendance import get_attendance, get_attendance_frequency
-from librus_apix.messages import get_recieved, message_content, get_max_page_number as get_max_page_messages
+from librus_apix.messages import get_recieved, message_content, get_max_page_number as get_max_page_messages, recipient_groups, get_recipients, send_message
 from librus_apix.homework import get_homework, homework_detail
 from librus_apix.schedule import get_schedule
 from librus_apix.announcements import get_announcements
@@ -60,6 +60,18 @@ def fetch_announcements(token):
         return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode('utf-8')), handle_announcements(announcements)
 
+def get_recipient_groups():
+    return recipient_groups()
+
+def get_group_recipients(token, group):
+    token = create_token(token)
+    try:
+        recipients = get_recipients(token, group)
+    except TokenError as token_err:
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except (ParseError, ValueError) as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
+    return Atom("ok".encode('utf-8')), recipients
 
 def fetch_messages(token, page):
     token = create_token(token)
@@ -175,6 +187,17 @@ def fetch_attendance_frequency(token):
     except (ParseError) as err:
         return Atom("error".encode("utf-8")), str(err)
     return Atom("ok".encode('utf-8')), frequency
+
+def keep_token_alive(token):
+    token = create_token(token)
+    try:
+        if token.get(token.ANNOUNCEMENTS_URL).status_code == 200:
+            token.refresh_oauth()
+        else:
+            return Atom("error".encode("utf-8")), str(err)
+        return Atom("ok".encode('utf-8')) 
+    except AuthorizationError:
+        return Atom("error".encode("utf-8")), str(err)
 
 def refresh_oauth(token):
     token = create_token(token)
