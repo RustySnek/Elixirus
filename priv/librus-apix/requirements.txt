@@ -4,7 +4,7 @@ certifi==2023.11.17
 charset-normalizer==3.3.2
 erlport==0.6
 idna==3.7
-librus-apix==0.7.3
+librus-apix==0.7.5
 lxml==4.9.3
 requests==2.31.0
 soupsieve==2.5
