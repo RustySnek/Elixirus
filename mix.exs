@@ -33,6 +33,7 @@ defmodule Elixirus.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.7.10"},
+      {:html_sanitize_ex, "~> 1.4"},
       {:earmark, "~> 1.4"},
       {:cachex, "~> 3.6"},
       {:httpoison, "~> 2.2.1"},
