@@ -120,12 +120,33 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
         "unread" ->
           socket.assigns.unread_messages
+
+        "sent" ->
+          socket.assigns.sent_messages
       end
 
     socket =
       socket
       |> assign(:shown_messages, messages)
       |> assign(:visibility, visibility)
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_sent_messages, {:ok, messages}, socket) do
+    socket =
+      case messages do
+        {:ok, messages} ->
+          socket
+          |> assign(:sent_messages, messages)
+          |> assign(:loadings, socket.assigns.loadings |> List.delete(:sent_messages))
+
+        {:token_error, msg} ->
+          socket |> assign(:login_required, true) |> put_flash(:error, msg)
+
+        {:error, msg} ->
+          put_flash(socket, :error, msg)
+      end
 
     {:noreply, socket}
   end
@@ -174,12 +195,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     socket =
       case groups do
         {:error, msg} ->
-          socket |> put_flash(:error, msg) |> assign(:recipient_groups, [])
+          socket |> put_flash(:error, msg)
 
         {:token_error, msg} ->
           socket
           |> assign(:login_required, true)
-          |> assign(:recipient_groups, [])
           |> put_flash(:error, msg)
 
         {:ok, groups} ->
@@ -223,6 +243,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       ) do
     api_token = handle_api_token(socket, api_token)
     data = handle_cache_data(user_id, "messages")
+    sent = handle_cache_data(user_id, "sent_messages")
 
     socket =
       socket
@@ -235,12 +256,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:messages, [])
       |> assign(:shown_messages, [])
       |> assign(:seen_messages, [])
+      |> assign(:sent_messages, [])
+      |> assign(:unread_messages, [])
       |> assign(:visibility, "all")
       |> assign(:selected_recipients, MapSet.new())
       |> assign(:selected_group, "")
       |> assign(:group_recipients, %{})
       |> assign(:recipient_groups, [])
-      |> assign(:unread_messages, [])
       |> assign(:content, "")
       |> assign(:title, "")
       |> assign(:compose_title, "")
@@ -249,8 +271,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:author, "")
       |> assign(:content, "")
       |> assign(:page_title, "Messages")
-      |> start_async(:load_recipient_groups, fn ->
+      |> create_fetcher(:load, :recipient_groups, fn ->
         python(:helpers, :get_recipient_groups, [api_token])
+      end)
+      |> create_fetcher(sent, :sent_messages, fn ->
+        python(:helpers, :fetch_sent_messages, [api_token, 0])
       end)
 
     socket =
