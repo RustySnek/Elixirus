@@ -104,7 +104,7 @@ def send_message(token: Token, title, content, recipients):
     recipients = list(map(lambda id: id.decode("utf-8"), recipients))
     try:
         was_sent, msg = send_msg(token, title, content, recipients)
-        if was_sent == True:
+        if was_sent == False:
             return Atom("send_error".encode("utf-8")), str(msg)
         return Atom("ok".encode("utf-8")), str(msg)
     except TokenError as token_err:
