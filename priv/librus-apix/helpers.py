@@ -6,6 +6,7 @@ from librus_apix.messages import (
     get_max_page_number as get_max_page_messages,
     recipient_groups,
     get_recipients,
+    get_sent,
     send_message as send_msg,
 )
 from librus_apix.homework import get_homework, homework_detail
@@ -110,6 +111,16 @@ def send_message(token: Token, title, content, recipients):
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
+
+def fetch_sent_messages(token, page):
+    token = create_token(token)
+    try:
+        messages = get_sent(token, int(page))
+    except TokenError as token_err:
+        return Atom("token_error".encode("utf-8")), str(token_err)
+    except ParseError as parse_err:
+        return Atom("error".encode("utf-8")), str(parse_err)
+    return Atom("ok".encode("utf-8")), handle_messages(messages)
 
 
 def fetch_messages(token, page):
