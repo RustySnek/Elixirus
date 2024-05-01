@@ -53,7 +53,6 @@
   ### In Progress
   - [ ] Make stuff more appealing to user's eye
     - [X] Mobile scalibility down to 320px
-  - [ ] Sending messages
   ### Done ✓ 
  - [X] Announcements Page 📯
     - [X] Parse descriptions properly 📯
@@ -72,11 +71,11 @@
   - [X] Homework Page 📰
   - [x] Timetable page 🗓️
     - [x] Add timeline indicator 🕚
-    - [X] Add google calendar functionality 
+    - [x] Add google calendar functionality 
     - [x] Add details modal 🔍
   - [x] Messages Page 📫
     - [x] Handle recieved messages 📩
+    - [x] Sending messages 📩
     - [x] Add message content modal 📑
-    - [x] Make some cool sliding animations 🎥
   - [x] Authentication
     - [x] Add a modal for quick login to pages  
