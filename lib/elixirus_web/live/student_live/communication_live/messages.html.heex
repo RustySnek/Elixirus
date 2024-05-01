@@ -158,6 +158,18 @@
         class={"w-10 #{@visibility |> Kernel.==("unread") && '!text-fuchsia-400'}"}
       />
     </button>
+    <button phx-value-visibility="sent" phx-click="toggle_visibility">
+      <div class="flex flex-row">
+        <Heroicons.envelope
+          mini
+          class={"w-10 #{@visibility |> Kernel.==("sent") && '!text-fuchsia-400'}"}
+        />
+        <Heroicons.chevron_up
+          mini
+          class={"w-10 #{@visibility |> Kernel.==("sent") && '!text-fuchsia-400'}"}
+        />
+      </div>
+    </button>
   </div>
   <div class="px-10 flex-row gap-y-5 justify-start gap-x-10 flex-grow hidden md:flex items-center rounded-2xl pb-4 text-sm">
     <button phx-click={
@@ -169,7 +181,7 @@
           <Heroicons.envelope class="w-10" />
           <Heroicons.arrow_up class="w-10" />
         </div>
-        <span>Send</span>
+        <span>Send Message</span>
       </div>
     </button>
     <button phx-value-visibility="all" phx-click="toggle_visibility">
@@ -190,6 +202,15 @@
         <span>Unread</span>
       </div>
     </button>
+    <button phx-value-visibility="sent" phx-click="toggle_visibility">
+      <div class="flex flex-col items-center">
+        <div class="flex flex-row">
+          <Heroicons.envelope class={"w-10 #{@visibility |> Kernel.==("sent") && '!text-fuchsia-400'}"} />
+          <Heroicons.chevron_up class={"w-10 #{@visibility |> Kernel.==("sent") && '!text-fuchsia-400'}"} />
+        </div>
+        <span>Sent</span>
+      </div>
+    </button>
   </div>
 
   <div
@@ -206,7 +227,7 @@
             <Heroicons.envelope class="w-10" />
             <Heroicons.arrow_up class="w-10" />
           </div>
-          <span>Send</span>
+          <span>Send Message</span>
         </div>
       </button>
     </div>
