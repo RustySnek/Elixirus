@@ -107,24 +107,37 @@
 </div>
 <!-- SEND MSGS -->
 <.live_component module={Modal} id="message-modal">
-  <div phx-click-away="wipe_content" class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50">
-    <div class={"bg-[#1E1E1E] #{@author == "" && "!bg-transparent"} rounded-2xl"}>
+  <div
+    phx-click-away={Modal.hide_modal("message-modal") |> JS.push("wipe_content")}
+    class="m-5 min-h-[300px] z-40 w-full relative"
+  >
+    <button
+      phx-click={Modal.hide_modal("message-modal") |> JS.push("wipe_content")}
+      l
+      class="absolute right-3 top-1"
+    >
+      <Heroicons.arrow_uturn_left class="w-10" />
+    </button>
+    <div
+      :if={@content == ""}
+      class="animate-pulse bg-fuchsia-800/25 rounded-2xl min-w-[300px] sm:min-w-[440px] min-h-[300px] h-full"
+    >
+    </div>
+    <div
+      :if={@content != ""}
+      class={"flex flex-col bg-purple-950/95 #{@author == "" && "!bg-transparent"} items-center rounded-2xl pb-2 pt-14 px-2"}
+    >
       <div class="flex px-5 flex-col gap-x-4">
         <p class="text-gray-400 text-center"><%= @author %></p>
         <p class="text-center text-lg"><%= @title %></p>
 
         <p class="text-gray-400 text-end"><%= @date %></p>
       </div>
-      <div
-        class="px-4 pb-4 overflow-y-auto max-h-[40vh] announcement_link"
-        phx-hook="new_page_link"
-        id="content-holder"
-      >
+      <div class="px-4 pb-4 announcement_link w-full" phx-hook="new_page_link" id="content-holder">
         <%= @content |> as_html!() |> HtmlSanitizeEx.html5() |> Phoenix.HTML.raw() %>
       </div>
     </div>
   </div>
-  <.spinner :if={@author == ""} />
 </.live_component>
 <div :if={:messages in @loadings} class="flex flex-col gap-y-5 mt-20 mx-10">
   <div
@@ -232,7 +245,7 @@
       </button>
     </div>
     <div
-      :for={{message, idx} <- @shown_messages |> Enum.with_index()}
+      :for={message <- @shown_messages}
       class={"hover:opacity-90 rotate-0 w-full  bg-fuchsia-800/25 #{message |> Map.get(~c"unread") == true && '!bg-red-700/25'} rounded"}
     >
       <button
