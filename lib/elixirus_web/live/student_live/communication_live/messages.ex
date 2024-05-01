@@ -3,12 +3,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   import Elixirus.PythonWrapper
   alias ElixirusWeb.LoginModal
   import ElixirusWeb.Helpers
-  import Heroicons
+  alias Heroicons
   alias ElixirusWeb.Modal
   import ElixirusWeb.Components.Loadings
   use ElixirusWeb.LoginHandler
   use ElixirusWeb.SetSemesterLive
   import Earmark, only: [as_html!: 1]
+  alias HtmlSanitizeEx
 
   def fetch_messages(token, page) do
     python(:helpers, :fetch_messages, [token, page])
@@ -124,6 +125,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     socket =
       socket
       |> assign(:shown_messages, messages)
+      |> assign(:visibility, visibility)
 
     {:noreply, socket}
   end
@@ -168,6 +170,25 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     {:noreply, socket}
   end
 
+  def handle_async(:load_recipient_groups, {:ok, groups}, socket) do
+    socket =
+      case groups do
+        {:error, msg} ->
+          socket |> put_flash(:error, msg) |> assign(:recipient_groups, [])
+
+        {:token_error, msg} ->
+          socket
+          |> assign(:login_required, true)
+          |> assign(:recipient_groups, [])
+          |> put_flash(:error, msg)
+
+        {:ok, groups} ->
+          socket |> assign(:recipient_groups, groups |> Enum.map(&to_string(&1)))
+      end
+
+    {:noreply, socket}
+  end
+
   def handle_async(:load_messages, {:ok, messages}, socket) do
     socket =
       case messages do
@@ -179,7 +200,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           cache_and_ttl_data(socket.assigns.user_id, "messages", messages, 15)
 
           socket
-          |> assign(:loaded, true)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :messages))
           |> assign(:messages, messages)
           |> assign(:shown_messages, messages)
           |> assign(:seen_messages, seen)
@@ -204,21 +225,6 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     data = handle_cache_data(user_id, "messages")
 
     socket =
-      case python(:helpers, :get_recipient_groups, [api_token]) do
-        {:error, msg} ->
-          socket |> put_flash(:error, msg) |> assign(:recipient_groups, [])
-
-        {:token_error, msg} ->
-          socket
-          |> assign(:login_required, true)
-          |> assign(:recipient_groups, [])
-          |> put_flash(:error, msg)
-
-        {:ok, groups} ->
-          socket |> assign(:recipient_groups, groups |> Enum.map(&to_string(&1)))
-      end
-
-    socket =
       socket
       |> assign(:token, api_token)
       |> assign(:loadings, [])
@@ -226,13 +232,14 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:user_id, user_id)
       |> assign(:login_required, false)
       |> assign(:show_message_modal, false)
-      |> assign(:loaded, false)
       |> assign(:messages, [])
       |> assign(:shown_messages, [])
       |> assign(:seen_messages, [])
+      |> assign(:visibility, "all")
       |> assign(:selected_recipients, MapSet.new())
       |> assign(:selected_group, "")
       |> assign(:group_recipients, %{})
+      |> assign(:recipient_groups, [])
       |> assign(:unread_messages, [])
       |> assign(:content, "")
       |> assign(:title, "")
@@ -242,11 +249,16 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:author, "")
       |> assign(:content, "")
       |> assign(:page_title, "Messages")
+      |> start_async(:load_recipient_groups, fn ->
+        python(:helpers, :get_recipient_groups, [api_token])
+      end)
 
     socket =
       case data do
         :load ->
-          socket |> start_async(:load_messages, fn -> fetch_messages(api_token, 0) end)
+          socket
+          |> assign(:loadings, [:messages | socket.assigns.loadings])
+          |> start_async(:load_messages, fn -> fetch_messages(api_token, 0) end)
 
         data ->
           {unread, seen} =
@@ -257,7 +269,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:shown_messages, data)
           |> assign(:unread_messages, unread)
           |> assign(:seen_messages, seen)
-          |> assign(:loaded, true)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :messages))
       end
 
     {:ok, socket}
