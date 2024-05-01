@@ -36,10 +36,23 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
              socket.assigns.compose_content,
              socket.assigns.selected_recipients |> Enum.map(fn {_, id} -> id end)
            ]) do
-        {:ok, msg} -> put_flash(socket, :notice, "Sent!\n#{msg}")
-        {:send_error, msg} -> put_flash(socket, :info, "Error!\n#{msg}")
-        {:token_error, msg} -> socket |> assign(:login_required, true) |> put_flash(:error, msg)
-        {:error, msg} -> put_flash(socket, :error, msg)
+        {:ok, msg} ->
+          put_flash(socket, :info, "Sent!\n#{msg}")
+          |> assign(:compose_title, "")
+          |> assign(:compose_content, "")
+          |> assign(:selected_recipients, MapSet.new())
+          |> start_async(:load_sent_messages, fn ->
+            python(:helpers, :fetch_sent_messages, [socket.assigns.token, 0])
+          end)
+
+        {:send_error, msg} ->
+          put_flash(socket, :error, "Error!\n#{msg}")
+
+        {:token_error, msg} ->
+          socket |> assign(:login_required, true) |> put_flash(:error, msg)
+
+        {:error, msg} ->
+          put_flash(socket, :error, msg)
       end
 
     {:noreply, socket}
