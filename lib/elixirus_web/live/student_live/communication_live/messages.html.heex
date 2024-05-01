@@ -2,8 +2,106 @@
   module={LoginModal}
   id="login_modal"
   login_required={@login_required}
-  return_url="/student/messages"
+  return_url="/student/communication/messages"
 />
+<!-- SEND MSGS -->
+<div class="!hidden mx-4 md:mx-10" id="send-message-view">
+  <div class="flex flex-col gap-y-4">
+    <div class="flex flex-row">
+      <button
+        class="w-28 h-10 rounded-2xl bg-purple-900 hover:bg-fuchsia-700 transition"
+        phx-click={
+          JS.toggle_class("!hidden", to: "#send-message-view")
+          |> JS.toggle_class("!hidden", to: "#message-view")
+        }
+      >
+        Back
+      </button>
+    </div>
+    <form
+      class="flex flex-col gap-x-8 gap-y-4 xl:flex-row xl:justify-center"
+      id="pick-recipients-form"
+      phx-hook="recipients_form"
+    >
+      <div class="flex-col flex md:grid md:grid-cols-2 gap-2">
+        <div :for={group <- @recipient_groups} class="flex flex-row items-center">
+          <label class="border items-center border-fuchsia-700 rounded-full py-1 px-2 overflow-x-hidden flex flex-row gap-x-1">
+            <input
+              class="md:w-5 md:h-5 accent-fuchsia-600 text-fuchsia-600 bg-[#1E1E1E] border-none"
+              type="radio"
+              phx-change="select_recipient_group"
+              name="recipient_group"
+              checked={@selected_group |> Kernel.==(group)}
+              value={group}
+            />
+            <span><%= group %></span>
+          </label>
+        </div>
+      </div>
+      <input
+        :if={@selected_group != ""}
+        type="text"
+        autocomplete="off"
+        id="recipient-name-input"
+        list="recipient_options"
+        placeholder="select name"
+        name="name"
+        phx-change="pick_recipient"
+        phx-debounce={100}
+        class="bg-[#121212] h-12 lg:w-1/3"
+      />
+      <datalist id="recipient_options">
+        <option :for={{name, _recipient_id} <- @group_recipients}><%= name %></option>
+      </datalist>
+      <div :if={@selected_recipients != MapSet.new()} class=" border border-fuchsia-600 p-4">
+        <ul class="sm:grid flex flex-col md:grid-cols-3 xl:grid-cols-2 sm:grid-cols-2 gap-y-1 gap-x-10 overflow-y-auto">
+          <li :for={{recipient, id} <- @selected_recipients} class="h-fit">
+            <span
+              class="cursor-pointer hover:text-red-600 text-lg"
+              phx-value-recipient={recipient}
+              phx-value-recipient_id={id}
+              phx-click="remove_recipient"
+              class="line-clamp-1 overflow-x-auto"
+            >
+              <%= recipient %>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </form>
+    <form
+      :if={@selected_recipients != MapSet.new()}
+      phx-change="write_message"
+      class="flex flex-col gap-y-4 items-center xl:mt-10"
+    >
+      <input
+        onkeydown="return event.key != 'Enter'"
+        placeholder="title"
+        type="text"
+        value={@compose_title}
+        name="title"
+        class="bg-[#121212] text-xl md:text-2xl xl:max-w-3xl 2xl:max-w-5xl lg:max-w-xl w-full"
+      />
+      <textarea
+        placeholder="content"
+        id="content-area"
+        phx-hook="handle_textarea"
+        name="content"
+        type="text"
+        class="bg-[#121212] text-lg md:text-xl lg:h-96 h-40 xl:max-w-3xl 2xl:max-w-5xl lg:max-w-xl w-full "
+      ><%= @compose_content%></textarea>
+      <button
+        id="send-message-button"
+        phx-hook="form_confirmation"
+        disabled={@compose_title == "" || @compose_content == ""}
+        class="w-28 h-10 rounded-2xl bg-purple-900 hover:bg-fuchsia-700 transition"
+      >
+        Send
+      </button>
+    </form>
+  </div>
+</div>
+<!-- SEND MSGS -->
 <.live_component module={Modal} id="message-modal">
   <div phx-click-away="wipe_content" class="w-full m-5 md:w-2/3 lg:w-1/2 absolute z-50">
     <div class={"bg-[#1E1E1E] #{@author == "" && "!bg-transparent"} rounded-2xl"}>
@@ -32,6 +130,7 @@
 </div>
 <div
   :if={@shown_messages != []}
+  id="message-view"
   class="flex flex-col md:flex-row gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 "
 >
   <div class="justify-evenly flex flex-row w-full self-center order-last z-40 fixed bottom-2 mx-auto md:hidden">
@@ -45,7 +144,13 @@
       <.eye_slash class="w-10 text-fuchsia-400" />
     </button>
   </div>
-  <div class="flex flex-col gap-y-5 flex-grow hidden md:flex items-center w-96 bg-[#121212] rounded-2xl py-10 font-bold text-xl">
+  <div class="flex-col gap-y-5 flex-grow hidden md:flex items-center w-96 bg-[#121212] rounded-2xl py-10 font-bold text-xl">
+    <button phx-click={
+      JS.toggle_class("!hidden", to: "#send-message-view")
+      |> JS.toggle_class("!hidden", to: "#message-view")
+    }>
+      Send message
+    </button>
     <button phx-value-visibility="all" phx-click="toggle_visibility">All</button>
     <button phx-value-visibility="seen" phx-click="toggle_visibility">Seen</button>
     <button phx-value-visibility="unread" phx-click="toggle_visibility">Unread</button>
@@ -58,7 +163,7 @@
       :for={{message, idx} <- @shown_messages |> Enum.with_index()}
       phx-mounted={
         JS.transition({"blur-md", "blur-sm", "blur-none"},
-          time: 100 + 20 * (idx + 1)
+          time: (100 + 20 * (idx + 1)) |> max(500)
         )
         |> JS.transition({"none", "translate-x-1/2", "translate-x-none"}, time: 500)
         |> JS.add_class("hover:rotate-1 hover:!duration-100")
@@ -67,14 +172,14 @@
       id={"container-#{message |> stringify_value(~c"href")}"}
       phx-remove={
         JS.transition({"blur-md translate-x-none", "blur-sm", "translate-x-[120%] blur-none"},
-          time: 50 + 7 * (idx + 1)
+          time: (50 + 7 * (idx + 1)) |> max(150)
         )
       }
-      style={"transition-duration: #{400 + 20 * idx}ms;"}
+      style={"transition-duration: #{400 + 20 * idx |> max(600)}ms;"}
       class={"hover:opacity-90 rotate-0 w-full  bg-fuchsia-800/25 #{message |> Map.get(~c"unread") == true && '!bg-red-700/25'} rounded"}
     >
       <button
-        class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24 xl:h-16 "
+        class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24 xl:h-16"
         phx-click={
           JS.push("view_message")
           |> ElixirusWeb.Modal.show_modal_js("message-modal")

@@ -18,6 +18,70 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     python(:helpers, :fetch_message_content, [token, id])
   end
 
+  def handle_event("write_message", %{"content" => content, "title" => title}, socket) do
+    socket =
+      socket
+      |> assign(:compose_content, content)
+      |> assign(:compose_title, title)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("send_message", _params, socket) do
+    socket =
+      case python(:helpers, :send_message, [
+             socket.assigns.token,
+             socket.assigns.compose_title,
+             socket.assigns.compose_content,
+             socket.assigns.selected_recipients |> Enum.map(fn {_, id} -> id end)
+           ]) do
+        {:ok, msg} -> put_flash(socket, :notice, "Sent!\n#{msg}")
+        {:send_error, msg} -> put_flash(socket, :info, "Error!\n#{msg}")
+        {:token_error, msg} -> socket |> assign(:login_required, true) |> put_flash(:error, msg)
+        {:error, msg} -> put_flash(socket, :error, msg)
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("remove_recipient", %{"recipient" => recipient, "recipient_id" => id}, socket) do
+    {:noreply,
+     assign(
+       socket,
+       :selected_recipients,
+       MapSet.delete(socket.assigns.selected_recipients, {recipient, id})
+     )}
+  end
+
+  def handle_event("pick_recipient", %{"name" => name}, socket) do
+    socket =
+      case socket.assigns.group_recipients[name] do
+        nil ->
+          socket
+
+        id ->
+          socket
+          |> assign(
+            :selected_recipients,
+            socket.assigns.selected_recipients |> MapSet.put({name, id})
+          )
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("select_recipient_group", %{"recipient_group" => group}, socket) do
+    socket =
+      socket
+      |> assign(:group_recipients, %{})
+      |> assign(:selected_group, group)
+      |> create_fetcher(:load, :group_recipients, fn ->
+        python(:helpers, :get_group_recipients, [socket.assigns.token, group])
+      end)
+
+    {:noreply, socket}
+  end
+
   def handle_event("wipe_content", _params, socket) do
     socket =
       socket
@@ -60,6 +124,30 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     socket =
       socket
       |> assign(:shown_messages, messages)
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_group_recipients, {:ok, recipients}, socket) do
+    socket =
+      case recipients do
+        {:ok, recipients} ->
+          socket
+          |> assign(
+            :group_recipients,
+            recipients
+            |> Enum.reduce(%{}, fn {key, val}, acc ->
+              Map.put(acc, key |> to_string(), val |> to_string())
+            end)
+          )
+          |> assign(:loadings, socket.assigns.loadings |> List.delete(:recipients))
+
+        {:token_error, msg} ->
+          socket |> assign(:login_required, true) |> put_flash(:error, msg)
+
+        {:error, msg} ->
+          put_flash(socket, :error, msg)
+      end
 
     {:noreply, socket}
   end
@@ -116,8 +204,24 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     data = handle_cache_data(user_id, "messages")
 
     socket =
+      case python(:helpers, :get_recipient_groups, [api_token]) do
+        {:error, msg} ->
+          socket |> put_flash(:error, msg) |> assign(:recipient_groups, [])
+
+        {:token_error, msg} ->
+          socket
+          |> assign(:login_required, true)
+          |> assign(:recipient_groups, [])
+          |> put_flash(:error, msg)
+
+        {:ok, groups} ->
+          socket |> assign(:recipient_groups, groups |> Enum.map(&to_string(&1)))
+      end
+
+    socket =
       socket
       |> assign(:token, api_token)
+      |> assign(:loadings, [])
       |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:login_required, false)
@@ -126,9 +230,14 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:messages, [])
       |> assign(:shown_messages, [])
       |> assign(:seen_messages, [])
+      |> assign(:selected_recipients, MapSet.new())
+      |> assign(:selected_group, "")
+      |> assign(:group_recipients, %{})
       |> assign(:unread_messages, [])
       |> assign(:content, "")
       |> assign(:title, "")
+      |> assign(:compose_title, "")
+      |> assign(:compose_content, "")
       |> assign(:date, "")
       |> assign(:author, "")
       |> assign(:content, "")
