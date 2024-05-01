@@ -2,11 +2,12 @@ defmodule ElixirusWeb.Modal do
   use ElixirusWeb, :live_component
 
   attr :id, :string, required: true
+  attr :hidden, :boolean, default: true
   slot :inner_block, required: true
 
   def render(assigns) do
     ~H"""
-    <div class="absolute z-40 " id={@id} hidden>
+    <div class="absolute z-40 " id={@id} hidden={@hidden}>
       <div
         id={"#{@id}-bg"}
         class=" fixed bg-blue-500/10  inset-0 transition-opacity"
