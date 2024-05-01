@@ -112,6 +112,7 @@ def send_message(token: Token, title, content, recipients):
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
 
+
 def fetch_sent_messages(token, page):
     token = create_token(token)
     try:
@@ -212,7 +213,7 @@ def fetch_homework(token, start, end):
 def fetch_homework_details(token, id):
     token = create_token(token)
     try:
-        details = (homework_detail(token, id.decode("utf-8")),)
+        details = homework_detail(token, id.decode("utf-8"))
     except TokenError as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
