@@ -15,7 +15,9 @@
           |> JS.toggle_class("!hidden", to: "#message-view")
         }
       >
-        Back
+        <div class="flex flex-row justify-center gap-x-2">
+          <Heroicons.arrow_left class="w-5" /><span>Back</span>
+        </div>
       </button>
     </div>
     <form
@@ -96,7 +98,9 @@
         disabled={@compose_title == "" || @compose_content == ""}
         class="w-28 h-10 rounded-2xl bg-purple-900 hover:bg-fuchsia-700 transition"
       >
-        Send
+        <div class="flex flex-row justify-center gap-x-2">
+          <Heroicons.arrow_up class="w-5" /><span>Send</span>
+        </div>
       </button>
     </form>
   </div>
@@ -116,70 +120,102 @@
         phx-hook="new_page_link"
         id="content-holder"
       >
-        <%= @content
-        |> as_html!()
-        |> String.replace("pre", "p")
-        |> Phoenix.HTML.raw() %>
+        <%= @content |> as_html!() |> HtmlSanitizeEx.html5() |> Phoenix.HTML.raw() %>
       </div>
     </div>
   </div>
   <.spinner :if={@author == ""} />
 </.live_component>
-<div :if={@loaded == false} class=" absolute flex items-center justify-center inset-0 -z-40">
+<div :if={:messages in @loadings} class="flex flex-col gap-y-5 mt-20 mx-10">
+  <div
+    :for={_ <- 0..15}
+    class="bg-fuchsia-800/25 px-4 py-2 rounded gap-x-2 flex animate-pulse flex-col xl:flex-row w-full text-lg justify-between h-24"
+  >
+  </div>
   <.spinner />
 </div>
 <div
-  :if={@shown_messages != []}
+  :if={@messages != []}
   id="message-view"
-  class="flex flex-col md:flex-row gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 "
+  class="flex flex-col gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 "
 >
   <div class="justify-evenly flex flex-row w-full self-center order-last z-40 fixed bottom-2 mx-auto md:hidden">
     <button phx-value-visibility="all" phx-click="toggle_visibility">
-      <.inbox class="w-10 text-fuchsia-400" />
+      <Heroicons.inbox
+        mini
+        class={"w-10 #{@visibility |> Kernel.==("all") && '!text-fuchsia-400'}"}
+      />
     </button>
     <button phx-value-visibility="seen" phx-click="toggle_visibility">
-      <.eye class="w-10 text-fuchsia-400" />
+      <Heroicons.eye
+        mini
+        class={"w-10 #{@visibility |> Kernel.==("seen") && '!text-fuchsia-400'}"}
+      />
     </button>
     <button phx-value-visibility="unread" phx-click="toggle_visibility">
-      <.eye_slash class="w-10 text-fuchsia-400" />
+      <Heroicons.eye_slash
+        mini
+        class={"w-10 #{@visibility |> Kernel.==("unread") && '!text-fuchsia-400'}"}
+      />
     </button>
   </div>
-  <div class="flex-col gap-y-5 flex-grow hidden md:flex items-center w-96 bg-[#121212] rounded-2xl py-10 font-bold text-xl">
+  <div class="px-10 flex-row gap-y-5 justify-start gap-x-10 flex-grow hidden md:flex items-center rounded-2xl pb-4 text-sm">
     <button phx-click={
       JS.toggle_class("!hidden", to: "#send-message-view")
       |> JS.toggle_class("!hidden", to: "#message-view")
     }>
-      Send message
+      <div class="flex flex-col items-center">
+        <div class="flex flex-row">
+          <Heroicons.envelope class="w-10" />
+          <Heroicons.arrow_up class="w-10" />
+        </div>
+        <span>Send</span>
+      </div>
     </button>
-    <button phx-value-visibility="all" phx-click="toggle_visibility">All</button>
-    <button phx-value-visibility="seen" phx-click="toggle_visibility">Seen</button>
-    <button phx-value-visibility="unread" phx-click="toggle_visibility">Unread</button>
+    <button phx-value-visibility="all" phx-click="toggle_visibility">
+      <div class="flex flex-col items-center">
+        <Heroicons.inbox class={"w-10 #{@visibility |> Kernel.==("all") && '!text-fuchsia-400'}"} />
+        <span>Inbox</span>
+      </div>
+    </button>
+    <button phx-value-visibility="seen" phx-click="toggle_visibility">
+      <div class="flex flex-col items-center">
+        <Heroicons.envelope_open class={"w-10 #{@visibility |> Kernel.==("seen") && '!text-fuchsia-400'}"} />
+        <span>Seen</span>
+      </div>
+    </button>
+    <button phx-value-visibility="unread" phx-click="toggle_visibility">
+      <div class="flex flex-col items-center">
+        <Heroicons.envelope class={"w-10 #{@visibility |> Kernel.==("unread") && '!text-fuchsia-400'}"} />
+        <span>Unread</span>
+      </div>
+    </button>
   </div>
+
   <div
-    :if={@shown_messages != []}
-    class="flex flex-col w-full translate-x-none opacity-100 items-center gap-y-4 overflow-x-hidden md:overflow-y-auto"
+    :if={@messages != []}
+    class="flex flex-col w-full translate-x-none opacity-100 items-center gap-y-4 overflow-x-hidden md:overflow-y-auto md:pb-0 pb-20"
   >
+    <div class="flex flex-row justify-start md:hidden w-full">
+      <button phx-click={
+        JS.toggle_class("!hidden", to: "#send-message-view")
+        |> JS.toggle_class("!hidden", to: "#message-view")
+      }>
+        <div class="flex flex-col items-center">
+          <div class="flex flex-row">
+            <Heroicons.envelope class="w-10" />
+            <Heroicons.arrow_up class="w-10" />
+          </div>
+          <span>Send</span>
+        </div>
+      </button>
+    </div>
     <div
       :for={{message, idx} <- @shown_messages |> Enum.with_index()}
-      phx-mounted={
-        JS.transition({"blur-md", "blur-sm", "blur-none"},
-          time: (100 + 20 * (idx + 1)) |> max(500)
-        )
-        |> JS.transition({"none", "translate-x-1/2", "translate-x-none"}, time: 500)
-        |> JS.add_class("hover:rotate-1 hover:!duration-100")
-      }
-      phx-hook="slide_right"
-      id={"container-#{message |> stringify_value(~c"href")}"}
-      phx-remove={
-        JS.transition({"blur-md translate-x-none", "blur-sm", "translate-x-[120%] blur-none"},
-          time: (50 + 7 * (idx + 1)) |> max(150)
-        )
-      }
-      style={"transition-duration: #{400 + 20 * idx |> max(600)}ms;"}
       class={"hover:opacity-90 rotate-0 w-full  bg-fuchsia-800/25 #{message |> Map.get(~c"unread") == true && '!bg-red-700/25'} rounded"}
     >
       <button
-        class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24 xl:h-16"
+        class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24"
         phx-click={
           JS.push("view_message")
           |> ElixirusWeb.Modal.show_modal_js("message-modal")
