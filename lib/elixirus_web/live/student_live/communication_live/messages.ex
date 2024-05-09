@@ -11,6 +11,34 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   import Earmark, only: [as_html!: 1]
   alias HtmlSanitizeEx
 
+  def find_group(group_name, author, token) do
+    {:ok, group} = python(:helpers, :get_group_recipients, [token, group_name])
+    {group[author |> String.to_charlist()], group_name}
+  end
+
+  def find_group_and_recipient(socket, author) do
+    author = Regex.replace(~r/\(.*?\)/, author, "", global: true) |> String.trim()
+
+    {_, {name, group}} =
+      Task.async_stream(socket.assigns.recipient_groups, fn group ->
+        find_group(group, author, socket.assigns.token)
+      end)
+      |> Enum.filter(fn {:ok, {id, _group}} ->
+        id != nil
+      end)
+      |> Enum.at(0)
+
+    case name do
+      nil ->
+        put_flash(socket, :error, "Error while finding recipient's id")
+
+      name ->
+        socket
+        |> assign(:selected_recipients, MapSet.new() |> MapSet.put({author, to_string(name)}))
+        |> assign(:selected_group, group)
+    end
+  end
+
   def fetch_messages(token, page) do
     python(:helpers, :fetch_messages, [token, page])
   end
@@ -26,6 +54,19 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:compose_title, title)
 
     {:noreply, socket}
+  end
+
+  def handle_event("reply", _params, socket) do
+    socket =
+      socket
+      |> assign(
+        :compose_content,
+        "\n\n====================================\n#{socket.assigns.content}"
+      )
+      |> assign(:compose_title, "Re: #{socket.assigns.title}")
+      |> find_group_and_recipient(socket.assigns.author)
+
+    handle_event("wipe_content", %{}, socket)
   end
 
   def handle_event("send_message", _params, socket) do

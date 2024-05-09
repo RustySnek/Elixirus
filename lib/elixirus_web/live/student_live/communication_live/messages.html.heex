@@ -99,15 +99,24 @@
     </form>
   </div>
 </div>
-<!-- SEND MSGS -->
 <.live_component module={Modal} id="message-modal">
   <div
     phx-click-away={Modal.hide_modal("message-modal") |> JS.push("wipe_content")}
     class="m-5 min-h-[300px] z-40 w-full relative"
   >
     <button
+      phx-click={
+        Modal.hide_modal("message-modal")
+        |> JS.push("reply")
+        |> JS.toggle_class("!hidden", to: "#send-message-view")
+        |> JS.toggle_class("!hidden", to: "#message-view")
+      }
+      class="absolute left-3 top-1"
+    >
+      <Heroicons.chat_bubble_bottom_center_text class="w-10" />
+    </button>
+    <button
       phx-click={Modal.hide_modal("message-modal") |> JS.push("wipe_content")}
-      l
       class="absolute right-3 top-1"
     >
       <Heroicons.arrow_uturn_left class="w-10" />
