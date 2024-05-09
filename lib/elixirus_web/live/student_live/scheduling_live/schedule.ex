@@ -1,9 +1,9 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   use ElixirusWeb, :live_view
-  use ElixirusWeb.LoginHandler
+
   use ElixirusWeb.SetSemesterLive
   import Elixirus.PythonWrapper
-  alias ElixirusWeb.LoginModal
+
   import ElixirusWeb.Helpers
   alias ElixirusWeb.Modal
   import ElixirusWeb.Components.Loadings
@@ -16,7 +16,9 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
           assign(socket, :schedule, schedule)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)

@@ -1,10 +1,10 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
-  alias ElixirusWeb.LoginModal
+  
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
-  use ElixirusWeb.LoginHandler
+
   use ElixirusWeb.SetSemesterLive
   import Heroicons, only: [chevron_right: 1, chevron_left: 1, information_circle: 1]
 
@@ -183,7 +183,9 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           )
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          socket
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -227,7 +229,9 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          socket
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -329,7 +333,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
 
     socket =
       socket
-      |> assign(:login_required, false)
       |> assign(:user_id, user_id)
       |> assign(:semester, semester)
       |> assign(:token, token)

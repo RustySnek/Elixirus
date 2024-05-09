@@ -1,9 +1,3 @@
-<.live_component
-  module={LoginModal}
-  id="login_modal"
-  login_required={@login_required}
-  return_url="/student/scheduling/timetable"
-/>
 <div :if={@schedule == %{} && @login_required == false} class="flex justify-center items-center">
   <.spinner />
 </div>

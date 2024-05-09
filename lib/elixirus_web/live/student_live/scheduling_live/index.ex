@@ -3,8 +3,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Index do
   # import Elixirus.PythonWrapper
   import ElixirusWeb.Helpers
   use ElixirusWeb.SetSemesterLive
-  use ElixirusWeb.LoginHandler
-  alias ElixirusWeb.LoginModal
+  
+  
 
   def mount(
         _params,

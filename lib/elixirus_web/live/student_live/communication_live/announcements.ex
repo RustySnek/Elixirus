@@ -1,10 +1,10 @@
 defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
   use ElixirusWeb, :live_view
-  use ElixirusWeb.LoginHandler
+
   use ElixirusWeb.SetSemesterLive
   import ElixirusWeb.Helpers
   import Elixirus.PythonWrapper
-  alias ElixirusWeb.LoginModal
+
   alias HtmlSanitizeEx
   import Earmark, only: [as_html!: 1]
 
@@ -19,7 +19,9 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
           |> assign(:announcements, announcements)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)

@@ -3,8 +3,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
   import Elixirus.PythonWrapper
   import ElixirusWeb.Helpers
   use ElixirusWeb.SetSemesterLive
-  use ElixirusWeb.LoginHandler
-  alias ElixirusWeb.LoginModal
+
   import Heroicons, only: [scale: 1, magnifying_glass: 1]
 
   defp sort_grades_by_date(grades) do
@@ -60,7 +59,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :completed_lessons))
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -80,7 +81,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:homework, homework |> Enum.reverse())
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -104,7 +107,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :week_attendance))
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
