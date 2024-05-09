@@ -1,9 +1,8 @@
 defmodule ElixirusWeb.StudentLive.Index do
-  alias ElixirusWeb.LoginModal
   use ElixirusWeb, :live_view
   import Heroicons
   import ElixirusWeb.Helpers
-  use ElixirusWeb.LoginHandler
+
   import Elixirus.PythonWrapper
   import Heroicons, only: [chevron_right: 1, inbox: 1]
 
@@ -213,7 +212,9 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:frequency, frequency)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -233,7 +234,9 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:schedule, schedule)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -281,7 +284,9 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, name))
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)

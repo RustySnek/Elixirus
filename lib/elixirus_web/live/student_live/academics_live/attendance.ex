@@ -1,10 +1,10 @@
 defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   use ElixirusWeb, :live_view
-  use ElixirusWeb.LoginHandler
+
   import ElixirusWeb.Helpers
   import Elixirus.PythonWrapper
   import ElixirusWeb.Components.Loadings
-  alias ElixirusWeb.LoginModal
+
   import Phoenix.UI.Components.Tooltip
   import Phoenix.UI.Components.Typography
 
@@ -27,7 +27,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           |> assign(:frequency, freq)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -48,7 +50,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           socket |> assign(:attendance, attendance)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)

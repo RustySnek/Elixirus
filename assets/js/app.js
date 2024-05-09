@@ -1,23 +1,4 @@
-// If you want to use Phoenix channels, run `mix help phx.gen.channel`
-// to get started and then uncomment the line below.
-// import "./user_socket.js"
-
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
-
-// Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
-// Establish Phoenix Socket and LiveView configuration.
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
@@ -210,16 +191,10 @@ Hooks.store_token = {
     }
     const {v4: uuidv4} = require("uuid");
     const user_id = uuidv4();
-    fetch(`/set_token?token=${this.el.value}&user_id=${user_id}`).then((response) => {
-      this.pushEvent("navigate_students", {return_url: this.el.getAttribute("return_url"),token: this.el.value, user_id: user_id})
-      })
+    fetch(`/set_token?token=${this.el.value}&user_id=${user_id}`).then(_response => window.location.reload())
     }
 }
-Hooks.store_semester = {
-  updated() {
-    fetch(`/set_semester?semester=${this.el.value}`)
-  }
-}
+
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks,params: {_csrf_token: csrfToken}})
 
 // Show progress bar on live navigation and form submits
@@ -229,13 +204,11 @@ window.addEventListener('phx:page-loading-start', _info =>
   topbar.show(200)
 )
 window.addEventListener('phx:page-loading-stop', _info => topbar.hide())
+window.addEventListener('phx:require-login', e => {
+  const modal = document.getElementById('login-modal-renderer')
+  modal.classList.remove("hidden")
+})
 
-// connect if there are any LiveViews on the page
 liveSocket.connect()
-
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 

@@ -3,10 +3,10 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   use ElixirusWeb.SetSemesterLive
   import Elixirus.PythonWrapper
   import ElixirusWeb.Helpers
-  alias ElixirusWeb.LoginModal
+
   import Heroicons
   alias ElixirusWeb.Modal
-  use ElixirusWeb.LoginHandler
+
   import ElixirusWeb.Components.Loadings
 
   def fetch_homework_details(token, id) do
@@ -20,7 +20,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
           assign(socket, :details, details)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
@@ -37,7 +39,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
           assign(socket, :homework, homework |> Enum.reverse())
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)

@@ -3,8 +3,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   import Elixirus.PythonWrapper
   import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
-  alias ElixirusWeb.LoginModal
-  use ElixirusWeb.LoginHandler
 
   @default_params %{
     query: "",
@@ -250,7 +248,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> assign_averages(grades)
 
         {:token_error, message} ->
-          assign(socket, :login_required, true) |> put_flash(:error, message)
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
         {:error, message} ->
           put_flash(socket, :error, message)
