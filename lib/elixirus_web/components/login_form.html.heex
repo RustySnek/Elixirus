@@ -30,9 +30,17 @@
       value=""
       name="password"
     />
-    <div class="flex flex-row items-center gap-x-2">
-      <span class="text-lg">Keep token alive?</span>
-      <input type="checkbox" class="rounded-full h-5 w-5 text-fuchsia-700" name="save_token" />
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="flex flex-row items-center gap-x-2">
+        <span class="text-lg">Keep token alive?</span>
+        <input type="checkbox" class="rounded-full h-5 w-5 text-fuchsia-700" name="save_token" />
+      </div>
+      <select name="ttl" class="bg-[#1e1e1e]">
+        <%= Phoenix.HTML.Form.options_for_select(
+          ["6h": 6, "8h": 8, "10h": 10, "12h": 12],
+          6
+        ) %>
+      </select>
     </div>
     <button class="bg-fuchsia-900 hover:brightness-125 transition rounded w-24 h-12 px-4 py-1">
       Login

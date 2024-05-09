@@ -17,14 +17,26 @@ defmodule Elixirus.TokenWorker do
     {:reply, :ok, table}
   end
 
+  def handle_call({:extend_lifetime, token}, _from, table) do
+    case :ets.match(table, {:"$1", token, :"$2", :_}) do
+      [] ->
+        :ok
+
+      [[name, ttl] | _] ->
+        unless(name == nil,
+          do: :ets.insert(table, {name, token, ttl, DateTime.now!("Europe/Warsaw")})
+        )
+    end
+
+    {:reply, :ok, table}
+  end
+
   def handle_call({:extend_lifetime, token, ttl}, _from, table) do
     case :ets.match(table, {:"$1", token, :_, :_}) do
       [] ->
         :ok
 
-      [name | _] ->
-        name = name |> Enum.at(0)
-
+      [[name] | _] ->
         unless(name == nil,
           do: :ets.insert(table, {name, token, ttl, DateTime.now!("Europe/Warsaw")})
         )
