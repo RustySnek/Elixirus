@@ -1,10 +1,18 @@
 defmodule ElixirusWeb.Components.NavHeader do
   use Phoenix.Component
   alias Phoenix.LiveView.JS
+  alias Elixirus.Healthcheck.Healthcheck
+  alias Elixirus.Healthcheck.Services
 
   defp toggle_dropdown(id, js \\ %JS{}) do
     js
     |> JS.toggle(to: id)
+  end
+
+  defp status() do
+    librus = Healthcheck.get_service_status(Services.LibrusConnection)
+    proxy = Healthcheck.get_service_status(Services.ProxyAlive)
+    %{librus: librus, proxy: proxy}
   end
 
   attr :name, :string, default: "My App"
@@ -37,6 +45,15 @@ defmodule ElixirusWeb.Components.NavHeader do
   def header(assigns) do
     ~H"""
     <nav class=" border-gray-200 px-2 xs:px-0 sm:px-4 py-2.5 rounded w-full">
+      <div class="flex flex-row text-xs gap-x-4">
+        Services:
+        <div
+          :for={{service, status} <- status()}
+          class={"#{status == :up && '!text-green-400'} text-red-600"}
+        >
+          <%= service %> <span class="font-semibold"><%= status %></span>
+        </div>
+      </div>
       <div class="container flex flex-wrap items-center justify-between mx-auto">
         <%= render_slot(@logo) %>
         <button
