@@ -1,7 +1,7 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   use ElixirusWeb, :live_view
   import Elixirus.PythonWrapper
-  
+
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
 

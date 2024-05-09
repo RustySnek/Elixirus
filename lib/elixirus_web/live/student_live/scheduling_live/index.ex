@@ -3,8 +3,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Index do
   # import Elixirus.PythonWrapper
   import ElixirusWeb.Helpers
   use ElixirusWeb.SetSemesterLive
-  
-  
 
   def mount(
         _params,
