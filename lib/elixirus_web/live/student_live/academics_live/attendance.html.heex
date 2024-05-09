@@ -1,7 +1,7 @@
-<div :if={@attendance == [] && @login_required == false} class="flex items-center justify-center">
-  <.spinner />
+<div :if={@frequency == [] && :frequency in @loadings} class="flex flex-row gap-10 justify-center">
+  <div :for={_ <- 0..2} class="circle animate-pulse opacity-10"></div>
 </div>
-<div :if={@attendance != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
+<div :if={@frequency != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
   <div :for={{freq, idx} <- @frequency |> Enum.with_index()} class="select-none relative">
     <div class="circle percentage">
       <div
@@ -17,6 +17,16 @@
     <span class="top-2/3 left-1/3 -translate-y-[140%] absolute"><%= freq %>%</span>
   </div>
 </div>
+
+<div
+  :if={@attendance == [] && :attendance in @loadings}
+  class="flex items-center justify-center flex-col gap-y-10 mt-8"
+>
+  <div :for={_ <- 0..6} class="flex flex-row gap-2">
+    <div :for={_ <- 0..6} class="h-14 w-14 animate-pulse bg-[#1e1e1e] rounded-md"></div>
+  </div>
+</div>
+
 <div :if={@attendance != []} id="initer" class="mt-8 mx-10 flex flex-col gap-y-2">
   <div :for={day <- @attendance} class="flex gap-2 flex-col items-center">
     <p class="mr-1"><%= day |> hd |> stringify_value(~c"date") %></p>

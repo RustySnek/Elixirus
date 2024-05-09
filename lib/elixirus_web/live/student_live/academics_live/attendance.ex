@@ -3,7 +3,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
 
   import ElixirusWeb.Helpers
   import Elixirus.PythonWrapper
-  import ElixirusWeb.Components.Loadings
 
   import Phoenix.UI.Components.Tooltip
   import Phoenix.UI.Components.Typography
@@ -25,6 +24,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
 
           socket
           |> assign(:frequency, freq)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
 
         {:token_error, message} ->
           assign(socket, :login_required, true)
@@ -47,7 +47,10 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
             |> Enum.chunk_by(&Map.get(&1, ~c"date"))
 
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance, 10)
-          socket |> assign(:attendance, attendance)
+
+          socket
+          |> assign(:attendance, attendance)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :attendance))
 
         {:token_error, message} ->
           assign(socket, :login_required, true)
