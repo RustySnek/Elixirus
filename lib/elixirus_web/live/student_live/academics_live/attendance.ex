@@ -41,16 +41,18 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   def handle_async(:load_attendance, {:ok, {attendance, semester}}, socket) do
     socket =
       case attendance do
-        {:ok, attendance} ->
+        {:ok, attendance, stats} ->
           attendance =
             attendance
             |> Enum.chunk_by(&Map.get(&1, ~c"date"))
 
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance, 10)
+          cache_and_ttl_data(socket.assigns.user_id, "attendance-stats", stats, 10)
 
           socket
           |> assign(:attendance, attendance)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :attendance))
+          |> assign(:stats, stats)
 
         {:token_error, message} ->
           assign(socket, :login_required, true)
@@ -72,7 +74,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:semester, semester)
       |> assign(:attendance, [])
       |> create_fetcher(attendance, :attendance, fn ->
-        {python(:helpers, :fetch_all_attendance, [socket.assigns.token, semester]), semester}
+        {python(:helpers, :fetch_all_attendance, [socket.assigns.token, semester, true]),
+         semester}
       end)
 
     {:noreply, socket}
@@ -87,9 +90,16 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
 
     frequency = handle_cache_data(user_id, "frequency")
 
+    stats =
+      case handle_cache_data(user_id, "attendance-stats") do
+        :load -> []
+        stats -> stats
+      end
+
     socket =
       socket
       |> assign(:attendance, [])
+      |> assign(:stats, stats)
       |> assign(:frequency, [])
       |> assign(:loadings, [])
       |> assign(:token, token)
