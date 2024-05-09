@@ -20,7 +20,7 @@ from handle_classes import *
 from datetime import datetime
 from librus_apix.exceptions import TokenError, ParseError
 import os
-
+from collections import Counter
 
 def extract_grades(grades):
     return [grade for subject in list(grades.values()) for grade in subject]
@@ -220,30 +220,40 @@ def fetch_homework_details(token, id):
         return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode("utf-8")), details
 
-
-def fetch_attendance(token, semester, opt="all"):
+def get_attendance_stats(attendance):
+    first, second = attendance
+    base_counter = Counter({"nb": 0, "sp": 0, "u": 0})
+    first = base_counter + Counter(a.symbol for a in first)
+    second = base_counter + Counter(a.symbol for a in second)
+    total = first + second
+    return [dict(first), dict(second), dict(total)]
+    
+def fetch_attendance(token, semester, opt="all", get_stats = False):
     try:
         attendance = get_attendance(token, opt)
     except TokenError as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
-    return Atom("ok".encode("utf-8")), handle_attendance(attendance[int(semester)])
+    if get_stats is True:
+        return Atom("ok".encode("utf-8")), handle_attendance(attendance[int(semester)]), get_attendance_stats(attendance)
+    else:
+        return Atom("ok".encode("utf-8")), handle_attendance(attendance[int(semester)])
 
 
-def fetch_all_attendance(token, semester):
+def fetch_all_attendance(token, semester, get_stats = False):
     token = create_token(token)
-    return fetch_attendance(token, semester, "all")
+    return fetch_attendance(token, semester, "all", get_stats)
 
 
-def fetch_week_attendance(token, semester):
+def fetch_week_attendance(token, semester, get_stats = False):
     token = create_token(token)
-    return fetch_attendance(token, semester, "week")
+    return fetch_attendance(token, semester, "week", get_stats)
 
 
-def fetch_new_attendance(token, semester):
+def fetch_new_attendance(token, semester, get_stats = False):
     token = create_token(token)
-    return fetch_attendance(token, semester, "last_login")
+    return fetch_attendance(token, semester, "last_login", get_stats)
 
 
 def fetch_attendance_frequency(token):
