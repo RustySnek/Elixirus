@@ -38,9 +38,9 @@ Hooks.retrieve_local_storage = {
     if (name === "semester" && item === undefined || name === "semester" && item === null) {
     let currentMonth = new Date().getMonth() + 1
     let result = (currentMonth >= 2 && currentMonth < 9) ? "1" : "0"
-    this.pushEvent("retrieve_local_storage", {[name]: result})
+    this.pushEventTo(this.el, "retrieve_local_storage", {[name]: result})
     }else {
-    this.pushEvent("retrieve_local_storage", {[name]: item})
+    this.pushEventTo(this.el, "retrieve_local_storage", {[name]: item})
     }
   }
 }
