@@ -11,8 +11,24 @@ defmodule ElixirusWeb.LoginForm do
       |> assign(:token, "")
       |> assign(:username, "")
       |> assign(:error_message, "")
+      |> assign(:keep_alive, false)
+      |> assign(:ttl, "12")
 
     {:ok, socket}
+  end
+
+  def handle_event("retrieve_local_storage", %{"save_token" => keep_alive}, socket) do
+    keep_alive =
+      case keep_alive do
+        "true" -> true
+        _ -> false
+      end
+
+    {:noreply, assign(socket, :keep_alive, keep_alive)}
+  end
+
+  def handle_event("retrieve_local_storage", %{"ttl" => ttl}, socket) do
+    {:noreply, assign(socket, :ttl, ttl)}
   end
 
   def handle_event(
@@ -27,6 +43,11 @@ defmodule ElixirusWeb.LoginForm do
     :python.stop(pid)
 
     socket =
+      socket
+      |> assign(:ttl, token_ttl)
+      |> assign(:keep_alive, keep_alive?)
+
+    socket =
       case get_token do
         {:ok, token} ->
           unless(keep_alive? == false,
@@ -37,7 +58,9 @@ defmodule ElixirusWeb.LoginForm do
               )
           )
 
-          socket |> assign(:token, token |> to_string()) |> assign(:username, username)
+          socket
+          |> assign(:token, token |> to_string())
+          |> assign(:username, username)
 
         {:error, error_message} ->
           socket
