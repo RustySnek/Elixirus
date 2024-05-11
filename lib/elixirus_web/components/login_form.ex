@@ -17,6 +17,10 @@ defmodule ElixirusWeb.LoginForm do
     {:ok, socket}
   end
 
+  def handle_event("save_token", _params, socket) do
+    {:noreply, assign(socket, :keep_alive, !socket.assigns.keep_alive)}
+  end
+
   def handle_event("retrieve_local_storage", %{"save_token" => keep_alive}, socket) do
     keep_alive =
       case keep_alive do
@@ -27,7 +31,8 @@ defmodule ElixirusWeb.LoginForm do
     {:noreply, assign(socket, :keep_alive, keep_alive)}
   end
 
-  def handle_event("retrieve_local_storage", %{"ttl" => ttl}, socket) do
+  def handle_event(task, %{"ttl" => ttl}, socket)
+      when task in ["retrieve_local_storage", "change_ttl"] do
     {:noreply, assign(socket, :ttl, ttl)}
   end
 
@@ -70,4 +75,6 @@ defmodule ElixirusWeb.LoginForm do
 
     {:noreply, socket}
   end
+
+  defp ttl_options(), do: ["2h": 2, "4h": 4, "6h": 6, "8h": 8, "10h": 10, "12h": 12]
 end

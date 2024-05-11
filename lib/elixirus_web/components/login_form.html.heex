@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-y-10 bg-stone-900 p-10 rounded-2xl">
+<div class="flex flex-col gap-y-10 bg-stone-900 p-10 rounded-2xl xs:max-w-xs">
   <div class="flex flex-row gap-x-2 justify-center">
     <h1 class="font-quicksand text-6xl md:text-7xl xl:text-8xl font-extrabold text-fuchsia-700">
       Elixir<span class="text-fuchsia-900">us</span>
@@ -47,36 +47,47 @@
       value=""
       name="password"
     />
-    <div class="flex flex-col sm:flex-row gap-2">
-      <div class="flex flex-row items-center gap-x-2">
-        <span class="text-lg">Keep token alive?</span>
+    <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
+      <div class="flex flex-row items-center justify-evenly">
+        <span class="text-lg mr-2">Keep token alive?</span>
         <input
           type="checkbox"
-          phx-hook="set_local_storage"
-          id="save-token-checkbox"
           class="rounded-full h-5 w-5 text-fuchsia-700"
           name="save_token"
+          phx-change="save_token"
           checked={@keep_alive}
+        />
+        <input
+          hidden
+          phx-hook="set_local_storage"
           value={@keep_alive |> to_string()}
+          name="save_token"
+          id="save-token-checkbox"
         />
       </div>
-      <select
-        phx-hook="set_local_storage"
-        value={@ttl}
-        id="ttl-select"
-        name="ttl"
-        class="bg-[#1e1e1e]"
-      >
-        <%= Phoenix.HTML.Form.options_for_select(
-          ["6h": 6, "8h": 8, "10h": 10, "12h": 12],
-          @ttl
-        ) %>
-      </select>
+      <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
+        <span :if={@keep_alive} class="text-xs">
+          Requests librus every hour to refresh token automatically for <%= @ttl %> hours.
+        </span>
+        <select
+          :if={@keep_alive}
+          phx-hook="set_local_storage"
+          phx-change="change_ttl"
+          value={@ttl}
+          id="ttl-select"
+          name="ttl"
+          class="bg-[#1e1e1e]"
+        >
+          <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
+        </select>
+      </div>
     </div>
     <button class="bg-fuchsia-900 hover:brightness-125 transition rounded w-24 h-12 px-4 py-1">
       Login
     </button>
   </form>
   <input hidden phx-hook="store_token" id="token_input" name={@username} value={@token} />
-  <h2 class="self-center text-lg text-red-600"><%= @error_message %></h2>
+  <h2 class="self-center text-lg text-red-600">
+    <%= @error_message %>
+  </h2>
 </div>

@@ -64,7 +64,7 @@ defmodule Elixirus.TokenWorker do
     |> Task.async_stream(fn token -> refresh_token(table, token) end)
     |> Enum.to_list()
 
-    Process.send_after(self(), :refresh, 15_000 * 60)
+    Process.send_after(self(), :refresh, 60 * 60 * 1000)
     {:noreply, table}
   end
 
