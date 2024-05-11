@@ -14,9 +14,8 @@
     python311Packages.pip
     nodePackages.pyright
 
-nodePackages.vscode-css-languageserver-bin
-    nodePackages.vscode-html-languageserver-bin
-    nodePackages."@tailwindcss/language-server"
+    vscode-langservers-extracted
+    tailwindcss-language-server
     
  ] ++ lib.optionals pkgs.stdenv.isLinux (with pkgs; [inotify-tools]);
 
