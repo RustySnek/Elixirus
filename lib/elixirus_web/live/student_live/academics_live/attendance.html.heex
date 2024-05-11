@@ -1,4 +1,7 @@
-<div :if={@frequency == [] && :frequency in @loadings} class="flex flex-row gap-10 justify-center">
+<div
+  :if={@frequency == [] && :frequency in @loadings}
+  class="flex flex-col lg:flex-row gap-10 justify-center items-center"
+>
   <div :for={_ <- 0..2} class="circle animate-pulse opacity-10"></div>
 </div>
 <div :if={@frequency != []} class="flex flex-col md:flex-row gap-10 justify-center items-center">
@@ -13,7 +16,9 @@
       >
       </div>
     </div>
-    <span class="top-2/3 left-1/3 -translate-y-[140%] absolute"><%= freq %>%</span>
+    <span class="top-2/3 left-1/3 -translate-y-[140%] absolute">
+      <%= freq %>%
+    </span>
   </div>
 </div>
 
@@ -38,11 +43,14 @@
     </div>
   </div>
   <div :for={day <- @attendance} class="flex gap-2 flex-col items-center">
-    <p class="mr-1"><%= day |> hd |> stringify_value(~c"date") %></p>
+    <p class="mr-1">
+      <%= day |> hd |> stringify_value(~c"date") %>
+    </p>
     <div class="flex flex-row gap-2 w-full md:w-max flex-wrap">
       <div
         :for={att <- day}
-        class={"flex h-14 justify-center items-center flex-row border border-#{att |> stringify_value(~c"symbol") |> attendance_color()} rounded-md text-center  h-14 w-14"}
+        class={"flex h-14 justify-center items-center flex-row border border-#{att |>
+        stringify_value(~c"symbol") |> attendance_color()} rounded-md text-center h-14 w-14"}
       >
         <div class=" flex flex-col justify-center h-14 w-14 md:hidden block">
           <p class="text-3xl select-none">
@@ -74,7 +82,9 @@
                 |> stringify_value(~c"date") %>)
               </p>
               <p>Excursion: <%= att |> stringify_value(~c"excursion") %></p>
-              <p><%= att |> stringify_value(~c"type") %></p>
+              <p>
+                <%= att |> stringify_value(~c"type") %>
+              </p>
             </:content>
 
             <div class=" flex flex-col justify-center h-14 w-14">
