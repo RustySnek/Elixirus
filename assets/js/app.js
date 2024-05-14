@@ -7,7 +7,9 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 let Hooks = {}
 Hooks.set_local_storage = {
   updated() {
-    localStorage.setItem(this.el.name, this.el.value)
+    if (this.el.value === "") {
+      localStorage.setItem(this.el.name, this.el.value)
+    }
   }
 }
 
