@@ -33,19 +33,15 @@ defmodule ElixirusWeb.LoginForm do
 
   def handle_event(
         "login",
-        %{"username" => username, "password" => password, "ttl" => token_ttl} = params,
+        %{"username" => username, "password" => password} = _params,
         socket
       ) do
-    keep_alive? = "save_token" |> Kernel.in(params |> Map.keys())
+    keep_alive? = socket.assigns.keep_alive
+    token_ttl = socket.assigns.ttl
     {:ok, pid} = :python.start()
 
     get_token = :python.call(pid, :handle_classes, :handle_token, [username, password])
     :python.stop(pid)
-
-    socket =
-      socket
-      |> assign(:ttl, token_ttl)
-      |> assign(:keep_alive, keep_alive?)
 
     socket =
       case get_token do
