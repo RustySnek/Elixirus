@@ -71,10 +71,12 @@ defmodule ElixirusWeb.StudentLive.Index do
 
     schedule[day]
     |> Enum.reduce(todays_lessons, fn event, acc ->
+      number = event |> stringify_value(~c"number")
+
       number =
-        case event |> stringify_value(~c"number") do
-          "unknown" -> -1
-          number -> number
+        case number |> Integer.parse() do
+          {number, _} -> number
+          _ -> -1
         end
 
       event_map = %{
