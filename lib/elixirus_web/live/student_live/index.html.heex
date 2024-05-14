@@ -94,7 +94,7 @@
             <span class="line-clamp-1">
               <%= event.subject %>
             </span>
-<span class="line-clamp-1 text-end text-sm text-gray-300">
+            <span class="line-clamp-1 text-end text-sm text-gray-300">
               <%= event.timeframe %>
             </span>
           </div>
@@ -263,10 +263,7 @@
         <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
       </div>
 
-      <div
-        :for={absence <- @new_attendance}
-        class=" h-20 bg-purple-900/90 p-2"
-      >
+      <div :for={absence <- @new_attendance} class=" h-20 bg-purple-900/90 p-2">
         <%= absence |> stringify_value(~c"topic") %>
       </div>
     </div>
