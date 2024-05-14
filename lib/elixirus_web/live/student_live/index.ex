@@ -201,32 +201,33 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def handle_async(:load_semester_grades, {:ok, {data, semester}}, socket) do
-    case data do
-      {:ok, [grades, gpas]} ->
-        gpas =
-          gpas
-          |> Enum.sort_by(fn {_, [_, _, gpa]} ->
-            case to_string(gpa) do
-              "-" -> 99.0
-              gpa -> gpa |> String.to_float()
-            end
-          end)
+    socket =
+      case data do
+        {:ok, [grades, gpas]} ->
+          gpas =
+            gpas
+            |> Enum.sort_by(fn {_, [_, _, gpa]} ->
+              case to_string(gpa) do
+                "-" -> 99.0
+                gpa -> gpa |> String.to_float()
+              end
+            end)
 
-        cache_and_ttl_data(socket.assigns.user_id, "semester_grades", gpas, 15)
-        cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
+          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", gpas, 15)
+          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
 
-        socket
-        |> assign(:semester_grades, gpas)
-        |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
+          socket
+          |> assign(:semester_grades, gpas)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
 
-      {:token_error, message} ->
-        assign(socket, :login_required, true)
-        |> put_flash(:error, message)
-        |> push_event("require-login", %{})
+        {:token_error, message} ->
+          assign(socket, :login_required, true)
+          |> put_flash(:error, message)
+          |> push_event("require-login", %{})
 
-      {:error, message} ->
-        put_flash(socket, :error, message)
-    end
+        {:error, message} ->
+          put_flash(socket, :error, message)
+      end
 
     {:noreply, socket}
   end
