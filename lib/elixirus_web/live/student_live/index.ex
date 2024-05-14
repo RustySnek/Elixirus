@@ -6,6 +6,34 @@ defmodule ElixirusWeb.StudentLive.Index do
   import Elixirus.PythonWrapper
   import Heroicons, only: [chevron_right: 1, inbox: 1]
 
+  defp clean_period_name(period) do
+    case period do
+      -1 -> "Today"
+      period -> period
+    end
+  end
+
+  defp averages_color(final_gpa) do
+    case to_string(final_gpa) do
+      "-" ->
+        "bg-gray-900/80"
+
+      gpa ->
+        gpa = String.to_float(gpa)
+
+        cond do
+          Kernel.<(gpa, 3.0) and Kernel.>(gpa, 2.0) ->
+            "bg-amber-700"
+
+          Kernel.<=(gpa, 2.0) ->
+            "bg-red-700"
+
+          true ->
+            "bg-purple-900/90"
+        end
+    end
+  end
+
   defp handle_timetable_events(timetable, schedule, _calendar, day) do
     now = warsaw_now()
 
@@ -19,7 +47,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       |> Enum.at(weekday)
       |> Enum.filter(&(&1 |> Map.get(~c"subject") != []))
       |> Enum.reduce(%{}, fn event, acc ->
-        number = event |> stringify_value(~c"number")
+        number = event |> stringify_value(~c"number") |> String.to_integer()
 
         event_map = %{
           title: event |> stringify_value(~c"subject"),
@@ -43,7 +71,11 @@ defmodule ElixirusWeb.StudentLive.Index do
 
     schedule[day]
     |> Enum.reduce(todays_lessons, fn event, acc ->
-      number = event |> stringify_value(~c"number")
+      number =
+        case event |> stringify_value(~c"number") do
+          "unknown" -> -1
+          number -> number
+        end
 
       event_map = %{
         title: event |> stringify_value(~c"title"),
@@ -65,8 +97,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   def calculate_gpa_from_averages(averages) do
     sum =
       averages
-      |> Map.values()
-      |> Enum.map(fn avgs -> avgs |> List.last() end)
+      |> Enum.map(fn {_, avgs} -> avgs |> List.last() end)
       |> Enum.filter(&(&1 != ~c"-"))
 
     sum
@@ -99,7 +130,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> assign(:student_data, %{})
     |> assign(:events, [])
     |> assign(:unread_messages, [])
-    |> assign(:semester_grades, %{})
+    |> assign(:semester_grades, [])
     |> create_fetcher(averages, :semester_grades, fn ->
       {python(:helpers, :fetch_all_grades, [token, semester]), semester}
     end)
@@ -169,14 +200,33 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
-  def handle_async(:load_semester_grades, {:ok, {{:ok, [grades, averages]}, semester}}, socket) do
-    cache_and_ttl_data(socket.assigns.user_id, "semester_grades", averages, 15)
-    cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
+  def handle_async(:load_semester_grades, {:ok, {data, semester}}, socket) do
+    case data do
+      {:ok, [grades, gpas]} ->
+        gpas =
+          gpas
+          |> Enum.sort_by(fn {_, [_, _, gpa]} ->
+            case to_string(gpa) do
+              "-" -> 99.0
+              gpa -> gpa |> String.to_float()
+            end
+          end)
 
-    socket =
-      socket
-      |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
-      |> assign(:semester_grades, averages)
+        cache_and_ttl_data(socket.assigns.user_id, "semester_grades", gpas, 15)
+        cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
+
+        socket
+        |> assign(:semester_grades, gpas)
+        |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
+
+      {:token_error, message} ->
+        assign(socket, :login_required, true)
+        |> put_flash(:error, message)
+        |> push_event("require-login", %{})
+
+      {:error, message} ->
+        put_flash(socket, :error, message)
+    end
 
     {:noreply, socket}
   end
@@ -261,7 +311,14 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
-  def handle_async(task_name, {:ok, {data, semester}}, socket) do
+  def handle_async(task_name, {:ok, {data, semester}}, socket)
+      when task_name in [
+             :load_new_attendance,
+             :load_student_data,
+             :load_timetable,
+             :load_unread_messages,
+             :load_new_grades
+           ] do
     name =
       task_name
       |> Atom.to_string()

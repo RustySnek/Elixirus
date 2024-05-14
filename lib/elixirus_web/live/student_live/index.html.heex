@@ -7,7 +7,11 @@
           class="percentage-bar"
           phx-hook="frequency"
           id="overall_freq"
-          name={@frequency |> Enum.at(2) |> percentage_to_deg()}
+          name={
+            @frequency
+            |> Enum.at(2)
+            |> percentage_to_deg()
+          }
           style="--progress-value: 360deg;"
         >
         </div>
@@ -42,7 +46,7 @@
       JS.toggle_class("rotate-90", to: "#events-chevron")
       |> JS.toggle_class("hidden", to: "#overview-events")
     }
-    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-3 rounded-xl border-fuchsia-600 border-2"
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-3 border-fuchsia-600 border-2"
   >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Events</span>
@@ -54,12 +58,11 @@
     <div class="space-y-4 mt-4 lg:block hidden lg:h-[370px] overflow-y-auto" id="overview-events">
       <div
         :if={
-          [:timetable, :schedule, :timetable_calendar]
-          |> Enum.any?(&Enum.member?(@loadings, &1))
+          [:timetable, :schedule, :timetable_calendar] |> Enum.any?(&Enum.member?(@loadings, &1))
         }
         class="space-y-6 animate-pulse"
       >
-        <div :for={_ <- 0..5} class="h-40 rounded-xl bg-purple-800/50"></div>
+        <div :for={_ <- 0..5} class="h-40 bg-purple-800/50"></div>
       </div>
       <div
         :if={
@@ -75,16 +78,25 @@
               handle_timetable_events(@timetable, @schedule, @timetable_calendar, @day)
               |> Map.to_list()
           }
-          class="space-y-4 border-purple-800 border p-4"
+          class="space-y-4 border p-4"
         >
-          <span class="text-xl font-bold -ml-2 -mt-2"><%= period %></span>
+          <span class="text-xl font-bold -ml-2 -mt-2">
+            <%= clean_period_name(period) %>
+          </span>
           <div
             :for={event <- events}
-            class=" h-20 rounded-xl border-purple-800 border-2 p-2"
+            class=" h-20 last:bg-purple-800/90 bg-red-800 p-2"
             class="overflow-x-hidden"
           >
-            <span class="line-clamp-1"><%= event.title %></span>
-            <span class="line-clamp-1"><%= event.subject %></span>
+            <span class="line-clamp-1">
+              <%= event.title %>
+            </span>
+            <span class="line-clamp-1">
+              <%= event.subject %>
+            </span>
+<span class="line-clamp-1 text-end text-sm text-gray-300">
+              <%= event.timeframe %>
+            </span>
           </div>
         </div>
       </div>
@@ -96,10 +108,10 @@
       JS.toggle_class("rotate-90", to: "#grades-chevron")
       |> JS.toggle_class("hidden", to: "#avg-grades-events")
     }
-    class="space-y-4 lg:cursor-default cursor-pointer lg:order-4 p-4 rounded-xl border-fuchsia-600 border-2"
+    class="space-y-4 lg:cursor-default cursor-pointer lg:order-4 p-4 border-fuchsia-600 border-2"
   >
     <div class="text-center flex flex-row relative">
-      <span class="mx-auto">Average grades</span>
+      <span class="mx-auto">Averages</span>
       <.chevron_right
         id="grades-chevron"
         class="w-8 inline absolute transition lg:hidden right-0 self-center"
@@ -110,15 +122,17 @@
       id="avg-grades-events"
     >
       <div :if={:semester_grades in @loadings} class="space-y-4 animate-pulse">
-        <div :for={_ <- 0..5} class="h-20 rounded-xl bg-purple-800/50"></div>
+        <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
       </div>
 
       <div
-        :for={{subject, gpas} <- @semester_grades |> Map.to_list()}
-        class=" h-20 rounded-xl border-purple-800 border-2 px-2"
+        :for={{subject, gpas} <- @semester_grades}
+        class={" h-20 #{averages_color(gpas |> Enum.at(-1))} px-2"}
       >
         <div class="grid grid-cols-4 space-x-2">
-          <span class="col-span-3 line-clamp-2"><%= subject |> to_string %></span>
+          <span class="col-span-3 line-clamp-2">
+            <%= subject |> to_string %>
+          </span>
           <div class="flex flex-col text-end">
             <span :for={gpa <- gpas} class="last:font-bold">
               <%= gpa |> to_string %>
@@ -134,7 +148,7 @@
       JS.toggle_class("rotate-90", to: "#message-chevron")
       |> JS.toggle_class("hidden", to: "#unread-messages")
     }
-    class="space-y-4 lg:cursor-default cursor-pointer p-4 col-span-2 lg:order-2 rounded-xl border-fuchsia-600 border-2"
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 col-span-2 lg:order-2 border-fuchsia-600 border-2"
   >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Unread messages</span>
@@ -155,15 +169,20 @@
       <div
         :for={_ <- 0..5}
         :if={:unread_messages in @loadings}
-        class="rounded-xl animate-pulse bg-purple-800/50 h-14"
+        class=" animate-pulse bg-purple-800/50 h-24"
       >
       </div>
 
       <div
         :for={message <- @unread_messages}
-        class=" h-14 rounded-xl border-purple-800 border-2 p-2"
+        class=" sm:h-24  bg-purple-900/90 hover:bg-purple-900/80 transition p-2 flex flex-col justify-between"
       >
-        <span><%= message |> stringify_value(~c"title") %></span>
+        <span>
+          <%= message |> stringify_value(~c"title") %>
+        </span>
+        <span class="text-sm text-gray-500">
+          <%= message |> stringify_value(~c"author") %>
+        </span>
       </div>
     </div>
   </div>
@@ -173,7 +192,7 @@
       JS.toggle_class("rotate-90", to: "#new-grades-chevron")
       |> JS.toggle_class("hidden", to: "#new-grades")
     }
-    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-5 rounded-xl border-fuchsia-600 border-2"
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-5 border-fuchsia-600 border-2"
   >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">New grades</span>
@@ -194,16 +213,20 @@
       </div>
 
       <div :if={:new_grades in @loadings} class="space-y-4 animate-pulse">
-        <div :for={_ <- 0..5} class="h-20 rounded-xl bg-purple-800/50"></div>
+        <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
       </div>
 
       <div
         :for={grade <- @new_grades |> Map.values() |> List.flatten()}
-        class=" h-20 rounded-xl border-purple-800 border-2 p-2"
+        class=" h-20 bg-purple-900/90 p-2"
       >
         <div class="flex flex-row gap-x-2">
-          <span class="font-bold text-xl"><%= grade |> stringify_value(~c"grade") %></span>
-          <span><%= grade |> stringify_value(~c"category") %></span>
+          <span class="font-bold text-xl">
+            <%= grade |> stringify_value(~c"grade") %>
+          </span>
+          <span>
+            <%= grade |> stringify_value(~c"category") %>
+          </span>
         </div>
         <span class="line-clamp-1 text-sm text-gray-500">
           <%= grade |> stringify_value(~c"title") %>
@@ -220,7 +243,7 @@
       JS.toggle_class("rotate-90", to: "#absence-chevron")
       |> JS.toggle_class("hidden", to: "#latest-absence")
     }
-    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-6 rounded-xl border-fuchsia-600 border-2"
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-6 border-fuchsia-600 border-2"
   >
     <div class="text-center flex flex-row relative">
       <span class="mx-auto">Latest absence</span>
@@ -237,12 +260,12 @@
         <.inbox class="w-48 text-gray-500/10" />
       </div>
       <div :if={:new_attendance in @loadings} class="space-y-4 animate-pulse">
-        <div :for={_ <- 0..5} class="h-20 rounded-xl bg-purple-800/50"></div>
+        <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
       </div>
 
       <div
         :for={absence <- @new_attendance}
-        class=" h-20 rounded-xl border-purple-800 border-2 p-2"
+        class=" h-20 bg-purple-900/90 p-2"
       >
         <%= absence |> stringify_value(~c"topic") %>
       </div>

@@ -5,79 +5,33 @@
     </h1>
     <.beaker mini class="h-14 text-fuchsia-700 self-end" />
   </div>
-  <div
-    phx-target={@myself}
-    phx-hook="retrieve_local_storage"
-    id="retrieve-token-ttl"
-    name="ttl"
-    hidden
-  >
+  <div phx-target={@myself} phx-hook="retrieve_local_storage" id="retrieve-token-ttl" name="ttl" hidden>
   </div>
-  <div
-    phx-target={@myself}
-    phx-hook="retrieve_local_storage"
-    id="retrieve-save-token"
-    name="save_token"
-    hidden
-  >
+  <div phx-target={@myself} phx-hook="retrieve_local_storage" id="retrieve-save-token" name="save_token" hidden>
   </div>
 
-  <form
-    phx-target={@myself}
-    id="elixirus-login-form"
-    phx-hook="login_form"
-    phx-submit="login"
-    class="flex text-xl flex-col gap-y-6 items-center"
-  >
-    <input
-      class="bg-[#121212] w-4/5 text-xl rounded border-none"
-      placeholder="username"
-      type="text"
-      id="form-username"
-      value=""
-      name="username"
-      autocomplete="username"
-    />
-    <input
-      class="bg-[#121212] w-4/5 text-xl rounded border-none"
-      id="form-password"
-      autocomplete="current-password"
-      placeholder="password"
-      type="password"
-      value=""
-      name="password"
-    />
+  <form phx-target={@myself} id="elixirus-login-form" phx-hook="login_form" phx-submit="login"
+    class="flex text-xl flex-col gap-y-6 items-center">
+    <input class="bg-[#121212] w-4/5 text-xl rounded border-none" placeholder="username" type="text" id="form-username"
+      value="" name="username" autocomplete="username" />
+    <input class="bg-[#121212] w-4/5 text-xl rounded border-none" id="form-password" autocomplete="current-password"
+      placeholder="password" type="password" name="password" />
     <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
       <div class="flex flex-row items-center justify-evenly">
         <span class="text-lg mr-2">Keep token alive?</span>
-        <input
-          type="checkbox"
-          class="rounded-full h-5 w-5 text-fuchsia-700"
-          name="save_token"
-          phx-change="save_token"
-          checked={@keep_alive}
-        />
-        <input
-          hidden
-          phx-hook="set_local_storage"
-          value={@keep_alive |> to_string()}
-          name="save_token"
-          id="save-token-checkbox"
+        <input type="checkbox" class="rounded-full h-5 w-5 text-fuchsia-700" name="save_token" phx-change="save_token"
+          checked={@keep_alive} />
+        <input hidden phx-hook="set_local_storage" value={@keep_alive |> to_string()}
+        name="save_token"
+        id="save-token-checkbox"
         />
       </div>
-      <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
+      <div class="flex flex-col sm:flex-row lg:flex-col gap-2 w-72">
         <span :if={@keep_alive} class="text-xs">
           Requests librus every hour to refresh token automatically for <%= @ttl %> hours.
         </span>
-        <select
-          :if={@keep_alive}
-          phx-hook="set_local_storage"
-          phx-change="change_ttl"
-          value={@ttl}
-          id="ttl-select"
-          name="ttl"
-          class="bg-[#1e1e1e]"
-        >
+        <select :if={@keep_alive} phx-hook="set_local_storage" phx-change="change_ttl" value={@ttl} id="ttl-select"
+          name="ttl" class="bg-[#1e1e1e]">
           <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
         </select>
       </div>
