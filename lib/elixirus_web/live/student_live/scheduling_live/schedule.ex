@@ -6,7 +6,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
 
   import ElixirusWeb.Helpers
   alias ElixirusWeb.Modal
-  import ElixirusWeb.Components.Loadings
 
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
     socket =
