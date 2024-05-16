@@ -11,8 +11,9 @@ defmodule Elixirus.Application do
     children = [
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
-      Supervisor.child_spec({TokenWorker, [:token_storage, :set, :public]},
-        id: TokenWorker
+      Supervisor.child_spec({TokenWorker, :ets.new(:token_storage, [:set, :public])},
+        id: TokenWorker,
+        restart: :permanent
       ),
       {DNSCluster, query: Application.get_env(:elixirus, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Elixirus.PubSub},
