@@ -30,14 +30,26 @@ defmodule Elixirus.Python.SnakeManager do
     {:noreply, state}
   end
 
+  def handle_info({:sacrifice_snake, pid}, state) do
+    GenServer.cast(pid, :kill_snake)
+    DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
+    {:noreply, state}
+  end
+
   defp clean_inactive_workers() do
     pids = DynamicSupervisor.which_children(SnakeSupervisor)
+    dbg(pids)
     now = DateTime.now!("Europe/Warsaw")
 
     Enum.each(pids, fn {_id, pid, _type, _modules} ->
       case GenServer.call(pid, :status) do
         {:busy, _} ->
           nil
+
+        {:dead, _} ->
+          GenServer.cast(pid, :kill_snake)
+          DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
+          Logger.info("Cleared dead snake")
 
         {_state, update} ->
           if DateTime.compare(now, Timex.shift(update, minutes: 15)) == :gt do

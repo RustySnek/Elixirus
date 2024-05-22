@@ -1,5 +1,6 @@
 # A.K.A. snake worker 🔨🐍
 defmodule Elixirus.Python.SnakeWorker do
+  alias Elixirus.Python.SnakeManager
   use GenServer
   require Logger
 
@@ -8,8 +9,6 @@ defmodule Elixirus.Python.SnakeWorker do
   end
 
   def init(_) do
-    Logger.info("Started python worker")
-
     case :python.start() do
       {:error, reason} ->
         Logger.error(reason)
@@ -32,7 +31,7 @@ defmodule Elixirus.Python.SnakeWorker do
 
   def handle_cast(:kill_snake, state) do
     :ok = :python.stop(state.pid)
-    {:noreply, %{pid: state.pid, state: :dead}}
+    {:noreply, %{pid: state.pid, state: :dead, update: state.update}}
   end
 
   def handle_call({:run, module, func, args}, _from, state) do
@@ -40,8 +39,9 @@ defmodule Elixirus.Python.SnakeWorker do
 
     response =
       try do
-        :python.call(state.pid, module, func, args)
+        data = :python.call(state.pid, module, func, args)
         GenServer.cast(self(), {:set_state, :ready})
+        data
       rescue
         error ->
           case error do
@@ -49,8 +49,9 @@ defmodule Elixirus.Python.SnakeWorker do
               Logger.error(exception |> to_string)
               Logger.error(error |> to_string)
               Logger.error(backtrace |> to_string)
-              GenServer.cast(self(), {:set_state, :dead})
-              {:error, exception}
+              GenServer.cast(self(), :kill_snake)
+              Process.send_after(SnakeManager, {:sacrifice_snake, self()}, 200)
+              %{error: exception}
           end
       end
 
