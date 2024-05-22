@@ -2,7 +2,7 @@ defmodule Elixirus.TokenWorker do
   use GenServer
   require Logger
   alias Timex
-  import Elixirus.Python.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
@@ -72,7 +72,7 @@ defmodule Elixirus.TokenWorker do
   defp refresh_token(table, {username, token, ttl, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
-    if now <= Timex.shift(last_update, hours: ttl) do
+    if DateTime.compare(now, Timex.shift(last_update, hours: ttl)) in [:lt, :eq] do
       case python(:fetchers, :keep_token_alive, [token]) do
         {:ok, notifications} ->
           :ets.insert(table, {username, token, ttl, now})
