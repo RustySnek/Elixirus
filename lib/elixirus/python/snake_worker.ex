@@ -14,7 +14,6 @@ defmodule Elixirus.Python.SnakeWorker do
       {:error, reason} ->
         Logger.error(reason)
 
-        Process.flag(:trap_exit, true)
         {:error, :rip_python}
 
       {:ok, pid} ->
@@ -24,7 +23,6 @@ defmodule Elixirus.Python.SnakeWorker do
 
   def handle_continue(:init_data_types, state) do
     :python.call(state.pid, :helpers, :setup_data_types, [])
-    Process.flag(:trap_exit, true)
     {:noreply, set_state(state.pid, :ready)}
   end
 
@@ -32,22 +30,35 @@ defmodule Elixirus.Python.SnakeWorker do
     {:noreply, set_state(state.pid, new_state)}
   end
 
+  def handle_cast(:kill_snake, state) do
+    :ok = :python.stop(state.pid)
+    {:noreply, %{pid: state.pid, state: :dead}}
+  end
+
   def handle_call({:run, module, func, args}, _from, state) do
     GenServer.cast(self(), {:set_state, :busy})
-    response = :python.call(state.pid, module, func, args)
-    GenServer.cast(self(), {:set_state, :ready})
+
+    response =
+      try do
+        :python.call(state.pid, module, func, args)
+        GenServer.cast(self(), {:set_state, :ready})
+      rescue
+        error ->
+          case error do
+            %ErlangError{original: {:python, exception, error, backtrace}} ->
+              Logger.error(exception |> to_string)
+              Logger.error(error |> to_string)
+              Logger.error(backtrace |> to_string)
+              GenServer.cast(self(), {:set_state, :dead})
+              {:error, exception}
+          end
+      end
+
     {:reply, response, state}
   end
 
   def handle_call(:status, _from, state) do
     {:reply, {state.state, state.update}, state}
-  end
-
-  def handle_info({:EXIT, pid, reason}, state) do
-    GenServer.cast(pid, {:set_state, :dead})
-    Logger.error(reason)
-    :timer.sleep(5_000)
-    {:stop, reason, state}
   end
 
   defp set_state(pid, state) do
