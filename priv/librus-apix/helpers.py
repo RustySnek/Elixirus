@@ -16,31 +16,30 @@ def setup_data_types():
     return Atom("ok".encode("utf-8"))
 
 
-def token_encoder(value: Tuple) -> Tuple:
+def token_encoder(value: Tuple) -> Dict:
     if len(value) == 1 and isinstance(value[0], Token):
         token = value[0].API_Key.encode("utf-8")
-        return Atom("token".encode("utf-8")), token
+        return {Atom("token".encode("utf-8")): token}
     elif isinstance(value[0], Token):
         token = value[0].API_Key.encode("utf-8")
-        return (
-            Atom("token".encode("utf-8")),
-            token,
-            Atom("data".encode("utf-8")),
-            value[1:],
-        )
+        return {
+            Atom("token".encode("utf-8")): token,
+            Atom("data".encode("utf-8")):
+            value[1:]
+            }
     elif len(value) >= 2 and isinstance(value[0], Atom) and isinstance(value[1], Token):
         token = value[1].API_Key.encode("utf-8")
-        return value[0], token, Atom("data".encode("utf-8")), value[2:]
+        return {value[0]: token, Atom("data".encode("utf-8")): value[2:]}
 
     elif isinstance(value[0], Atom) and isinstance(value[1], str) and len(value) > 1:
-        return (
-            value[0],
+        return {
+                value[0]:
             value[1].encode("utf-8"),
-            Atom("data".encode("utf-8")),
-            value[1:],
-        )
+            Atom("data".encode("utf-8")):
+            value[1:]
+            }
     else:
-        return Atom("data".encode("utf-8")), value
+        return value 
 
 
 def token_decoder(value):
