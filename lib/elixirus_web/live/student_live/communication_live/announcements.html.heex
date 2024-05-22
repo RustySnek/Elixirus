@@ -10,22 +10,21 @@
     class="border-fuchsia-600 border rounded py-1 px-4 mx-4 lg:mx-0"
   >
     <div class="text-center text-xl font-semibold">
-      <%= announcement |> stringify_value(~c"title") %>
+      <%= announcement.title %>
     </div>
     <div
       class="lg:text-lg child:whitespace-break-spaces announcement_link"
       id={"#{idx}announcement-wrapper"}
       phx-hook="new_page_link"
     >
-      <%= announcement
-      |> stringify_value(~c"description")
+      <%= announcement.description
       |> as_html!()
       |> HtmlSanitizeEx.html5()
       |> Phoenix.HTML.raw() %>
     </div>
     <div class="flex flex-row justify-between text-gray-400">
-      <span><%= announcement |> stringify_value(~c"author") %></span>
-      <span><%= announcement |> stringify_value(~c"date") %></span>
+      <span><%= announcement.author %></span>
+      <span><%= announcement.date %></span>
     </div>
   </div>
 </div>
