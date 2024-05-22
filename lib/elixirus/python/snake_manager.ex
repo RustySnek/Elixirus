@@ -1,5 +1,6 @@
 defmodule Elixirus.Python.SnakeManager do
   use GenServer
+  require Logger
   alias Elixirus.Python.SnakeSupervisor
 
   def start_link(_) do
@@ -7,6 +8,7 @@ defmodule Elixirus.Python.SnakeManager do
   end
 
   def init(state) do
+    Logger.info("Initialized snake manager")
     send(self(), :clean_inactive_workers)
     {:ok, state}
   end
@@ -24,7 +26,7 @@ defmodule Elixirus.Python.SnakeManager do
 
   def handle_info(:clean_inactive_workers, state) do
     clean_inactive_workers()
-    Process.send_after(self(), :clean_inactive_workers, 15_000 * 60)
+    Process.send_after(self(), :clean_inactive_workers, 10_000 * 60)
     {:noreply, state}
   end
 
@@ -34,13 +36,15 @@ defmodule Elixirus.Python.SnakeManager do
 
     Enum.each(pids, fn {_id, pid, _type, _modules} ->
       case GenServer.call(pid, :status) do
-        {:ready, update} ->
-          if DateTime.compare(now, Timex.shift(update, minutes: 15)) == :gt do
-            DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
-          end
-
-        _ ->
+        {:busy, _} ->
           nil
+
+        {_state, update} ->
+          if DateTime.compare(now, Timex.shift(update, minutes: 15)) == :gt do
+            GenServer.cast(pid, :kill_snake)
+            DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
+            Logger.info("Cleared unused snake")
+          end
       end
     end)
   end
