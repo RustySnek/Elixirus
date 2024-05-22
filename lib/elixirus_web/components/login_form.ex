@@ -43,14 +43,12 @@ defmodule ElixirusWeb.LoginForm do
       ) do
     keep_alive? = socket.assigns.keep_alive
     token_ttl = socket.assigns.ttl
-    {:ok, pid} = :python.start()
 
-    get_token = :python.call(pid, :handle_classes, :handle_token, [username, password])
-    :python.stop(pid)
+    get_token = Elixirus.Python.SnakeWrapper.python(:helpers, :create_token, [username, password])
 
     socket =
       case get_token do
-        {:ok, token} ->
+        %{:ok => token} ->
           unless(keep_alive? == false,
             do:
               GenServer.call(
@@ -63,7 +61,7 @@ defmodule ElixirusWeb.LoginForm do
           |> assign(:token, token |> to_string())
           |> assign(:username, username)
 
-        {:error, error_message} ->
+        %{:error => error_message} ->
           socket
           |> assign(:error_message, error_message |> to_string())
           |> assign(:username, username)

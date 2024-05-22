@@ -3,12 +3,14 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
 
   use ElixirusWeb.SetSemesterLive
   import ElixirusWeb.Helpers
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
 
   alias HtmlSanitizeEx
   import Earmark, only: [as_html!: 1]
 
   def handle_async(:load_announcements, {:ok, announcements}, socket) do
+    dbg(announcements)
+
     socket =
       case announcements do
         {:ok, announcements} ->
@@ -18,12 +20,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :announcements))
           |> assign(:announcements, announcements)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -48,7 +50,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
       |> assign(:user_id, user_id)
       |> assign(:token, token)
       |> create_fetcher(announcements, :announcements, fn ->
-        python(:helpers, :fetch_announcements, [token])
+        python(:fetchers, :fetch_announcements, [token])
       end)
 
     {:ok, socket}
