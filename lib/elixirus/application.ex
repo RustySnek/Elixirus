@@ -2,6 +2,7 @@ defmodule Elixirus.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
+  alias Elixirus.Python.PythonWorker
   alias Elixirus.TokenWorker
 
   use Application
@@ -11,6 +12,7 @@ defmodule Elixirus.Application do
     children = [
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
+      Supervisor.child_spec({PythonWorker, []}, id: PythonWorker, restart: :permanent),
       Supervisor.child_spec({TokenWorker, :ets.new(:token_storage, [:set, :public])},
         id: TokenWorker,
         restart: :permanent
