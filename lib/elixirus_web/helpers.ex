@@ -105,7 +105,7 @@ defmodule ElixirusWeb.Helpers do
         end
 
       token ->
-        token |> hd() |> to_charlist()
+        token |> hd() |> to_string()
     end
   end
 

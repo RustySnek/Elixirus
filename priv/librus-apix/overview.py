@@ -80,7 +80,6 @@ def handle_overview_announcements(token, amount):
 def handle_overview_timetable(token, monday):
     client = create_client(token)
     try:
-        monday = "".join([chr(n) for n in monday])
         monday = datetime.strptime(monday, "%Y-%m-%d")
         timetable = get_timetable(client, monday)
     except TokenError as token_err:
