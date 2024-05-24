@@ -145,7 +145,7 @@ def fetch_all_messages(token):
         pages = get_max_page_messages(client)
         messages = []
         for page in range(0, pages + 1):
-            messages += get_received(client, page)
+            messages.extend(get_received(client, page))
     except TokenError as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
