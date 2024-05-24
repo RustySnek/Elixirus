@@ -2,7 +2,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   use ElixirusWeb, :live_view
 
   import ElixirusWeb.Helpers
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
 
   import Phoenix.UI.Components.Tooltip
   import Phoenix.UI.Components.Typography
@@ -26,12 +26,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           |> assign(:frequency, freq)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -54,12 +54,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :attendance))
           |> assign(:stats, stats)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 

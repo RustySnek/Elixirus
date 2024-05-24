@@ -21,18 +21,17 @@
       </span>
     </div>
     <!-- End attendance circle -->
-    <div class="flex flex-col text-lg md:text-xl xl:text-2xl">
+    <div :if={@student_data != %{}} class="flex flex-col text-lg md:text-xl xl:text-2xl">
       <p>
-        <%= @student_data |> stringify_value(~c"name") %> Semester: <%= @semester
+        <%= @student_data.name %> Semester: <%= @semester
         |> String.to_integer()
         |> Kernel.+(1) %>
       </p>
       <p>
-        <%= @student_data |> stringify_value(~c"class_name") %> - <%= @student_data
-        |> stringify_value(~c"tutor") %>
+        <%= @student_data.class_name %> - <%= @student_data.tutor %>
       </p>
-      <p>Your number: <%= @student_data |> stringify_value(~c"number") %></p>
-      <p>Lucky number: <%= @student_data |> stringify_value(~c"lucky_number") %></p>
+      <p>Your number: <%= @student_data.number %></p>
+      <p>Lucky number: <%= @student_data.lucky_number %></p>
       <p :if={@semester_grades != %{}}>
         Overall Average: <%= calculate_gpa_from_averages(@semester_grades)
         |> to_string
@@ -178,10 +177,10 @@
         class=" sm:h-24  bg-purple-900/90 hover:bg-purple-900/80 transition p-2 flex flex-col justify-between"
       >
         <span>
-          <%= message |> stringify_value(~c"title") %>
+          <%= message.title %>
         </span>
         <span class="text-sm text-gray-500">
-          <%= message |> stringify_value(~c"author") %>
+          <%= message.author %>
         </span>
       </div>
     </div>
@@ -222,17 +221,17 @@
       >
         <div class="flex flex-row gap-x-2">
           <span class="font-bold text-xl">
-            <%= grade |> stringify_value(~c"grade") %>
+            <%= grade.grade %>
           </span>
           <span>
-            <%= grade |> stringify_value(~c"category") %>
+            <%= grade.category %>
           </span>
         </div>
         <span class="line-clamp-1 text-sm text-gray-500">
-          <%= grade |> stringify_value(~c"title") %>
+          <%= grade.title %>
         </span>
         <span class="line-clamp-1 text-sm text-gray-500">
-          <%= grade |> stringify_value(~c"teacher") %>
+          <%= grade.teacher %>
         </span>
       </div>
     </div>
@@ -264,7 +263,7 @@
       </div>
 
       <div :for={absence <- @new_attendance} class=" h-20 bg-purple-900/90 p-2">
-        <%= absence |> stringify_value(~c"topic") %>
+        <%= absence.topic %>
       </div>
     </div>
   </div>

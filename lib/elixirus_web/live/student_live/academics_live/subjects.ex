@@ -1,6 +1,6 @@
 defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   use ElixirusWeb, :live_view
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
   import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
 
@@ -247,12 +247,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> assign(:semester_grades, semester_grades)
           |> assign_averages(grades)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 

@@ -74,7 +74,7 @@
     - [x] Add google calendar functionality 
     - [x] Add details modal 🔍
   - [x] Messages Page 📫
-    - [x] Handle recieved messages 📩
+    - [x] Handle received messages 📩
     - [x] Sending messages 📩
     - [x] Add message content modal 📑
   - [x] Authentication

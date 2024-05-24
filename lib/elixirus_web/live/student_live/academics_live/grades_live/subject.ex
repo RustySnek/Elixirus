@@ -2,7 +2,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   use ElixirusWeb, :live_view
   import ElixirusWeb.Helpers
 
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
   import ElixirusWeb.Components.Loadings
 
   def fetch_all_grades(token, semester) do
@@ -19,12 +19,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
           socket
           |> assign(:grades, grades)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 

@@ -1,6 +1,6 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   use ElixirusWeb, :live_view
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
 
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
@@ -182,12 +182,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
             Map.put(socket.assigns.schedule, "#{year}-#{month}", schedule)
           )
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           socket
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -228,12 +228,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:timetable))
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           socket
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
