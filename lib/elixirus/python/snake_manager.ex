@@ -16,11 +16,11 @@ defmodule Elixirus.Python.SnakeManager do
   def handle_call({:run, module, func, args}, _from, state) do
     case find_ready_worker() do
       {:ok, pid} ->
-        {:reply, GenServer.call(pid, {:run, module, func, args}), state}
+        {:reply, GenServer.call(pid, {:run, module, func, args}, 60_000), state}
 
       :none_available ->
         {:ok, pid} = SnakeSupervisor.deploy_snake_worker()
-        {:reply, GenServer.call(pid, {:run, module, func, args}), state}
+        {:reply, GenServer.call(pid, {:run, module, func, args}, 60_000), state}
     end
   end
 
@@ -38,7 +38,6 @@ defmodule Elixirus.Python.SnakeManager do
 
   defp clean_inactive_workers() do
     pids = DynamicSupervisor.which_children(SnakeSupervisor)
-    dbg(pids)
     now = DateTime.now!("Europe/Warsaw")
 
     Enum.each(pids, fn {_id, pid, _type, _modules} ->
