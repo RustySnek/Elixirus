@@ -3,7 +3,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   import Heroicons
   import ElixirusWeb.Helpers
 
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
   import Heroicons, only: [chevron_right: 1, inbox: 1]
 
   defp clean_period_name(period) do
@@ -45,19 +45,18 @@ defmodule ElixirusWeb.StudentLive.Index do
     todays_lessons =
       timetable
       |> Enum.at(weekday)
-      |> Enum.filter(&(&1 |> Map.get(~c"subject") != []))
+      |> Enum.filter(&(&1 |> Map.get(:subject) != ""))
       |> Enum.reduce(%{}, fn event, acc ->
-        number = event |> stringify_value(~c"number") |> String.to_integer()
+        number = event.number
 
         event_map = %{
-          title: event |> stringify_value(~c"subject"),
-          subject: event |> stringify_value(~c"teacher_and_classroom"),
+          title: event.subject,
+          subject: event.teacher_and_classroom,
           timeframe:
-            event
-            |> stringify_value(~c"date_from")
+            event.date_from
             |> Kernel.<>("-")
-            |> Kernel.<>(event |> stringify_value(~c"date_to")),
-          data: event |> Map.get(~c"info")
+            |> Kernel.<>(event.date_to),
+          data: event.info
         }
 
         update_events =
@@ -71,7 +70,7 @@ defmodule ElixirusWeb.StudentLive.Index do
 
     schedule[day]
     |> Enum.reduce(todays_lessons, fn event, acc ->
-      number = event |> stringify_value(~c"number")
+      number = event.number
 
       number =
         case number |> Integer.parse() do
@@ -80,10 +79,10 @@ defmodule ElixirusWeb.StudentLive.Index do
         end
 
       event_map = %{
-        title: event |> stringify_value(~c"title"),
-        subject: event |> stringify_value(~c"subject"),
-        timeframe: event |> stringify_value(~c"hour"),
-        data: event |> Map.get(~c"data")
+        title: event.title,
+        subject: event.subject,
+        timeframe: event.hour,
+        data: event.data
       }
 
       update_events =
@@ -100,10 +99,10 @@ defmodule ElixirusWeb.StudentLive.Index do
     sum =
       averages
       |> Enum.map(fn {_, avgs} -> avgs |> List.last() end)
-      |> Enum.filter(&(&1 != ~c"-"))
+      |> Enum.filter(&(&1 != "-"))
 
     sum
-    |> Enum.reduce(0, fn avg, acc -> avg |> List.to_float() |> Kernel.+(acc) end)
+    |> Enum.reduce(0, fn avg, acc -> avg |> String.to_float() |> Kernel.+(acc) end)
     |> Kernel./(length(sum) |> max(1))
   end
 
@@ -134,26 +133,26 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> assign(:unread_messages, [])
     |> assign(:semester_grades, [])
     |> create_fetcher(averages, :semester_grades, fn ->
-      {python(:helpers, :fetch_all_grades, [token, semester]), semester}
+      {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
     end)
     |> create_fetcher(unread_messages, :unread_messages, fn ->
-      {python(:helpers, :fetch_all_messages, [token]), nil}
+      {python(:fetchers, :fetch_all_messages, [token]), nil}
     end)
     |> create_fetcher(attendance, :new_attendance, fn ->
-      {python(:helpers, :fetch_new_attendance, [token, semester]), semester}
+      {python(:fetchers, :fetch_new_attendance, [token, semester]), semester}
     end)
     |> create_fetcher(new_grades, :new_grades, fn ->
-      {python(:helpers, :fetch_new_grades, [token, semester]), semester}
+      {python(:fetchers, :fetch_new_grades, [token, semester]), semester}
     end)
     |> create_fetcher(
       student_data,
       :student_data,
       fn ->
-        {python(:helpers, :fetch_student_data, [token]), nil}
+        {python(:fetchers, :fetch_student_data, [token]), nil}
       end
     )
     |> create_fetcher(schedule, :schedule, fn ->
-      {python(:helpers, :fetch_schedule, [token, socket.assigns.year, socket.assigns.month]),
+      {python(:fetchers, :fetch_schedule, [token, socket.assigns.year, socket.assigns.month]),
        socket.assigns.year, socket.assigns.month}
     end)
     |> create_fetcher(timetable, :timetable, fn ->
@@ -161,7 +160,7 @@ defmodule ElixirusWeb.StudentLive.Index do
        nil}
     end)
     |> create_fetcher(frequency, :frequency, fn ->
-      python(:helpers, :fetch_attendance_frequency, [socket.assigns.token])
+      python(:fetchers, :fetch_attendance_frequency, [socket.assigns.token])
     end)
   end
 
@@ -222,12 +221,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:semester_grades, gpas)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -264,12 +263,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
           |> assign(:frequency, frequency)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -286,12 +285,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
           |> assign(:schedule, schedule)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -302,7 +301,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     cache_and_ttl_data(socket.assigns.user_id, "messages", unread_messages |> Enum.take(50), 10)
 
     unread =
-      unread_messages |> Enum.filter(fn msg -> msg |> Map.get(~c"unread") |> Kernel.==(true) end)
+      unread_messages |> Enum.filter(fn msg -> msg |> Map.get(:unread) |> Kernel.==(true) end)
 
     cache_and_ttl_data(socket.assigns.user_id, "unread_messages", unread, 15)
 
@@ -343,12 +342,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(name, data)
           |> assign(:loadings, List.delete(socket.assigns.loadings, name))
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 

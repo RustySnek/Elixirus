@@ -1,7 +1,7 @@
 defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   use ElixirusWeb, :live_view
   use ElixirusWeb.SetSemesterLive
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
   import ElixirusWeb.Helpers
 
   import Heroicons
@@ -19,12 +19,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
         {:ok, details} ->
           assign(socket, :details, details)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -38,12 +38,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
           cache_and_ttl_data(socket.assigns.user_id, "homework", homework, 15)
           assign(socket, :homework, homework |> Enum.reverse())
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
