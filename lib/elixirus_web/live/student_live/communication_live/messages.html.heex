@@ -122,22 +122,22 @@
       <Heroicons.arrow_uturn_left class="w-10" />
     </button>
     <div
-      :if={@content == ""}
+      :if={@message_content == nil}
       class="animate-pulse bg-fuchsia-800/25 rounded-2xl min-w-[300px] sm:min-w-[440px] min-h-[300px] h-full"
     >
     </div>
     <div
-      :if={@content != ""}
-      class={"flex flex-col bg-purple-950/95 #{@author == "" && "!bg-transparent"} items-center rounded-2xl pb-2 pt-14 px-2"}
+      :if={@message_content}
+      class={"flex flex-col bg-purple-950/95 #{@message_content.author == "" && "!bg-transparent"} items-center rounded-2xl pb-2 pt-14 px-2"}
     >
       <div class="flex px-5 flex-col gap-x-4">
-        <p class="text-gray-400 text-center"><%= @author %></p>
-        <p class="text-center text-lg"><%= @title %></p>
+        <p class="text-gray-400 text-center"><%= @message_content.author %></p>
+        <p class="text-center text-lg"><%= @message_content.title %></p>
 
-        <p class="text-gray-400 text-end"><%= @date %></p>
+        <p class="text-gray-400 text-end"><%= @message_content.date %></p>
       </div>
       <div class="px-4 pb-4 announcement_link w-full" phx-hook="new_page_link" id="content-holder">
-        <%= @content |> as_html!() |> HtmlSanitizeEx.html5() |> Phoenix.HTML.raw() %>
+        <%= @message_content.content |> as_html!() |> HtmlSanitizeEx.html5() |> Phoenix.HTML.raw() %>
       </div>
     </div>
   </div>
@@ -257,17 +257,14 @@
           JS.push("view_message")
           |> ElixirusWeb.Modal.show_modal_js("message-modal")
         }
-        phx-value-msg_id={message |> stringify_value(~c"href")}
-        phx-value-title={message |> stringify_value(~c"title")}
-        phx-value-author={message |> stringify_value(~c"author")}
-        phx-value-date={message |> stringify_value(~c"date")}
+        phx-value-msg_id={message.href}
       >
         <div class="truncate xl:w-1/2 xl:text-justify w-full">
-          <%= message |> stringify_value(~c"title") %>
+          <%= message.title %>
         </div>
         <div class="text-base justify-between flex flex-col xl:w-1/3 w-full text-gray-400">
-          <p class="truncate text-end"><%= message |> stringify_value(~c"author") %></p>
-          <p class="truncate text-end"><%= message |> stringify_value(~c"date") %></p>
+          <p class="truncate text-end"><%= message.author %></p>
+          <p class="truncate text-end"><%= message.date %></p>
         </div>
       </button>
     </div>

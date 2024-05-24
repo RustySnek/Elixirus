@@ -1,6 +1,6 @@
 defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   use ElixirusWeb, :live_view
-  import Elixirus.PythonWrapper
+  import Elixirus.Python.SnakeWrapper
 
   import ElixirusWeb.Helpers
   alias Heroicons
@@ -12,12 +12,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   alias HtmlSanitizeEx
 
   def find_group(group_name, author, token) do
-    {:ok, group} = python(:helpers, :get_group_recipients, [token, group_name])
-    {group[author |> String.to_charlist()], group_name}
+    {:ok, group} = python(:fetchers, :get_group_recipients, [token, group_name])
+    {group[author], group_name}
   end
 
   def find_group_and_recipient(socket, author) do
-    author = Regex.replace(~r/\(.*?\)/, author, "", global: true) |> String.trim()
+    author = Regex.replace(~r/\(.*?\)*\[.*?\]/, author, "", global: true) |> String.trim()
 
     {_, {name, group}} =
       Task.async_stream(socket.assigns.recipient_groups, fn group ->
@@ -40,11 +40,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   end
 
   def fetch_messages(token, page) do
-    python(:helpers, :fetch_messages, [token, page])
+    python(:fetchers, :fetch_messages, [token, page])
   end
 
   def fetch_message_content(token, id) do
-    python(:helpers, :fetch_message_content, [token, id])
+    python(:fetchers, :fetch_message_content, [token, id])
   end
 
   def handle_event("write_message", %{"content" => content, "title" => title}, socket) do
@@ -61,17 +61,17 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       socket
       |> assign(
         :compose_content,
-        "\n\n====================================\n#{socket.assigns.content}"
+        "\n\n====================================\n#{socket.assigns.message_content.content}"
       )
-      |> assign(:compose_title, "Re: #{socket.assigns.title}")
-      |> find_group_and_recipient(socket.assigns.author)
+      |> assign(:compose_title, "Re: #{socket.assigns.message_content.title}")
+      |> find_group_and_recipient(socket.assigns.message_content.author)
 
     handle_event("wipe_content", %{}, socket)
   end
 
   def handle_event("send_message", _params, socket) do
     socket =
-      case python(:helpers, :send_message, [
+      case python(:fetchers, :send_message, [
              socket.assigns.token,
              socket.assigns.compose_title,
              socket.assigns.compose_content,
@@ -83,19 +83,19 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:compose_content, "")
           |> assign(:selected_recipients, MapSet.new())
           |> start_async(:load_sent_messages, fn ->
-            python(:helpers, :fetch_sent_messages, [socket.assigns.token, 0])
+            python(:fetchers, :fetch_sent_messages, [socket.assigns.token, 0])
           end)
 
-        {:send_error, msg} ->
+        %{:send_error => msg} ->
           put_flash(socket, :error, "Error!\n#{msg}")
 
-        {:token_error, msg} ->
+        %{:token_error => msg} ->
           socket
           |> assign(:login_required, true)
           |> put_flash(:error, msg)
           |> push_event("require-login", %{})
 
-        {:error, msg} ->
+        %{:error => msg} ->
           put_flash(socket, :error, msg)
       end
 
@@ -134,7 +134,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:group_recipients, %{})
       |> assign(:selected_group, group)
       |> create_fetcher(:load, :group_recipients, fn ->
-        python(:helpers, :get_group_recipients, [socket.assigns.token, group])
+        python(:fetchers, :get_group_recipients, [socket.assigns.token, group])
       end)
 
     {:noreply, socket}
@@ -142,26 +142,19 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
   def handle_event("wipe_content", _params, socket) do
     socket =
-      socket
-      |> assign(:title, "")
-      |> assign(:date, "")
-      |> assign(:author, "")
-      |> assign(:content, "")
+      socket |> assign(:message_content, nil)
 
     {:noreply, socket}
   end
 
   def handle_event(
         "view_message",
-        %{"msg_id" => id, "author" => author, "title" => title, "date" => date},
+        %{"msg_id" => id},
         socket
       ) do
     socket =
       socket
       |> start_async(:fetch_content, fn -> fetch_message_content(socket.assigns.token, id) end)
-      |> assign(:title, title)
-      |> assign(:date, date)
-      |> assign(:author, author)
 
     {:noreply, socket}
   end
@@ -198,13 +191,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:sent_messages, messages)
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:sent_messages))
 
-        {:token_error, msg} ->
+        %{:token_error => msg} ->
           socket
           |> assign(:login_required, true)
           |> put_flash(:error, msg)
           |> push_event("require-login", %{})
 
-        {:error, msg} ->
+        %{:error => msg} ->
           put_flash(socket, :error, msg)
       end
 
@@ -225,13 +218,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           )
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:recipients))
 
-        {:token_error, msg} ->
+        %{:token_error => msg} ->
           socket
           |> assign(:login_required, true)
           |> put_flash(:error, msg)
           |> push_event("require-login", %{})
 
-        {:error, msg} ->
+        %{:error => msg} ->
           put_flash(socket, :error, msg)
       end
 
@@ -242,14 +235,14 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     socket =
       case content do
         {:ok, content} ->
-          assign(socket, :content, content |> to_string())
+          assign(socket, :message_content, content |> dbg)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -259,10 +252,10 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   def handle_async(:load_recipient_groups, {:ok, groups}, socket) do
     socket =
       case groups do
-        {:error, msg} ->
+        %{:error => msg} ->
           socket |> put_flash(:error, msg)
 
-        {:token_error, msg} ->
+        %{:token_error => msg} ->
           socket
           |> assign(:login_required, true)
           |> push_event("require-login", %{})
@@ -292,12 +285,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:seen_messages, seen)
           |> assign(:unread_messages, unread)
 
-        {:token_error, message} ->
+        %{:token_error => message} ->
           assign(socket, :login_required, true)
           |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
-        {:error, message} ->
+        %{:error => message} ->
           put_flash(socket, :error, message)
       end
 
@@ -331,19 +324,15 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:selected_group, "")
       |> assign(:group_recipients, %{})
       |> assign(:recipient_groups, [])
-      |> assign(:content, "")
-      |> assign(:title, "")
+      |> assign(:message_content, nil)
       |> assign(:compose_title, "")
       |> assign(:compose_content, "")
-      |> assign(:date, "")
-      |> assign(:author, "")
-      |> assign(:content, "")
       |> assign(:page_title, "Messages")
       |> create_fetcher(:load, :recipient_groups, fn ->
-        python(:helpers, :get_recipient_groups, [api_token])
+        python(:fetchers, :get_recipient_groups, [api_token])
       end)
       |> create_fetcher(sent, :sent_messages, fn ->
-        python(:helpers, :fetch_sent_messages, [api_token, 0])
+        python(:fetchers, :fetch_sent_messages, [api_token, 0])
       end)
 
     socket =

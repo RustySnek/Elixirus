@@ -9,8 +9,6 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
   import Earmark, only: [as_html!: 1]
 
   def handle_async(:load_announcements, {:ok, announcements}, socket) do
-    dbg(announcements)
-
     socket =
       case announcements do
         {:ok, announcements} ->
