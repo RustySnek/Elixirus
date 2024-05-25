@@ -12,7 +12,10 @@ defmodule Elixirus.Application do
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
       {Elixirus.Python.SnakeSupervisor, []},
-      {Elixirus.Python.SnakeManager, []},
+      Supervisor.child_spec({Elixirus.Python.SnakeManager, []},
+        id: Elixirus.Python.SnakeManager,
+        restart: :permanent
+      ),
       Supervisor.child_spec({TokenWorker, :ets.new(:token_storage, [:set, :public])},
         id: TokenWorker,
         restart: :permanent
