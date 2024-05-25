@@ -77,7 +77,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> Map.values()
           |> Enum.filter(
             &(&1
-              |> to_string()
               |> String.downcase()
               |> String.contains?(String.downcase(query)))
           ) !=
@@ -97,7 +96,6 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     keys
     |> Enum.filter(fn subject ->
       subject
-      |> to_string()
       |> String.downcase()
       |> String.contains?(String.downcase(query))
     end)

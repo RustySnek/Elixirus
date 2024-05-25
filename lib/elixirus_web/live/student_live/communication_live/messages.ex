@@ -34,7 +34,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
       name ->
         socket
-        |> assign(:selected_recipients, MapSet.new() |> MapSet.put({author, to_string(name)}))
+        |> assign(:selected_recipients, MapSet.new() |> MapSet.put({author, name}))
         |> assign(:selected_group, group)
     end
   end
@@ -213,7 +213,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
             :group_recipients,
             recipients
             |> Enum.reduce(%{}, fn {key, val}, acc ->
-              Map.put(acc, key |> to_string(), val |> to_string())
+              Map.put(acc, key, val)
             end)
           )
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:recipients))
@@ -262,7 +262,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> put_flash(:error, msg)
 
         {:ok, groups} ->
-          socket |> assign(:recipient_groups, groups |> Enum.map(&to_string(&1)))
+          socket |> assign(:recipient_groups, groups)
       end
 
     {:noreply, socket}

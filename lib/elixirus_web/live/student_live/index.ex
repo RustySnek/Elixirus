@@ -14,7 +14,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   defp averages_color(final_gpa) do
-    case to_string(final_gpa) do
+    case final_gpa do
       "-" ->
         "bg-gray-900/80"
 
@@ -178,7 +178,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         {python(:calendar_handler, :get_google_calendar_events, [
            calendar_id,
            this_weeks_monday(),
-           end_of_week |> to_string
+           end_of_week
          ]), nil}
       end)
 

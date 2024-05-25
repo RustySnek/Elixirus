@@ -3,12 +3,12 @@
 </div>
 <div :if={@grades != %{}} class="flex gap-y-5 flex-col mx-10">
   <div
-    :for={grade <- @grades |> Map.get(@subject |> to_charlist())}
+    :for={grade <- @grades |> Map.get(@subject)}
     class={"rounded-2xl border-fuchsia-400 border #{grade.counts == false && "!border-red-600"}"}
   >
     <div
       :if={
-        grade.href |> to_string |> String.split("/") |> List.last() ==
+        grade.href |> String.split("/") |> List.last() ==
           @shown_grade
       }
       id={@shown_grade}
@@ -40,10 +40,10 @@
     </div>
     <div
       :if={
-        grade.href |> to_string |> String.split("/") |> List.last() !=
+        grade.href |> String.split("/") |> List.last() !=
           @shown_grade
       }
-      id={grade.href |> to_string}
+      id={grade.href}
       class=" flex flex-col sm:flex-row gap-x-20 rounded-2xl p-4 "
     >
       <p class="text-4xl text-center w-24 font-bold self-center">
