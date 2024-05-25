@@ -13,6 +13,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
     socket =
       case grades do
         {:ok, [grades, semester_grades]} ->
+          semester_grades = sort_gpas(semester_grades)
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
           cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades, 15)
 

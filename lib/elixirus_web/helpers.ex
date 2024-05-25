@@ -4,6 +4,12 @@ defmodule ElixirusWeb.Helpers do
   """
   use Phoenix.LiveView
 
+  def sort_gpas(gpas) do
+    Enum.sort_by(gpas, fn {_, [_, _, gpa]} ->
+      if gpa == "-", do: 99.0, else: gpa |> String.to_float()
+    end)
+  end
+
   def attendance_color(symbol) do
     case symbol do
       "nb" -> "red-500"
