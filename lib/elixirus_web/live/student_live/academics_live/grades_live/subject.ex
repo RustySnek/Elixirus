@@ -6,7 +6,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   import ElixirusWeb.Components.Loadings
 
   def fetch_all_grades(token, semester) do
-    {python(:helpers, :fetch_all_grades, [token, semester]), semester}
+    {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
   end
 
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
@@ -39,7 +39,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
       |> assign(:semester, semester)
       |> assign(:grades, %{})
       |> create_fetcher(grades, :grades, fn ->
-        {python(:helpers, :fetch_all_grades, [socket.assigns.token, semester]), semester}
+        {python(:fetchers, :fetch_all_grades, [socket.assigns.token, semester]), semester}
       end)
 
     {:noreply, socket}

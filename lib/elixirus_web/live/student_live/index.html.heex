@@ -130,11 +130,11 @@
       >
         <div class="grid grid-cols-4 space-x-2">
           <span class="col-span-3 line-clamp-2">
-            <%= subject |> to_string %>
+            <%= subject %>
           </span>
           <div class="flex flex-col text-end">
             <span :for={gpa <- gpas} class="last:font-bold">
-              <%= gpa |> to_string %>
+              <%= gpa %>
             </span>
           </div>
         </div>
