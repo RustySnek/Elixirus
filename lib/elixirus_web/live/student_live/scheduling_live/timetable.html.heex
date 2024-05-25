@@ -58,13 +58,13 @@
       <div :for={period <- hd(@timetable)} class="w-full">
         <div class="h-[90px] text-gray-500 xs:tracking-tight xs:text-xs  flex flex-col justify-between">
           <p class="w-full">
-            <%= period |> Map.get(~c"date_from") %>
+            <%= period.date_from %>
           </p>
           <p class="w-full">
-            <%= period |> Map.get(~c"date_to") %>
+            <%= period.date_to %>
           </p>
         </div>
-        <div style={"height: #{2 * calculate_minute_difference(period |> stringify_value(~c"next_recess_from"), period |> stringify_value(~c"next_recess_to"))}px"}>
+        <div style={"height: #{2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}>
         </div>
       </div>
     </div>
@@ -76,34 +76,30 @@
           <div>
             <.live_component
               module={Modal}
-              id={"#{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"}
+              id={"#{weekday |> List.first() |> Map.get(:weekday)}-googlecalendar"}
             >
               <div class="gap-y-2 flex flex-col items-center md:max-w-3xl max-w-xs xs:max-w-[250px]">
                 <div
                   :for={
                     event <-
                       @schedule
-                      |> get_events_inside_day(
-                        weekday
-                        |> List.first()
-                        |> stringify_value(~c"date")
-                      )
+                      |> get_events_inside_day(weekday |> List.first() |> Map.get(:date))
                   }
                   class="bg-[#1E1E1E] rounded-2xl px-4 py-2 md:max-w-3xl max-w-xs xs:max-w-[250px]"
                 >
                   <div class="flex flex-col text-center space-y-2 mb-3">
                     <span class="text-lg text-center text-fuchsia-700 font-bold">
-                      <%= event |> stringify_value(~c"title") %>
+                      <%= event["title"] %>
                     </span>
                     <span class="text-lg break-words">
-                      <%= event |> stringify_value(~c"subject") %>
+                      <%= event["subject"] %>
                     </span>
                   </div>
                   <div class="flex flex-col text-center">
                     <span :for={
                       item <-
                         event
-                        |> Map.get(~c"data")
+                        |> Map.get("data")
                         |> Map.values()
                         |> Enum.map(&to_string(&1))
                         |> Enum.reverse()
@@ -119,16 +115,16 @@
                       |> events_inside_timeframe(
                         weekday
                         |> List.first()
-                        |> stringify_value(~c"date")
+                        |> Map.get(:date)
                       )
                   }
                   class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
                 >
                   <span class="mb-2 text-lg font-bold">
-                    <%= event |> stringify_value(~c"summary") %>
+                    <%= event.summary %>
                   </span>
                   <br />
-                  <span><%= event |> stringify_value(~c"description") |> raw %></span>
+                  <span><%= event.description |> raw %></span>
                 </div>
               </div>
             </.live_component>
@@ -136,20 +132,20 @@
             <button
               phx-click={
                 ElixirusWeb.Modal.show_modal_js(
-                  "#{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"
+                  "#{weekday |> List.first() |> Map.get(:weekday)}-googlecalendar"
                 )
               }
-              phx-target={"##{weekday |> List.first() |> stringify_value(~c"weekday")}-googlecalendar"}
+              phx-target={"##{weekday |> List.first() |> Map.get(:weekday)}-googlecalendar"}
               class={"text-center h-12 w-full rounded-2xl border-fuchsia-700 border-2 font-semibold flex flex-col items-center justify-center text-2xl
 #{ @calendar_events |>
                     inside_event_timeframe?(
-                    weekday |> List.first() |> stringify_value(~c"date")
+                    weekday |> List.first() |> Map.get(:date)
                   
                    ) && "!bg-orange-500/10"
               }
           "}
             >
-              <%= weekday |> List.first([]) |> stringify_value(~c"weekday") %>
+              <%= weekday |> List.first() |> Map.get(:weekday) %>
             </button>
           </div>
           <div :for={period <- weekday} class="w-72 xs:w-60 text-justify">
@@ -161,9 +157,9 @@
             </div>
             <div class="w-full overflow-x-hidden">
               <.live_component
-                :if={period |> Map.get(~c"subject") != []}
+                :if={period.subject != ""}
                 module={Modal}
-                id={"#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
+                id={"#{period.weekday}-#{period.number}"}
               >
                 <div class="bg-[#1E1E1E] mx-5 md:max-w-3xl max-w-xs xs:max-w-[250px] overflow-y-auto rounded-2xl absolute z-40">
                   <div
@@ -175,23 +171,23 @@
                   >
                     <div class="flex flex-col text-center space-y-2 mb-3">
                       <span class="text-lg text-center text-fuchsia-700 font-bold">
-                        <%= event |> stringify_value(~c"title") %>
+                        <%= event["title"] %>
                       </span>
                       <span
                         :if={
-                          event |> stringify_value(~c"subject") !=
-                            event |> stringify_value(~c"title")
+                          event["subject"] !=
+                            event["title"]
                         }
                         class="text-lg"
                       >
-                        <%= event |> stringify_value(~c"subject") %>
+                        <%= event["subject"] %>
                       </span>
                     </div>
                     <div class="flex flex-col text-center">
                       <span :for={
                         item <-
                           event
-                          |> Map.get(~c"data")
+                          |> Map.get("data")
                           |> Map.values()
                           |> Enum.map(&to_string(&1))
                           |> Enum.reverse()
@@ -203,72 +199,69 @@
 
                   <div class="p-4 flex flex-col text-center items-center justify-center gap-y-1 lg:gap-y-4">
                     <span class="text-base lg:text-lg font-bold">
-                      <%= period |> stringify_value(~c"weekday") %>
+                      <%= period.weekday %>
                     </span>
 
                     <span class="break-words lg:text-lg font-bold w-full">
-                      <%= period |> stringify_value(~c"subject") %>
+                      <%= period.subject %>
                     </span>
                     <div
                       :for={
                         info <-
-                          period
-                          |> Map.get(~c"info")
+                          period.info
                           |> Map.values()
                       }
-                      :if={info != []}
+                      :if={info != ""}
                       class="flex flex-col border-red-700 border rounded-2xl p-2"
                     >
-                      <span :for={line <- info |> Map.values()}>
-                        <%= line |> to_string() %>
+                      <span :for={
+                        val <-
+                          info
+                          |> Map.values()
+                      }>
+                        <%= val %>
                       </span>
                     </div>
 
                     <span>
-                      Lesson: <%= period |> stringify_value(~c"number") %>
+                      Lesson: <%= period.number %>
                     </span>
                     <span>
-                      <%= period
-                      |> stringify_value(~c"teacher_and_classroom") %>
+                      <%= period.teacher_and_classroom %>
                     </span>
                     <span>
-                      <%= period |> stringify_value(~c"date") %>
+                      <%= period.date %>
                     </span>
                   </div>
                 </div>
               </.live_component>
 
               <button
-                disabled={period |> Map.get(~c"subject") == []}
-                phx-click={
-                  ElixirusWeb.Modal.show_modal_js(
-                    "#{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"
-                  )
-                }
-                phx-target={"##{period |> stringify_value(~c"weekday")}-#{period |> stringify_value(~c"number")}"}
+                disabled={period.subject == ""}
+                phx-click={ElixirusWeb.Modal.show_modal_js("#{period.weekday}-#{period.number}")}
+                phx-target={"##{period.weekday}-#{period.number}"}
                 class={"
                 hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
                 duration-100 border-2 border-fuchsia-600 rounded-2xl
-                #{ period |> Map.get(~c"subject") == [] &&"!border-none !bg-inherit"}
-                #{ period |> Map.get(~c"info") |> Map.keys() |> length() > 0 && "!border-red-700"}
+                #{ period.subject == "" &&"!border-none !bg-inherit"}
+                #{ period.info |> Map.keys() |> length() > 0 && "!border-red-700"}
                                "}
               >
                 <span class="flex-shrink text-center font-bold text-red-600">
-                  <%= period |> Map.get(~c"info") |> Map.keys() |> Enum.join(", ") |> to_string() %>
+                  <%= period.info |> Map.keys() |> Enum.join(", ") %>
                 </span>
                 <div class="flex-grow">
                   <span class="line-clamp-1">
-                    <%= period |> stringify_value(~c"subject") %>
+                    <%= period.subject %>
                   </span>
                 </div>
                 <span class="text-sm text-gray-500 ">
-                  <%= period
-                  |> stringify_value(~c"teacher_and_classroom")
+                  <%= period.teacher_and_classroom
                   |> String.split("s.")
                   |> List.last() %>
                 </span>
               </button>
-              <div style={"height: #{2* calculate_minute_difference(period |> stringify_value(~c"next_recess_from"), period |> stringify_value(~c"next_recess_to"))}px"}>
+              <div style={"height: #{2* calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}>
               </div>
             </div>
           </div>

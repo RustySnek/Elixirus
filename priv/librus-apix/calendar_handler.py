@@ -1,7 +1,9 @@
 from collections import defaultdict
-from urllib.parse import quote
-import requests
 from datetime import datetime, timedelta
+from urllib.parse import quote
+
+import requests
+from helpers import brew_elixir_dict
 
 HEAD = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
@@ -13,12 +15,12 @@ cest = "T01:00:00+01:00"
 public_key = "AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"
 
 
-def get_google_calendar_events(calendar_id, date_min: bytes, date_max: bytes):
+def get_google_calendar_events(calendar_id, date_min: str, date_max: str):
     events = defaultdict(list)
-    date_min = quote(date_min.decode("utf-8") + cest)
-    date_max = quote(date_max.decode("utf-8") + cest)
+    date_min = quote(date_min + cest)
+    date_max = quote(date_max + cest)
     default_suffix = "@group.calendar.google.com"
-    calendar_id = str(calendar_id.decode("utf-8"))
+    calendar_id = str(calendar_id)
     if "@" not in calendar_id:
         calendar_id = quote(calendar_id + default_suffix)
     r = requests.get(
@@ -61,4 +63,4 @@ def get_google_calendar_events(calendar_id, date_min: bytes, date_max: bytes):
                 "end_time": end_time,
             }
         )
-    return dict(events)
+    return brew_elixir_dict(dict(events), safe=False)
