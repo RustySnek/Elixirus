@@ -99,7 +99,7 @@
                     <span :for={
                       item <-
                         event
-                        |> Map.get("data")
+                        |> Map.get(:data)
                         |> Map.values()
                         |> Enum.map(&to_string(&1))
                         |> Enum.reverse()
@@ -187,7 +187,7 @@
                       <span :for={
                         item <-
                           event
-                          |> Map.get("data")
+                          |> Map.get(:data)
                           |> Map.values()
                           |> Enum.map(&to_string(&1))
                           |> Enum.reverse()

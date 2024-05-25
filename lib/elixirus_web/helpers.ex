@@ -1,10 +1,6 @@
 defmodule ElixirusWeb.Helpers do
   use Phoenix.LiveView
 
-  def stringify_value(data, charlist_key) do
-    data |> Map.get(charlist_key) |> to_string()
-  end
-
   def attendance_color(symbol) do
     case symbol do
       "nb" -> "red-500"
@@ -23,12 +19,11 @@ defmodule ElixirusWeb.Helpers do
       {avg, divisor} =
         grades
         |> Enum.reduce({0, 1}, fn grade, {acc, divisor} ->
-          weight = stringify_value(grade, ~c"weight") |> String.to_integer()
+          weight = grade.weight
 
-          if grade |> Map.get(~c"counts") == true do
+          if grade.counts == true do
             {grade
-             |> stringify_value(~c"value")
-             |> String.to_float()
+             |> Map.get(:value)
              |> Kernel.*(weight)
              |> Kernel.+(acc), divisor + weight}
           else

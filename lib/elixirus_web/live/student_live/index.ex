@@ -208,7 +208,7 @@ defmodule ElixirusWeb.StudentLive.Index do
           gpas =
             gpas
             |> Enum.sort_by(fn {_, [_, _, gpa]} ->
-              case to_string(gpa) do
+              case gpa do
                 "-" -> 99.0
                 gpa -> gpa |> String.to_float()
               end

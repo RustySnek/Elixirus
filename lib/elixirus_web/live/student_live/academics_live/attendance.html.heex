@@ -44,17 +44,16 @@
   </div>
   <div :for={day <- @attendance} class="flex gap-2 flex-col items-center">
     <p class="mr-1">
-      <%= day |> hd |> stringify_value(~c"date") %>
+      <%= day |> Enum.at(0, %{}) |> Map.get(:date) %>
     </p>
     <div class="flex flex-row gap-2 w-full md:w-max flex-wrap">
       <div
         :for={att <- day}
-        class={"flex h-14 justify-center items-center flex-row border border-#{att |>
-        stringify_value(~c"symbol") |> attendance_color()} rounded-md text-center h-14 w-14"}
+        class={"flex h-14 justify-center items-center flex-row border border-#{attendance_color(att.symbol)} rounded-md text-center h-14 w-14"}
       >
         <div class=" flex flex-col justify-center h-14 w-14 md:hidden block">
           <p class="text-3xl select-none">
-            <%= att |> stringify_value(~c"symbol") %>
+            <%= att.symbol %>
           </p>
         </div>
 
@@ -63,33 +62,31 @@
             <:content>
               <.typography align="center" color="red" margin={false}>
                 <span class="font-semibold text-xl">
-                  <%= att |> stringify_value(~c"period") %>
+                  <%= att.period %>
                 </span>
               </.typography>
               <.typography align="center" color="white" variant="p" margin={false}>
                 <span class="text-base">
-                  <%= att |> stringify_value(~c"subject") |> String.slice(0, 50) %>
+                  <%= att.subject |> String.slice(0, 50) %>
                 </span>
               </.typography>
               <.typography align="center" color="white" variant="p" margin={false}>
                 <span class="text-sm">
-                  <%= att |> stringify_value(~c"topic") |> String.slice(0, 50) %>
+                  <%= att.topic |> String.slice(0, 50) %>
                 </span>
               </.typography>
               <p class="mt-1">
-                <%= att |> stringify_value(~c"teacher") %> (<%= day
-                |> hd
-                |> stringify_value(~c"date") %>)
+                <%= att.teacher %> (<%= day |> Enum.at(0, %{}) |> Map.get(:date) %>)
               </p>
-              <p>Excursion: <%= att |> stringify_value(~c"excursion") %></p>
+              <p>Excursion: <%= att.excursion %></p>
               <p>
-                <%= att |> stringify_value(~c"type") %>
+                <%= att.type %>
               </p>
             </:content>
 
             <div class=" flex flex-col justify-center h-14 w-14">
               <p class="text-3xl select-none">
-                <%= att |> stringify_value(~c"symbol") %>
+                <%= att.symbol %>
               </p>
             </div>
           </.tooltip>

@@ -45,7 +45,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
       |> assign(:month, month)
       |> assign(:page_title, "Schedule #{year}-#{month}")
       |> create_fetcher(schedule, :schedule, fn ->
-        {python(:helpers, :fetch_schedule, [token, year, month]), year, month}
+        {python(:fetchers, :fetch_schedule, [token, year, month]), year, month}
       end)
 
     {:ok, socket}

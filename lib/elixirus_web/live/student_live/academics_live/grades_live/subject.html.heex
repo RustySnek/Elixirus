@@ -4,11 +4,11 @@
 <div :if={@grades != %{}} class="flex gap-y-5 flex-col mx-10">
   <div
     :for={grade <- @grades |> Map.get(@subject |> to_charlist())}
-    class={"rounded-2xl border-fuchsia-400 border #{grade |> Map.get(~c"counts") == false && "!border-red-600"}"}
+    class={"rounded-2xl border-fuchsia-400 border #{grade.counts == false && "!border-red-600"}"}
   >
     <div
       :if={
-        grade |> Map.get(~c"href") |> to_string |> String.split("/") |> List.last() ==
+        grade.href |> to_string |> String.split("/") |> List.last() ==
           @shown_grade
       }
       id={@shown_grade}
@@ -17,53 +17,53 @@
     >
       <p class="text-4xl text-center w-24 font-bold self-center">
         <span>
-          <%= grade |> Map.get(~c"grade") %>
+          <%= grade.grade %>
         </span>
         <span class="text-sm font-normal bottom-7 right-2 relative">
-          <%= grade |> stringify_value(~c"weight") %>
+          <%= grade.weight %>
         </span>
       </p>
 
       <div class="flex flex-col justify-between w-full ">
-        <p class="text-xl ml-2"><%= grade |> stringify_value(~c"category") %></p>
+        <p class="text-xl ml-2"><%= grade.category %></p>
         <div class="flex-col flex">
-          <div class={" flex flex-row self-end gap-x-2 #{grade |> Map.get(~c"counts") == false && "hidden"}"}>
+          <div class={" flex flex-row self-end gap-x-2 #{grade.counts == false && "hidden"}"}>
             <p>Real value:</p>
-            <p><%= grade |> stringify_value(~c"value") %></p>
+            <p><%= grade.value %></p>
           </div>
           <div class="flex-row gap-x-2 self-end flex">
-            <p><%= grade |> stringify_value(~c"teacher") %></p>
-            <p><%= grade |> stringify_value(~c"date") %></p>
+            <p><%= grade.teacher %></p>
+            <p><%= grade.date %></p>
           </div>
         </div>
       </div>
     </div>
     <div
       :if={
-        grade |> Map.get(~c"href") |> to_string |> String.split("/") |> List.last() !=
+        grade.href |> to_string |> String.split("/") |> List.last() !=
           @shown_grade
       }
-      id={grade |> Map.get(~c"href") |> to_string}
+      id={grade.href |> to_string}
       class=" flex flex-col sm:flex-row gap-x-20 rounded-2xl p-4 "
     >
       <p class="text-4xl text-center w-24 font-bold self-center">
         <span>
-          <%= grade |> Map.get(~c"grade") %>
+          <%= grade.grade %>
         </span>
         <span class="text-sm font-normal bottom-7 right-2 relative">
-          <%= grade |> stringify_value(~c"weight") %>
+          <%= grade.weight %>
         </span>
       </p>
       <div class="flex flex-col justify-between w-full ">
-        <p class="text-xl ml-2"><%= grade |> stringify_value(~c"category") %></p>
+        <p class="text-xl ml-2"><%= grade.category %></p>
         <div class="flex-col flex">
-          <div class={" flex flex-row self-end gap-x-2 #{grade |> Map.get(~c"counts") == false && "hidden"}"}>
+          <div class={" flex flex-row self-end gap-x-2 #{grade.counts == false && "hidden"}"}>
             <p>Real value:</p>
-            <p><%= grade |> stringify_value(~c"value") %></p>
+            <p><%= grade.value %></p>
           </div>
           <div class="flex-row gap-x-2 self-end flex">
-            <p><%= grade |> stringify_value(~c"teacher") %></p>
-            <p><%= grade |> stringify_value(~c"date") %></p>
+            <p><%= grade.teacher %></p>
+            <p><%= grade.date %></p>
           </div>
         </div>
       </div>
