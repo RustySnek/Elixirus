@@ -65,7 +65,7 @@ defmodule Elixirus.TokenWorker do
 
   defp execute_token_refresh(table) do
     :ets.tab2list(table)
-    |> Task.async_stream(fn token -> refresh_token(table, token) end, timeout: 30 * 1000)
+    |> Task.async_stream(fn token -> refresh_token(table, token) end, timeout: 60 * 1000)
     # TODO push notifications
     |> Task.async_stream(
       fn notification ->
@@ -75,7 +75,7 @@ defmodule Elixirus.TokenWorker do
     )
     |> Stream.run()
 
-    Process.send_after(self(), :refresh, 15 * 1000)
+    Process.send_after(self(), :refresh, 15 * 60 * 1000)
     {:noreply, table}
   end
 
