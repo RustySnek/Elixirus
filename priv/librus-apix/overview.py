@@ -5,7 +5,7 @@ from handle_classes import *
 from helpers import brew_elixir_dict, brew_elixir_list, create_client, extract_grades
 from librus_apix.announcements import get_announcements
 from librus_apix.attendance import get_attendance
-from librus_apix.exceptions import TokenError
+from librus_apix.exceptions import TokenError, TokenKeyError
 from librus_apix.grades import ParseError, get_grades
 from librus_apix.homework import get_homework
 from librus_apix.messages import get_received
@@ -18,7 +18,7 @@ def handle_overview_grades(token, semester):
     client = create_client(token)
     try:
         subjects, average_grades, descriptive = get_grades(client, "week")
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -34,7 +34,7 @@ def handle_homework_overview(token, monday):
             datetime.strptime(monday, "%Y-%m-%d") + timedelta(days=7)
         ).strftime("%Y-%m-%d")
         homework = brew_elixir_list(get_homework(token, monday, this_week), safe=False)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -45,7 +45,7 @@ def handle_overview_student_info(token):
     client = create_client(token)
     try:
         info = brew_elixir_dict(get_student_information(client).__dict__)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -57,7 +57,7 @@ def handle_overview_messages(token):
     try:
         messages = get_received(client, 0)
         messages = filter(lambda x: x.unread == True, messages)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -70,7 +70,7 @@ def handle_overview_announcements(token, amount):
     client = create_client(token)
     try:
         announcements = get_announcements(client)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -84,7 +84,7 @@ def handle_overview_timetable(token, monday):
     try:
         monday = datetime.strptime(monday, "%Y-%m-%d")
         timetable = get_timetable(client, monday)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -97,7 +97,7 @@ def handle_overview_schedule(token, year, month):
     client = create_client(token)
     try:
         schedule = get_schedule(client, month, year)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -110,7 +110,7 @@ def handle_overview_attendance(token, semester):
     client = create_client(token)
     try:
         attendance = get_attendance(client, "week")
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)

@@ -249,7 +249,7 @@
     </div>
     <div
       :for={message <- @shown_messages}
-      class={"hover:opacity-90 rotate-0 w-full  bg-fuchsia-800/25 #{message |> Map.get(~c"unread") == true && '!bg-red-700/25'} rounded"}
+      class={"hover:opacity-90 rotate-0 w-full  bg-fuchsia-800/25 #{message.unread == true && '!bg-red-700/25'} rounded"}
     >
       <button
         class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24"

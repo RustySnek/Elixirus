@@ -6,20 +6,17 @@ from handle_classes import *
 from handle_classes import handle_completed_lessons
 from helpers import brew_elixir_dict, brew_elixir_list, create_client
 from librus_apix.announcements import get_announcements
-from librus_apix.attendance import ParseError, get_attendance, get_attendance_frequency
-from librus_apix.client import AuthorizationError, Client
+from librus_apix.attendance import (ParseError, get_attendance,
+                                    get_attendance_frequency)
+from librus_apix.client import Client
 from librus_apix.completed_lessons import get_completed
-from librus_apix.exceptions import ParseError, TokenError
+from librus_apix.exceptions import (AuthorizationError, ParseError, TokenError,
+                                    TokenKeyError)
 from librus_apix.grades import get_grades
 from librus_apix.homework import get_homework, homework_detail
 from librus_apix.messages import get_max_page_number as get_max_page_messages
-from librus_apix.messages import (
-    get_received,
-    get_recipients,
-    get_sent,
-    message_content,
-    recipient_groups,
-)
+from librus_apix.messages import (get_received, get_recipients, get_sent,
+                                  message_content, recipient_groups)
 from librus_apix.messages import send_message as send_msg
 from librus_apix.notifications import get_notifications
 from librus_apix.schedule import get_schedule
@@ -29,7 +26,7 @@ from librus_apix.student_information import get_student_information
 def sanitize_fetch(func, *args):
     try:
         return "ok", func(*args)
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
@@ -140,7 +137,7 @@ def fetch_all_messages(token):
         messages = []
         for page in range(0, pages + 1):
             messages.extend(get_received(client, page))
-    except TokenError as token_err:
+    except (TokenError, TokenKeyError) as token_err:
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)

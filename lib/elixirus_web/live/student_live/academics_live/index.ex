@@ -9,7 +9,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
   defp sort_grades_by_date(grades) do
     grades
     |> Enum.sort_by(
-      &(&1 |> Map.get(~c"date") |> to_string() |> Date.from_iso8601!()),
+      &(&1 |> Map.get(:date) |> Date.from_iso8601!()),
       :desc
     )
   end
@@ -27,20 +27,20 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     |> assign(:week_attendance, [])
     |> assign(:homework, [])
     |> create_fetcher(grades, :week_grades, fn ->
-      {python(:helpers, :fetch_week_grades, [token, semester]), semester}
+      {python(:fetchers, :fetch_week_grades, [token, semester]), semester}
     end)
     |> create_fetcher(todays_lessons, :completed_lessons, fn ->
-      python(:helpers, :fetch_todays_completed_lessons, [token])
+      python(:fetchers, :fetch_todays_completed_lessons, [token])
     end)
     |> create_fetcher(homework, :homework, fn ->
       monday = this_weeks_monday() |> Date.add(-14)
       next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
       monday = monday |> Calendar.strftime("%Y-%m-%d")
 
-      python(:helpers, :fetch_homework, [token, monday, next_monday])
+      python(:fetchers, :fetch_homework, [token, monday, next_monday])
     end)
     |> create_fetcher(attendance, :week_attendance, fn ->
-      {python(:helpers, :fetch_week_attendance, [token, semester]), semester}
+      {python(:fetchers, :fetch_week_attendance, [token, semester]), semester}
     end)
   end
 

@@ -235,7 +235,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     socket =
       case content do
         {:ok, content} ->
-          assign(socket, :message_content, content |> dbg)
+          assign(socket, :message_content, content)
 
         %{:token_error => message} ->
           assign(socket, :login_required, true)
@@ -274,7 +274,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
         {:ok, messages} ->
           {unread, seen} =
             messages
-            |> Enum.split_with(fn msg -> Map.get(msg, ~c"unread") == true end)
+            |> Enum.split_with(fn msg -> msg.unread == true end)
 
           cache_and_ttl_data(socket.assigns.user_id, "messages", messages, 15)
 
@@ -344,7 +344,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
         data ->
           {unread, seen} =
-            data |> Enum.split_with(fn msg -> Map.get(msg, ~c"unread") == true end)
+            data |> Enum.split_with(fn msg -> msg.unread == true end)
 
           socket
           |> assign(:messages, data)

@@ -111,7 +111,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
         grades
         |> Enum.sort_by(
           fn grade ->
-            Map.get(grade, ~c"weight") |> to_string |> String.to_integer()
+            grade.weight
           end,
           :desc
         )
@@ -120,8 +120,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
         grades
         |> Enum.sort_by(
           fn grade ->
-            if Map.get(grade, ~c"counts") == false do
-              Map.get(grade, ~c"value") |> to_string |> String.to_float()
+            if grade.counts == false do
+              grade.value
             end
           end,
           :desc
@@ -131,18 +131,14 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
         grades
         |> Enum.sort_by(
           fn grade ->
-            if Map.get(grade, ~c"counts") == false do
+            if grade.counts == false do
               0
             else
               value =
-                Map.get(grade, ~c"value")
-                |> to_string
-                |> String.to_float()
+                grade.value
 
               weight =
-                Map.get(grade, ~c"weight")
-                |> to_string()
-                |> String.to_integer()
+                grade.weight
 
               value * weight
             end
@@ -224,7 +220,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   end
 
   def fetch_all_grades(token, semester) do
-    {python(:helpers, :fetch_all_grades, [token, semester]), semester}
+    {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
   end
 
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do

@@ -10,7 +10,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   import ElixirusWeb.Components.Loadings
 
   def fetch_homework_details(token, id) do
-    python(:helpers, :fetch_homework_details, [token, id])
+    python(:fetchers, :fetch_homework_details, [token, id])
   end
 
   def handle_async(:load_details, {:ok, details}, socket) do
@@ -108,7 +108,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
       |> assign(:details, %{})
       |> assign(:page_title, "Homework")
       |> create_fetcher(homework, :homework, fn ->
-        python(:helpers, :fetch_homework, [api_token, monday, next_monday])
+        python(:fetchers, :fetch_homework, [api_token, monday, next_monday])
       end)
 
     {:ok, socket}

@@ -10,24 +10,23 @@
           <div>
             <div class="text-lg flex flex-row justify-between">
               <span>
-                <%= lesson |> stringify_value(~c"lesson_number") %>
+                <%= lesson.lesson_number %>
               </span>
 
-              <span class={"font-semibold text-#{lesson |> stringify_value(~c"attendance_symbol") |>
-                attendance_color()}"}>
-                <%= lesson |> stringify_value(~c"attendance_symbol") %>
+              <span class={"font-semibold text-#{attendance_color(lesson.attendance_symbol)}"}>
+                <%= lesson.attendance_symbol %>
               </span>
             </div>
             <div class="line-clamp-4">
-              <%= lesson |> stringify_value(~c"topic") %>
+              <%= lesson.topic %>
             </div>
           </div>
           <div class="flex flex-col">
             <span class="line-clamp-1">
-              <%= lesson |> stringify_value(~c"subject") %>
+              <%= lesson.subject %>
             </span>
             <span class="line-clamp-1 text-gray-400">
-              <%= lesson |> stringify_value(~c"teacher") %>
+              <%= lesson.teacher %>
             </span>
           </div>
         </div>
@@ -46,32 +45,32 @@
             <div class="text-lg flex flex-row justify-between">
               <div class="flex flex-row">
                 <span>
-                  <%= grade |> stringify_value(~c"weight") %>
+                  <%= grade.weight %>
                 </span>
                 <.scale mini class="w-4 self-center" />
               </div>
 
               <span class="font-semibold text-purple-700 text-2xl pb-1">
-                <%= grade |> stringify_value(~c"grade") %>
+                <%= grade.grade %>
               </span>
               <div>
                 <.link navigate={
-                  ~p"/student/academics/subjects/#{grade |> stringify_value(~c'title')}?grade_id=#{grade |> stringify_value(~c'href') |> String.split("/") |> List.last()}&semester=#{@semester}"
+                  ~p"/student/academics/subjects/#{grade.title}?grade_id=#{grade.href |> String.split("/") |> List.last()}&semester=#{@semester}"
                 }>
                   <.magnifying_glass class="w-6" />
                 </.link>
               </div>
             </div>
             <div class="line-clamp-4">
-              <%= grade |> stringify_value(~c"category") %>
+              <%= grade.category %>
             </div>
           </div>
           <div class="flex flex-col">
             <span class="line-clamp-1">
-              <%= grade |> stringify_value(~c"title") %>
+              <%= grade.title %>
             </span>
             <span class="line-clamp-1 text-gray-400">
-              <%= grade |> stringify_value(~c"teacher") %>
+              <%= grade.teacher %>
             </span>
           </div>
         </div>
@@ -87,22 +86,22 @@
       >
         <div class="w-56 px-2 flex flex-col justify-between h-full">
           <div class="pt-1">
-            <%= hw |> stringify_value(~c"category") %>
+            <%= hw.category %>
             <div class="text-lg flex flex-row justify-between">
               <span class="line-clamp-1">
-                <%= hw |> stringify_value(~c"lesson") %>
+                <%= hw.lesson %>
               </span>
             </div>
             <div class="line-clamp-4">
-              <%= hw |> stringify_value(~c"subject") %>
+              <%= hw.subject %>
             </div>
           </div>
           <div class="flex flex-col">
             <span class="line-clamp-1">
-              until: <%= hw |> stringify_value(~c"completion_date") %>
+              until: <%= hw.completion_date %>
             </span>
             <span class="line-clamp-1 text-gray-400">
-              <%= hw |> stringify_value(~c"teacher") %>
+              <%= hw.teacher %>
             </span>
           </div>
         </div>
@@ -121,25 +120,24 @@
             <div class="text-lg flex flex-row justify-between">
               <div class="flex flex-row">
                 <span class="text-base">
-                  <%= attendance |> stringify_value(~c"type") %>
+                  <%= attendance.type %>
                 </span>
               </div>
 
-              <span class={"font-semibold text-#{attendance |> stringify_value(~c"symbol") |> attendance_color()}"}>
-                <%= attendance |> stringify_value(~c"symbol") %>
+              <span class={"font-semibold text-#{attendance_color(attendance.symbol)}"}>
+                <%= attendance.symbol %>
               </span>
             </div>
             <div class="line-clamp-4">
-              <%= attendance |> stringify_value(~c"topic") %>
+              <%= attendance.topic %>
             </div>
           </div>
           <div class="flex flex-col">
             <span class="line-clamp-1">
-              <%= attendance |> stringify_value(~c"period") %> - <%= attendance
-              |> stringify_value(~c"date") %>
+              <%= attendance.period %> - <%= attendance.date %>
             </span>
             <span class="line-clamp-1 text-gray-400">
-              <%= attendance |> stringify_value(~c"teacher") %>
+              <%= attendance.teacher %>
             </span>
           </div>
         </div>

@@ -44,7 +44,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
         {:ok, attendance, stats} ->
           attendance =
             attendance
-            |> Enum.chunk_by(&Map.get(&1, ~c"date"))
+            |> Enum.chunk_by(&Map.get(&1, :date))
 
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance, 10)
           cache_and_ttl_data(socket.assigns.user_id, "attendance-stats", stats, 10)
@@ -74,7 +74,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:semester, semester)
       |> assign(:attendance, [])
       |> create_fetcher(attendance, :attendance, fn ->
-        {python(:helpers, :fetch_all_attendance, [socket.assigns.token, semester, true]),
+        {python(:fetchers, :fetch_all_attendance, [socket.assigns.token, semester, true]),
          semester}
       end)
 
@@ -109,7 +109,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:login_required, false)
       |> assign(:page_title, "Attendance")
       |> create_fetcher(frequency, :frequency, fn ->
-        python(:helpers, :fetch_attendance_frequency, [token])
+        python(:fetchers, :fetch_attendance_frequency, [token])
       end)
 
     {:ok, socket}
