@@ -77,6 +77,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> Map.values()
           |> Enum.filter(
             &(&1
+              |> to_string()
               |> String.downcase()
               |> String.contains?(String.downcase(query)))
           ) !=
@@ -96,6 +97,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     keys
     |> Enum.filter(fn subject ->
       subject
+      |> to_string()
       |> String.downcase()
       |> String.contains?(String.downcase(query))
     end)
@@ -226,6 +228,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       case grades do
         {:ok, [grades, semester_grades]} ->
           keys = grades |> Map.keys()
+          semester_grades = sort_gpas(semester_grades)
 
           keys =
             keys |> search_subjects(socket.assigns.query)
