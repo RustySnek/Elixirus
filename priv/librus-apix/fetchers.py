@@ -63,9 +63,8 @@ def fetch_completed_lessons(token, date_from, date_to, page=0):
 
 
 def fetch_todays_completed_lessons(token):
-    client: Client = create_client(token)
     today_date = datetime.now().strftime("%Y-%m-%d")
-    return fetch_completed_lessons(client, today_date, today_date)
+    return fetch_completed_lessons(token, today_date, today_date)
 
 
 def fetch_announcements(token):
@@ -166,7 +165,7 @@ def fetch_schedule(token, year, month):
     status, schedule = sanitize_fetch(get_schedule, client, month, year, True)
     if status == "ok":
         return Atom(status.encode("utf-8")), brew_elixir_dict(
-            handle_schedule(schedule), safe=True
+            handle_schedule(schedule), safe=False, exclude=["data"]
         )
     else:
         return status, schedule
