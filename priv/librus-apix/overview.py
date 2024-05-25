@@ -1,17 +1,17 @@
+from datetime import datetime, timedelta
+
 from erlport.erlterms import Atom
-from datetime import datetime
-from librus_apix.exceptions import TokenError
-from librus_apix.grades import get_grades, ParseError
+from handle_classes import *
+from helpers import brew_elixir_dict, brew_elixir_list, create_client, extract_grades
 from librus_apix.announcements import get_announcements
-from datetime import timedelta
 from librus_apix.attendance import get_attendance
+from librus_apix.exceptions import TokenError
+from librus_apix.grades import ParseError, get_grades
 from librus_apix.homework import get_homework
 from librus_apix.messages import get_received
 from librus_apix.schedule import get_schedule
 from librus_apix.student_information import get_student_information
 from librus_apix.timetable import get_timetable
-from handle_classes import *
-from helpers import brew_elixir_dict, brew_elixir_list, create_client, extract_grades
 
 
 def handle_overview_grades(token, semester):
@@ -23,8 +23,8 @@ def handle_overview_grades(token, semester):
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
     return Atom("ok".encode("utf-8")), extract_grades(
-        brew_elixir_dict(handle_grades(subjects[int(semester)])
-    ,safe = False))
+        brew_elixir_dict(handle_grades(subjects[int(semester)]), safe=False)
+    )
 
 
 def handle_homework_overview(token, monday):
@@ -61,7 +61,9 @@ def handle_overview_messages(token):
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
-    return Atom("ok".encode("utf-8")), brew_elixir_list(handle_messages(messages), safe=False)
+    return Atom("ok".encode("utf-8")), brew_elixir_list(
+        handle_messages(messages), safe=False
+    )
 
 
 def handle_overview_announcements(token, amount):
@@ -72,9 +74,9 @@ def handle_overview_announcements(token, amount):
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
-    return Atom("ok".encode("utf-8")), brew_elixir_list(handle_announcements(
-        announcements[: int(amount)]
-    ), safe=False)
+    return Atom("ok".encode("utf-8")), brew_elixir_list(
+        handle_announcements(announcements[: int(amount)]), safe=False
+    )
 
 
 def handle_overview_timetable(token, monday):
@@ -86,7 +88,9 @@ def handle_overview_timetable(token, monday):
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
-    return Atom("ok".encode("utf-8")), brew_elixir_list(handle_timetable(timetable), safe=False)
+    return Atom("ok".encode("utf-8")), brew_elixir_list(
+        handle_timetable(timetable), safe=False, exclude=["info"]
+    )
 
 
 def handle_overview_schedule(token, year, month):
@@ -97,7 +101,9 @@ def handle_overview_schedule(token, year, month):
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
-    return Atom("ok".encode("utf-8")), brew_elixir_dict(handle_schedule(schedule), safe=False)
+    return Atom("ok".encode("utf-8")), brew_elixir_dict(
+        handle_schedule(schedule), safe=False
+    )
 
 
 def handle_overview_attendance(token, semester):
@@ -108,4 +114,6 @@ def handle_overview_attendance(token, semester):
         return Atom("token_error".encode("utf-8")), str(token_err)
     except ParseError as parse_err:
         return Atom("error".encode("utf-8")), str(parse_err)
-    return Atom("ok".encode("utf-8")), brew_elixir_list(handle_attendance(attendance[int(semester)]), safe=False)
+    return Atom("ok".encode("utf-8")), brew_elixir_list(
+        handle_attendance(attendance[int(semester)]), safe=False
+    )

@@ -1,34 +1,29 @@
+from collections import Counter
+from datetime import datetime
+
 from erlport.erlterms import Atom
-from librus_apix.attendance import ParseError
-from librus_apix.completed_lessons import get_completed
-from librus_apix.exceptions import TokenError
-from librus_apix.grades import get_grades
-from librus_apix.student_information import get_student_information
-from librus_apix.notifications import get_notifications
-from librus_apix.client import AuthorizationError, Client
+from handle_classes import *
 from handle_classes import handle_completed_lessons
-from helpers import brew_elixir_list, create_client, brew_elixir_dict
-from erlport.erlterms import Atom
-from librus_apix.attendance import get_attendance, get_attendance_frequency
+from helpers import brew_elixir_dict, brew_elixir_list, create_client
+from librus_apix.announcements import get_announcements
+from librus_apix.attendance import ParseError, get_attendance, get_attendance_frequency
+from librus_apix.client import AuthorizationError, Client
+from librus_apix.completed_lessons import get_completed
+from librus_apix.exceptions import ParseError, TokenError
+from librus_apix.grades import get_grades
+from librus_apix.homework import get_homework, homework_detail
+from librus_apix.messages import get_max_page_number as get_max_page_messages
 from librus_apix.messages import (
     get_received,
-    message_content,
-    get_max_page_number as get_max_page_messages,
-    recipient_groups,
     get_recipients,
     get_sent,
-    send_message as send_msg,
+    message_content,
+    recipient_groups,
 )
-from librus_apix.homework import get_homework, homework_detail
+from librus_apix.messages import send_message as send_msg
+from librus_apix.notifications import get_notifications
 from librus_apix.schedule import get_schedule
-from librus_apix.announcements import get_announcements
-from librus_apix.completed_lessons import get_completed
 from librus_apix.student_information import get_student_information
-from handle_classes import *
-from datetime import datetime
-from librus_apix.exceptions import TokenError, ParseError
-
-from collections import Counter
 
 
 def sanitize_fetch(func, *args):
@@ -171,7 +166,7 @@ def fetch_schedule(token, year, month):
     status, schedule = sanitize_fetch(get_schedule, client, month, year, True)
     if status == "ok":
         return Atom(status.encode("utf-8")), brew_elixir_dict(
-            handle_schedule(schedule), safe=False
+            handle_schedule(schedule), safe=True
         )
     else:
         return status, schedule

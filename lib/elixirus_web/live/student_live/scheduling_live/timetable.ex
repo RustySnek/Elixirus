@@ -11,10 +11,9 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   defp exclude_empty_days(timetable) do
     timetable
     |> Enum.filter(fn weekday ->
-      Enum.filter(weekday, fn period ->
-        period |> Map.get(~c"subject") |> Enum.empty?() |> Kernel.not()
+      Enum.any?(weekday, fn period ->
+        period.subject |> Kernel.!=("")
       end)
-      |> Kernel.!=([])
     end)
   end
 
@@ -22,7 +21,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     [year, month] = month_year |> String.split("-")
 
     start_async(socket, :load_schedule, fn ->
-      {python(:helpers, :fetch_schedule, [socket.assigns.token, year, month]), year, month}
+      {python(:fetchers, :fetch_schedule, [socket.assigns.token, year, month]), year, month}
     end)
   end
 
@@ -74,8 +73,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   defp get_events_inside_period(schedule, period) do
-    get_events_inside_day(schedule, period |> stringify_value(~c"date"))
-    |> Enum.filter(&(&1 |> stringify_value(~c"number") == period |> stringify_value(~c"number")))
+    get_events_inside_day(schedule, period.date)
+    |> Enum.filter(&(&1 |> Map.get("number") == period.number))
   end
 
   defp get_events_inside_day(schedule, date) do
@@ -95,15 +94,15 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   defp is_event_inside_period?(schedule, period) do
-    [year, month, day] = period |> stringify_value(~c"date") |> String.split("-")
-    period_number = period |> stringify_value(~c"number")
+    [year, month, day] = period.date |> String.split("-")
+    period_number = period.number
 
     case schedule["#{year}-#{month}"][day |> String.to_integer()] do
       nil ->
         false
 
       events ->
-        events |> Enum.any?(&(&1 |> stringify_value(~c"number") |> Kernel.==(period_number)))
+        events |> Enum.any?(&(&1 |> Map.get("number") |> Kernel.==(period_number)))
     end
   end
 
@@ -145,8 +144,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   def get_indicator_position(timetable) do
     current_time = warsaw_now() |> Calendar.strftime("%H:%M")
     last = timetable |> hd() |> List.last()
-    date_from = Map.get(timetable |> hd() |> hd(), ~c"date_from") |> to_string()
-    date_to = Map.get(last, ~c"date_to") |> to_string()
+    date_from = timetable |> List.flatten() |> Enum.at(0, %{}) |> Map.get(:date_from)
+    date_to = last.date_to
 
     case calculate_timeline_percentage(current_time, date_from, date_to) do
       0 -> "visibility: hidden;"
@@ -155,7 +154,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def calculate_minute_difference(time_from_str, time_to_str) do
-    if time_to_str == nil or time_from_str == nil or time_from_str == "undefined" or
+    if time_to_str == nil or time_from_str == nil or time_from_str == :undefined or
          time_to_str == "undefined" do
       0
     else
