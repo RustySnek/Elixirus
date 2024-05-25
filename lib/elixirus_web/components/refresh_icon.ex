@@ -1,4 +1,7 @@
 defmodule ElixirusWeb.Components.RefreshIcon do
+  @moduledoc """
+  this needs to be gone...
+  """
   use Phoenix.Component
 
   def refresh_icon(assigns) do

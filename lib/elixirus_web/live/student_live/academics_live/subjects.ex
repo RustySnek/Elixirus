@@ -75,9 +75,13 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
         |> Enum.filter(fn grade ->
           grade
           |> Map.values()
-          |> Enum.filter(fn val ->
-            val |> to_string() |> String.downcase() |> String.contains?(String.downcase(query))
-          end) != []
+          |> Enum.filter(
+            &(&1
+              |> to_string()
+              |> String.downcase()
+              |> String.contains?(String.downcase(query)))
+          ) !=
+            []
         end)
 
       {subject, filtered_grades}
@@ -99,6 +103,20 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     end)
   end
 
+  def _sort_grade_by_weight_value(grade) do
+    if grade.counts == false do
+      0
+    else
+      value =
+        grade.value
+
+      weight =
+        grade.weight
+
+      value * weight
+    end
+  end
+
   defp sort_grades_by(grades, by) do
     case by do
       "newest" ->
@@ -110,39 +128,21 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       "weight" ->
         grades
         |> Enum.sort_by(
-          fn grade ->
-            grade.weight
-          end,
+          &Map.get(&1, :weight),
           :desc
         )
 
       "value" ->
         grades
         |> Enum.sort_by(
-          fn grade ->
-            if grade.counts == false do
-              grade.value
-            end
-          end,
+          &(&1 |> Map.get(:counts) |> Kernel.==(true) && &1 |> Map.get(:value)),
           :desc
         )
 
       "weighed_value" ->
         grades
         |> Enum.sort_by(
-          fn grade ->
-            if grade.counts == false do
-              0
-            else
-              value =
-                grade.value
-
-              weight =
-                grade.weight
-
-              value * weight
-            end
-          end,
+          &_sort_grade_by_weight_value(&1),
           :desc
         )
 

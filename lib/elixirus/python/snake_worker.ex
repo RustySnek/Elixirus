@@ -1,5 +1,8 @@
-# A.K.A. snake worker 🔨🐍
 defmodule Elixirus.Python.SnakeWorker do
+  @moduledoc """
+  🔨🐍
+  A brave snake worker slithering across...
+  """
   alias Elixirus.Python.SnakeManager
   use GenServer
   require Logger

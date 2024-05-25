@@ -1,4 +1,7 @@
 defmodule ElixirusWeb.Components.NavHeader do
+  @moduledoc """
+  main header with navigation
+  """
   use Phoenix.Component
   alias Phoenix.LiveView.JS
   alias Elixirus.Healthcheck.Healthcheck

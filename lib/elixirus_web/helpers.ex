@@ -1,4 +1,7 @@
 defmodule ElixirusWeb.Helpers do
+  @moduledoc """
+  Miscellanous functions to help parse data
+  """
   use Phoenix.LiveView
 
   def attendance_color(symbol) do
@@ -12,24 +15,27 @@ defmodule ElixirusWeb.Helpers do
     end
   end
 
+  defp _average_divisor_of_grades(grades) do
+    grades
+    |> Enum.reduce({0, 1}, fn grade, {acc, divisor} ->
+      weight = grade.weight
+
+      if grade.counts == true do
+        {grade
+         |> Map.get(:value)
+         |> Kernel.*(weight)
+         |> Kernel.+(acc), divisor + weight}
+      else
+        {acc, divisor}
+      end
+    end)
+  end
+
   def count_average(grades) do
     if grades == [] do
       0
     else
-      {avg, divisor} =
-        grades
-        |> Enum.reduce({0, 1}, fn grade, {acc, divisor} ->
-          weight = grade.weight
-
-          if grade.counts == true do
-            {grade
-             |> Map.get(:value)
-             |> Kernel.*(weight)
-             |> Kernel.+(acc), divisor + weight}
-          else
-            {acc, divisor}
-          end
-        end)
+      {avg, divisor} = _average_divisor_of_grades(grades)
 
       if divisor == 1 do
         0.0

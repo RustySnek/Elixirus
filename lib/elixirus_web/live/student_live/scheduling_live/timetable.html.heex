@@ -89,21 +89,24 @@
                 >
                   <div class="flex flex-col text-center space-y-2 mb-3">
                     <span class="text-lg text-center text-fuchsia-700 font-bold">
-                      <%= event["title"] %>
+                      <%= event.title %>
                     </span>
-                    <span class="text-lg break-words">
-                      <%= event["subject"] %>
+                    <span class="text-lg text-fuchsia-400 font-bold font-italic break-words">
+                      <%= event.subject %>
                     </span>
                   </div>
                   <div class="flex flex-col text-center">
-                    <span :for={
-                      item <-
-                        event
-                        |> Map.get(:data)
-                        |> Map.values()
-                        |> Enum.map(&to_string(&1))
-                        |> Enum.reverse()
-                    }>
+                    <span
+                      :for={
+                        item <-
+                          event
+                          |> Map.get(:data)
+                          |> Map.values()
+                          |> Enum.map(&to_string(&1))
+                          |> Enum.reverse()
+                      }
+                      :if={item != "unknown"}
+                    >
                       <%= item %>
                     </span>
                   </div>
@@ -124,7 +127,7 @@
                     <%= event.summary %>
                   </span>
                   <br />
-                  <span><%= event.description |> raw %></span>
+                  <span><%= event.description |> HtmlSanitizeEx.html5() |> raw %></span>
                 </div>
               </div>
             </.live_component>
@@ -149,7 +152,7 @@
             </button>
           </div>
           <div :for={period <- weekday} class="w-72 xs:w-60 text-justify">
-            <div :if={is_event_inside_period?(@schedule, period)} class="absolute">
+            <div :if={event_inside_period?(@schedule, period)} class="absolute">
               <.information_circle
                 outline
                 class="w-10 text-red-800 translate-y-11 xs:translate-x-48 translate-x-60"
@@ -171,27 +174,30 @@
                   >
                     <div class="flex flex-col text-center space-y-2 mb-3">
                       <span class="text-lg text-center text-fuchsia-700 font-bold">
-                        <%= event["title"] %>
+                        <%= event.title %>
                       </span>
                       <span
                         :if={
-                          event["subject"] !=
-                            event["title"]
+                          event.subject !=
+                            event.title
                         }
-                        class="text-lg"
+                        class="text-fuchsia-400 font-bold font-italic text-lg"
                       >
-                        <%= event["subject"] %>
+                        <%= event.subject %>
                       </span>
                     </div>
                     <div class="flex flex-col text-center">
-                      <span :for={
-                        item <-
-                          event
-                          |> Map.get(:data)
-                          |> Map.values()
-                          |> Enum.map(&to_string(&1))
-                          |> Enum.reverse()
-                      }>
+                      <span
+                        :for={
+                          item <-
+                            event
+                            |> Map.get(:data)
+                            |> Map.values()
+                            |> Enum.map(&to_string(&1))
+                            |> Enum.reverse()
+                        }
+                        :if={item != "unknown"}
+                      >
                         <%= item %>
                       </span>
                     </div>

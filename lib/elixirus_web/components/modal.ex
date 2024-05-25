@@ -1,4 +1,7 @@
 defmodule ElixirusWeb.Modal do
+  @moduledoc """
+  Terrible live_component modal
+  """
   use ElixirusWeb, :live_component
 
   attr :id, :string, required: true

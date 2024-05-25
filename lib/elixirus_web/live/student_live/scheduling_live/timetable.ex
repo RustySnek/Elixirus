@@ -74,7 +74,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
 
   defp get_events_inside_period(schedule, period) do
     get_events_inside_day(schedule, period.date)
-    |> Enum.filter(&(&1 |> Map.get("number") == period.number))
+    |> Enum.filter(&(&1 |> Map.get(:number) == period.number))
   end
 
   defp get_events_inside_day(schedule, date) do
@@ -93,7 +93,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     end
   end
 
-  defp is_event_inside_period?(schedule, period) do
+  defp event_inside_period?(schedule, period) do
     [year, month, day] = period.date |> String.split("-")
     period_number = period.number
 
@@ -102,16 +102,16 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
         false
 
       events ->
-        events |> Enum.any?(&(&1 |> Map.get("number") |> Kernel.==(period_number)))
+        events |> Enum.any?(&(&1 |> Map.get(:number) |> Kernel.==(period_number)))
     end
   end
 
-  defp is_within_range?(current_time, time_range) do
+  defp not_within_range?(current_time, time_range) do
     [time_from, time_to] = time_range
 
     compare_from = Timex.compare(current_time, time_from)
     compare_to = Timex.compare(current_time, time_to)
-    compare_from >= 0 and compare_to <= 0
+    compare_from < 0 and compare_to > 0
   end
 
   def calculate_timeline_percentage(current_time, time_from, time_to) do
@@ -119,7 +119,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     time_to = Timex.parse!(time_to, "{h24}:{m}")
     current_time = Timex.parse!(current_time, "{h24}:{m}")
 
-    if !is_within_range?(current_time, [time_from, time_to]) do
+    if not_within_range?(current_time, [time_from, time_to]) do
       0
     else
       total_seconds = Timex.diff(time_from, time_to, :seconds)
@@ -260,8 +260,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       )
 
     socket =
-      if calendar_data == :load do
-        if socket.assigns.calendar_id != "" do
+      cond do
+        calendar_data == :load and socket.assigns.calendar_id != "" ->
           start_async(socket, :load_calendar_data, fn ->
             fetch_calendar_data(
               socket.assigns.calendar_id,
@@ -269,11 +269,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
               current_monday |> Date.add(7) |> to_string()
             )
           end)
-        else
+
+        calendar_data == :load ->
           socket
-        end
-      else
-        assign(socket, :calendar_events, calendar_data)
+
+        true ->
+          assign(socket, :calendar_events, calendar_data)
       end
 
     socket =

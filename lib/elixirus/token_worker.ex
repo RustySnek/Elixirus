@@ -1,4 +1,7 @@
 defmodule Elixirus.TokenWorker do
+  @moduledoc """
+  GenServer for refreshing token lifespan and retrieving notifications
+  """
   use GenServer
   require Logger
   alias Timex
@@ -63,9 +66,16 @@ defmodule Elixirus.TokenWorker do
   defp execute_token_refresh(table) do
     :ets.tab2list(table)
     |> Task.async_stream(fn token -> refresh_token(table, token) end, timeout: 30 * 1000)
-    |> Enum.to_list()
+    # TODO push notifications
+    |> Task.async_stream(
+      fn notification ->
+        unless(notification == nil, do: :ok)
+      end,
+      timeout: 30 * 1000
+    )
+    |> Stream.run()
 
-    Process.send_after(self(), :refresh, 15 * 60 * 1000)
+    Process.send_after(self(), :refresh, 15 * 1000)
     {:noreply, table}
   end
 
@@ -76,14 +86,17 @@ defmodule Elixirus.TokenWorker do
       case python(:fetchers, :keep_token_alive, [token]) do
         {:ok, notifications} ->
           :ets.insert(table, {username, token, ttl, now})
+          notifications
 
         # do something with notifications
 
         {:error, __message} ->
           :ets.delete(table, username)
+          nil
       end
     else
       :ets.delete(table, username)
+      nil
     end
   end
 end

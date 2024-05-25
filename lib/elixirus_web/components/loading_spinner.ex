@@ -1,4 +1,7 @@
 defmodule ElixirusWeb.Components.Loadings do
+  @moduledoc """
+  Component for loadings. Kinda not used tho...
+  """
   import Phoenix.Component
 
   def spinner(assigns) do
