@@ -1,4 +1,7 @@
 defmodule Elixirus.Python.SnakeSupervisor do
+  @moduledoc """
+  DynamicSupervisor for Snakes
+  """
   alias Elixirus.Python.SnakeWorker
   use DynamicSupervisor
 

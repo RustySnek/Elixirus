@@ -1,4 +1,7 @@
 defmodule Elixirus.Python.SnakeWrapper do
+  @moduledoc """
+  Wrapper for SnakeManager GenServer to run python functions.
+  """
   alias Elixirus.Python.SnakeManager
 
   @doc """

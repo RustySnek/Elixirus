@@ -1,4 +1,7 @@
 defmodule ElixirusWeb.LoginModal do
+  @moduledoc """
+  modal for quick login
+  """
   alias ElixirusWeb.LoginForm
   use ElixirusWeb, :live_component
 

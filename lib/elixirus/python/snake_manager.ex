@@ -1,4 +1,7 @@
 defmodule Elixirus.Python.SnakeManager do
+  @moduledoc """
+  Manager for brave 🐍 workers
+  """
   use GenServer
   require Logger
   alias Elixirus.Python.SnakeSupervisor
@@ -36,27 +39,28 @@ defmodule Elixirus.Python.SnakeManager do
     {:noreply, state}
   end
 
-  defp clean_inactive_workers() do
-    pids = DynamicSupervisor.which_children(SnakeSupervisor)
+  defp _kill_inactive_worker(pid) do
+    GenServer.cast(pid, :kill_snake)
+    DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
+    Logger.info("Cleared unused snake")
+  end
+
+  defp clean_inactive_workers({:busy, _update}, _pid), do: nil
+  defp clean_inactive_workers({:dead, _update}, pid), do: _kill_inactive_worker(pid)
+
+  defp clean_inactive_workers({:ready, update}, pid) do
     now = DateTime.now!("Europe/Warsaw")
 
+    unless DateTime.compare(now, Timex.shift(update, minutes: 15)) != :gt do
+      _kill_inactive_worker(pid)
+    end
+  end
+
+  defp clean_inactive_workers() do
+    pids = DynamicSupervisor.which_children(SnakeSupervisor)
+
     Enum.each(pids, fn {_id, pid, _type, _modules} ->
-      case GenServer.call(pid, :status) do
-        {:busy, _} ->
-          nil
-
-        {:dead, _} ->
-          GenServer.cast(pid, :kill_snake)
-          DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
-          Logger.info("Cleared dead snake")
-
-        {_state, update} ->
-          if DateTime.compare(now, Timex.shift(update, minutes: 15)) == :gt do
-            GenServer.cast(pid, :kill_snake)
-            DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
-            Logger.info("Cleared unused snake")
-          end
-      end
+      clean_inactive_workers(GenServer.call(pid, :status), pid)
     end)
   end
 

@@ -1,4 +1,7 @@
 defmodule Elixirus.Healthcheck.Services.ProxyAlive do
+  @moduledoc """
+  Healthcheck for proxy status
+  """
   use HTTPoison.Base
 
   def check_status() do

@@ -1,4 +1,7 @@
 defmodule Elixirus.Healthcheck.HealthWorker do
+  @moduledoc """
+  Healthchecker GenServer <3
+  """
   use GenServer
 
   def start_link([service | _] = args) do

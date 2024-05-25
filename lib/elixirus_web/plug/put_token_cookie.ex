@@ -20,9 +20,10 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
     {_, month, _} = Date.to_erl(Date.utc_today())
 
     semester =
-      cond do
-        month >= 2 and month < 9 -> "1"
-        true -> "0"
+      if month >= 2 and month < 9 do
+        "1"
+      else
+        "0"
       end
 
     case cookie do

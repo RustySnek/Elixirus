@@ -1,4 +1,7 @@
 defmodule Elixirus.Healthcheck.HealthSupervisor do
+  @moduledoc """
+  supervisor for healthcheck workers
+  """
   alias Elixirus.Healthcheck.HealthWorker
   alias Elixirus.Healthcheck.Services.LibrusConnection
   alias Elixirus.Healthcheck.Services.ProxyAlive

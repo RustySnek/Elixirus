@@ -201,18 +201,17 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
+  def _sort_gpas(gpas) do
+    Enum.sort_by(gpas, fn {_, [_, _, gpa]} ->
+      if gpa == "-", do: 99.0, else: gpa |> String.to_float()
+    end)
+  end
+
   def handle_async(:load_semester_grades, {:ok, {data, semester}}, socket) do
     socket =
       case data do
         {:ok, [grades, gpas]} ->
-          gpas =
-            gpas
-            |> Enum.sort_by(fn {_, [_, _, gpa]} ->
-              case gpa do
-                "-" -> 99.0
-                gpa -> gpa |> String.to_float()
-              end
-            end)
+          gpas = _sort_gpas(gpas)
 
           cache_and_ttl_data(socket.assigns.user_id, "semester_grades", gpas, 15)
           cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
