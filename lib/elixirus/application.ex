@@ -10,6 +10,7 @@ defmodule Elixirus.Application do
   def start(_type, _args) do
     children = [
       ElixirusWeb.Telemetry,
+      Elixirus.FCM,
       Elixirus.Healthcheck.HealthSupervisor,
       {Elixirus.Python.SnakeSupervisor, []},
       Supervisor.child_spec({Elixirus.Python.SnakeManager, []},
