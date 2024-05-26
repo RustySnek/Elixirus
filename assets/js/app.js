@@ -2,9 +2,10 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import "./firebase_notifications"
+import { messaging } from "./firebase_notifications";
+import { getToken } from "firebase/messaging";
 
-navigator.serviceWorker.register('firebase-messaging-sw.js', { type: "module" })
+navigator.serviceWorker.register('/firebase-messaging-sw.js', { type: "module" })
   .then(function(registration) {
     console.log('Registration successful, scope is:', registration.scope);
   }).catch(function(err) {
@@ -18,6 +19,40 @@ Hooks.set_local_storage = {
     if (this.el.value !== "") {
       localStorage.setItem(this.el.name, this.el.value)
     }
+  }
+}
+Hooks.req_notification_perm = {
+  mounted() {
+    if (Notification.permission === "granted") {
+
+      getToken(messaging, { vapidKey: "BIyUE4dm3BYwGQ_4divqydjD8pFCRkAGxqxwVgXaVP3Q_jAnTamN72l_GERprXwJyvOXVJi7hZhy0iEiGhDQBO8" }).then((currentToken) => {
+        if (currentToken) {
+          this.pushEventTo(this.el, "set_notifications_token", { token: currentToken })
+        }
+      })
+    }
+
+    this.el.addEventListener('click', e => {
+      e.preventDefault()
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          console.log('Notification permission granted.');
+
+          getToken(messaging, { vapidKey: "BIyUE4dm3BYwGQ_4divqydjD8pFCRkAGxqxwVgXaVP3Q_jAnTamN72l_GERprXwJyvOXVJi7hZhy0iEiGhDQBO8" }).then((currentToken) => {
+            if (currentToken) {
+              this.pushEventTo(this.el, "set_notifications_token", { token: currentToken })
+            } else {
+              console.log('No registration token available. Request permission to generate one.');
+            }
+          }).catch((err) => {
+            console.log('An error occurred while retrieving token. ', err);
+          });
+        } else {
+          console.log('Unable to get permission to notify.');
+        }
+      });
+
+    })
   }
 }
 
@@ -201,10 +236,9 @@ Hooks.store_token = {
     }
     const { v4: uuidv4 } = require("uuid");
     const user_id = uuidv4();
-    fetch(`/set_token?token=${this.el.value}&user_id=${user_id}`).then(_response => window.location.reload())
+    fetch(`/set_token?token=${this.el.value}&notification_token=${this.el.getAttribute('data-notification-token', '')}&user_id=${user_id}`).then(_response => window.location.reload())
   }
 }
-
 let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: { _csrf_token: csrfToken } })
 
 // Show progress bar on live navigation and form submits
@@ -218,6 +252,9 @@ window.addEventListener('phx:require-login', e => {
   const modal = document.getElementById('login-modal-renderer')
   modal.classList.remove("hidden")
 })
+
+
+
 
 liveSocket.connect()
 window.liveSocket = liveSocket

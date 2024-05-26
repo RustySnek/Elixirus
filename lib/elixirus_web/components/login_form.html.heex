@@ -48,6 +48,19 @@
     />
     <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
       <div class="flex flex-row items-center justify-evenly">
+        <span class="text-lg mr-2">Notifications</span>
+        <Heroicons.x_circle
+          :if={@notification_token == nil}
+          id="notification-req-button"
+          phx-hook="req_notification_perm"
+          class="w-8 text-red-600 hover:cursor-pointer"
+        />
+        <Heroicons.check_circle
+          :if={!(@notification_token in [:loading, nil])}
+          class="w-8 text-green-600"
+        />
+      </div>
+      <div class="flex flex-row items-center justify-evenly">
         <span class="text-lg mr-2">Keep token alive?</span>
         <input
           type="checkbox"
@@ -85,7 +98,14 @@
       Login
     </button>
   </form>
-  <input hidden phx-hook="store_token" id="token_input" name={@username} value={@token} />
+  <input
+    hidden
+    phx-hook="store_token"
+    id="token_input"
+    data-username={@username}
+    data-notification-token={@notification_token}
+    value={@token}
+  />
   <h2 class="self-center text-lg text-red-600">
     <%= @error_message %>
   </h2>

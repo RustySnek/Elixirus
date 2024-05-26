@@ -14,6 +14,8 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
     cookie = conn.cookies["api_token"]
 
+    notification_token = conn.cookies |> Map.get("notification_token", "")
+
     user_id =
       conn.cookies |> Map.get("user_id", make_ref() |> :erlang.ref_to_list() |> to_string())
 
@@ -31,6 +33,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
         conn
         |> put_session(:token, %{"not:found": []})
         |> put_session(:user_id, user_id)
+        |> put_session(:notification_token, notification_token)
         |> put_session(:semester, semester)
 
       cookie ->
@@ -38,12 +41,13 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
         GenServer.call(
           TokenWorker,
-          {:extend_lifetime, token |> Map.keys() |> Enum.at(0) |> String.to_charlist()}
+          {:extend_lifetime, token |> Map.keys() |> Enum.at(0), notification_token}
         )
 
         conn
         |> put_session(:token, token)
         |> put_session(:user_id, user_id)
+        |> put_session(:notification_token, notification_token)
         |> put_session(:semester, semester)
     end
   end

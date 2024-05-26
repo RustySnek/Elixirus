@@ -13,8 +13,17 @@ defmodule ElixirusWeb.LoginForm do
       |> assign(:error_message, "")
       |> assign(:keep_alive, false)
       |> assign(:ttl, "12")
+      |> assign(:notification_token, nil)
 
     {:ok, socket}
+  end
+
+  def handle_event("notification_loading", _params, socket) do
+    {:noreply, assign(socket, :notification_token, :loading)}
+  end
+
+  def handle_event("set_notifications_token", %{"token" => notification_token}, socket) do
+    {:noreply, assign(socket, :notification_token, notification_token)}
   end
 
   def handle_event("save_token", _params, socket) do
@@ -53,7 +62,8 @@ defmodule ElixirusWeb.LoginForm do
             do:
               GenServer.call(
                 TokenWorker,
-                {:add_token, username, token, token_ttl |> String.to_integer()}
+                {:add_token, username, token, token_ttl |> String.to_integer(),
+                 socket.assigns.notification_token}
               )
           )
 
