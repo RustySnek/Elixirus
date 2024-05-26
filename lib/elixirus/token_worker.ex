@@ -13,7 +13,9 @@ defmodule Elixirus.TokenWorker do
 
   def init(table) do
     Logger.warning("restarted token worker")
-    {:ok, table, {:continue, :init_status}}
+    # Start refresh process after a minute (avoids crashing genserver)
+    Process.send_after(self(), :refresh, 60_000)
+    {:ok, table}
   end
 
   def handle_call({:add_token, username, token, ttl}, _from, table) do
@@ -65,13 +67,13 @@ defmodule Elixirus.TokenWorker do
 
   defp execute_token_refresh(table) do
     :ets.tab2list(table)
-    |> Task.async_stream(fn token -> refresh_token(table, token) end, timeout: 60 * 1000)
-    # TODO push notifications
+    |> Task.async_stream(fn token -> refresh_token(table, token) end, timeout: 120_000)
     |> Task.async_stream(
       fn notification ->
+        # TODO push notifications
         unless(notification == nil, do: :ok)
       end,
-      timeout: 30 * 1000
+      timeout: 60_000
     )
     |> Stream.run()
 
@@ -90,11 +92,17 @@ defmodule Elixirus.TokenWorker do
 
         # do something with notifications
 
-        {:error, __message} ->
+        {:error, message} ->
+          Logger.error(message)
           :ets.delete(table, username)
+          nil
+
+        exception ->
+          Logger.error(exception |> Map.get(:error, "") |> to_string())
           nil
       end
     else
+      Logger.info("Removing expired token")
       :ets.delete(table, username)
       nil
     end

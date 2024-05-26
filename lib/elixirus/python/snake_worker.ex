@@ -55,6 +55,10 @@ defmodule Elixirus.Python.SnakeWorker do
               GenServer.cast(self(), :kill_snake)
               Process.send_after(SnakeManager, {:sacrifice_snake, self()}, 200)
               %{error: exception}
+
+            exception ->
+              Logger.error(exception)
+              %{error: "Unknown error occured."}
           end
       end
 
