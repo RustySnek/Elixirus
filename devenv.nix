@@ -13,7 +13,7 @@
     python311
     python311Packages.pip
     nodePackages.pyright
-
+    nodePackages_latest.typescript-language-server
     vscode-langservers-extracted
     tailwindcss-language-server
     
