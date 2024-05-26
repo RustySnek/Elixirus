@@ -33,3 +33,5 @@ phoenix-*.ez
 # pre-commit
 .pre-commit-config.yaml
 
+# private firebase
+service-account.json
