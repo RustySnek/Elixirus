@@ -2,6 +2,7 @@
 # Devenv
 __pycache__
 venv/
+.env
 .devenv*
 devenv.local.nix
 /_build/
