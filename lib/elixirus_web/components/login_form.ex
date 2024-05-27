@@ -18,12 +18,12 @@ defmodule ElixirusWeb.LoginForm do
     {:ok, socket}
   end
 
-  def handle_event("notification_loading", _params, socket) do
-    {:noreply, assign(socket, :notification_token, :loading)}
-  end
-
   def handle_event("set_notifications_token", %{"token" => notification_token}, socket) do
     {:noreply, assign(socket, :notification_token, notification_token)}
+  end
+
+  def handle_event("set_notifications_loading", _params, socket) do
+    {:noreply, assign(socket, :notification_token, :loading)}
   end
 
   def handle_event("save_token", _params, socket) do

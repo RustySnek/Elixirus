@@ -55,6 +55,11 @@
           phx-hook="req_notification_perm"
           class="w-8 text-red-600 hover:cursor-pointer"
         />
+        <Heroicons.beaker
+          :if={@notification_token in [:loading, nil]}
+          id="notification-loading"
+          class="w-8 text-yellow-600 animate-spin transition hidden"
+        />
         <Heroicons.check_circle
           :if={!(@notification_token in [:loading, nil])}
           class="w-8 text-green-600"

@@ -4,15 +4,16 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { messaging } from "./firebase_notifications";
 import { getToken } from "firebase/messaging";
+let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
-navigator.serviceWorker.register('/firebase-messaging-sw.js', { type: "module" })
+navigator.serviceWorker.register('/firebase-messaging-sw.js', { type: "classic" })
   .then(function(registration) {
     console.log('Registration successful, scope is:', registration.scope);
   }).catch(function(err) {
     console.log('Service worker registration failed, error:', err);
   });
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
 let Hooks = {}
 Hooks.set_local_storage = {
   updated() {
@@ -23,17 +24,29 @@ Hooks.set_local_storage = {
 }
 Hooks.req_notification_perm = {
   mounted() {
+    const loading = document.getElementById("notification-loading")
+    this.el.classList.add("hidden")
+    loading.classList.remove("hidden")
     if (Notification.permission === "granted") {
-
       getToken(messaging, { vapidKey: "BIyUE4dm3BYwGQ_4divqydjD8pFCRkAGxqxwVgXaVP3Q_jAnTamN72l_GERprXwJyvOXVJi7hZhy0iEiGhDQBO8" }).then((currentToken) => {
         if (currentToken) {
           this.pushEventTo(this.el, "set_notifications_token", { token: currentToken })
         }
+        else {
+          this.el.classList.remove("hidden")
+        }
       })
+    } else {
+      this.el.classList.remove("hidden")
+
     }
+    loading.classList.add("hidden")
 
     this.el.addEventListener('click', e => {
       e.preventDefault()
+      this.el.classList.add("hidden")
+      loading.classList.remove("hidden")
+
       Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
           console.log('Notification permission granted.');
@@ -42,13 +55,21 @@ Hooks.req_notification_perm = {
             if (currentToken) {
               this.pushEventTo(this.el, "set_notifications_token", { token: currentToken })
             } else {
+
+              this.el.classList.remove("hidden")
+              loading.classList.add("hidden")
               console.log('No registration token available. Request permission to generate one.');
             }
           }).catch((err) => {
             console.log('An error occurred while retrieving token. ', err);
+            this.el.classList.remove("hidden")
+            loading.classList.add("hidden")
           });
+
         } else {
           console.log('Unable to get permission to notify.');
+          this.el.classList.remove("hidden")
+          loading.classList.add("hidden")
         }
       });
 

@@ -73,7 +73,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       number = event.number
 
       number =
-        case number |> Integer.parse() do
+        case number |> to_string() |> Integer.parse() do
           {number, _} -> number
           _ -> -1
         end
