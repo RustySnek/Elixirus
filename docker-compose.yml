@@ -3,7 +3,7 @@ services:
     build: .
     container_name: elixirus
     volumes:
-      - service-account.json:/run/keys/service-account.json:ro
-  environment:
-    SECRET_KEY_BASE: {your phx.gen.secret}
-    SERVICE_ACCOUNT_PATH: "/run/keys/service-account.json"
+      - /tmp/service-account.json:/run/keys/service-account.json:ro
+    environment:
+      SECRET_KEY_BASE: "zlJ1aKOS+rb52taNVjZH/dIQa9KvYma0GfrXOuGxzhnn2U8EQkaOVpIQJFBC5Ubt"
+      SERVICE_ACCOUNT_PATH: "/run/keys/service-account.json"
