@@ -13,6 +13,7 @@ defmodule Elixirus.Application do
       Elixirus.FCM,
       Elixirus.Healthcheck.HealthSupervisor,
       {Elixirus.Python.SnakeSupervisor, []},
+      {Elixirus.Notifications.NotificationsSupervisor, []},
       Supervisor.child_spec({Elixirus.Python.SnakeManager, []},
         id: Elixirus.Python.SnakeManager,
         restart: :permanent

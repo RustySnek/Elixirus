@@ -4,6 +4,7 @@ defmodule Elixirus.TokenWorker do
   """
   use GenServer
   require Logger
+  alias Elixirus.Notifications.NotificationsSupervisor
   alias Timex
   import Elixirus.Python.SnakeWrapper
 
@@ -19,21 +20,25 @@ defmodule Elixirus.TokenWorker do
   end
 
   def handle_call({:add_token, username, token, ttl, notification_token}, _from, table) do
-    :ets.insert(table, {username, token, ttl, notification_token, DateTime.now!("Europe/Warsaw")})
+    :ets.insert(
+      table,
+      {username, token, ttl, notification_token, "", DateTime.now!("Europe/Warsaw")}
+    )
+
     {:reply, :ok, table}
   end
 
   def handle_call({:extend_lifetime, token, notification_token}, _from, table) do
-    case :ets.match(table, {:"$1", token, :"$2", :_}) do
+    case :ets.match(table, {:"$1", token, :"$2", :_, :"$3"}) do
       [] ->
         :ok
 
-      [[name, ttl] | _] ->
+      [[name, ttl, hash] | _] ->
         unless(name == nil,
           do:
             :ets.insert(
               table,
-              {name, token, ttl, notification_token, DateTime.now!("Europe/Warsaw")}
+              {name, token, ttl, notification_token, hash, DateTime.now!("Europe/Warsaw")}
             )
         )
     end
@@ -42,16 +47,16 @@ defmodule Elixirus.TokenWorker do
   end
 
   def handle_call({:extend_lifetime, token, notification_token, ttl}, _from, table) do
-    case :ets.match(table, {:"$1", token, :_, :_}) do
+    case :ets.match(table, {:"$1", token, :_, :_, :"$2"}) do
       [] ->
         :ok
 
-      [[name] | _] ->
+      [[name, hash] | _] ->
         unless(name == nil,
           do:
             :ets.insert(
               table,
-              {name, token, ttl, notification_token, DateTime.now!("Europe/Warsaw")}
+              {name, token, ttl, notification_token, hash, DateTime.now!("Europe/Warsaw")}
             )
         )
     end
@@ -60,7 +65,7 @@ defmodule Elixirus.TokenWorker do
   end
 
   def handle_cast({:remove_token, username, token}, table) do
-    [{_username, lookup_token, _ttl, _notification_token, _last_update} | _] =
+    [{_username, lookup_token, _ttl, _notification_token, _hash, _last_update} | _] =
       :ets.lookup(table, username)
 
     if lookup_token == token do
@@ -74,40 +79,44 @@ defmodule Elixirus.TokenWorker do
 
   def handle_info(:refresh, table), do: execute_token_refresh(table)
 
-  def handle_cast({:push_notifications, notifications, token}, table) do
-    IO.inspect(notifications)
-
+  defp execute_push_notifications(notifications, token) do
     notifications
     |> Enum.each(fn notification ->
-      dbg(notification)
-
-      notify =
-        Pigeon.FCM.Notification.new(
-          {:token, token},
-          %{notification.destination => "#{notification.amount}"}
-        )
-        |> Elixirus.FCM.push()
-        |> dbg
-
-      if notify.response != :success do
-        Logger.error("Sending notification Failed")
-        notify.error |> inspect() |> Logger.error()
-      end
+      NotificationsSupervisor.push_notification(notification, token)
     end)
-    |> dbg
+  end
 
-    {:noreply, table}
+  defp create_notification_hash(notifications) do
+    notifications |> Enum.map_join("", &(&1 |> Map.values() |> Enum.join("")))
+  end
+
+  def set_notification_hash(table, username, new_hash) do
+    case :ets.lookup(table, username) |> Enum.at(0) do
+      {_username, token, ttl, notification_token, old_hash, last_update} ->
+        :ets.insert(table, {username, token, ttl, notification_token, new_hash, last_update})
+        old_hash
+
+      _ ->
+        ""
+    end
   end
 
   defp execute_token_refresh(table) do
     :ets.tab2list(table)
     |> Task.async_stream(fn token -> refresh_token(table, token) end, timeout: 120_000)
     |> Task.async_stream(
-      fn {_, {notifications, notification_token}} ->
-        dbg(notification_token)
-
+      fn {_, {username, notifications, notification_token}} ->
         if notifications != nil and notification_token not in [nil, ""] do
-          GenServer.cast(self(), {:push_notifications, notifications, notification_token})
+          new_hash = create_notification_hash(notifications)
+
+          notification_hash =
+            set_notification_hash(table, username, new_hash)
+
+          if new_hash != notification_hash do
+            execute_push_notifications(notifications, notification_token)
+          end
+        else
+          ""
         end
       end,
       timeout: 60_000
@@ -118,14 +127,14 @@ defmodule Elixirus.TokenWorker do
     {:noreply, table}
   end
 
-  defp refresh_token(table, {username, token, ttl, notification_token, last_update}) do
+  defp refresh_token(table, {username, token, ttl, notification_token, hash, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
     notifications =
       if DateTime.compare(now, Timex.shift(last_update, hours: ttl)) in [:lt, :eq] do
         case python(:fetchers, :keep_token_alive, [token]) do
           {:ok, notifications} ->
-            :ets.insert(table, {username, token, ttl, notification_token, now})
+            :ets.insert(table, {username, token, ttl, notification_token, hash, now})
             notifications
 
           # do something with notifications
@@ -145,6 +154,6 @@ defmodule Elixirus.TokenWorker do
         nil
       end
 
-    {notifications, notification_token}
+    {username, notifications, notification_token}
   end
 end
