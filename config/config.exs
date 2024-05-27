@@ -7,11 +7,6 @@
 # General application configuration
 import Config
 
-config :elixirus, Elixirus.FCM,
-  adapter: Pigeon.FCM,
-  project_id: "elixirus-push",
-  service_account_json: File.read!("service-account.json")
-
 config :elixirus,
   generators: [timestamp_type: :utc_datetime]
 

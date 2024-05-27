@@ -74,18 +74,21 @@ Run `direnv allow` to allow `.envrc` execution
  * ### Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
      Now you can visit [`localhost:4001`](http://localhost:4001) from your browser.
 
-## Deploy  🐋
+## Deploy  🐋 (currently requires firebase setup, will fix soon tm...)
 ❄️ Check out [example on deploying to remote NixOS machine with Colmena](https://github.com/RustySnek/elixirus-nix/blob/master/elixirus.nix)
 
 🐋 Docker
-* pull the existing container docker pull
+* you can pull the existing container with
 
 ```sh
 docker pull ghcr.io/rustysnek/elixirus:latest
 ```
 
-* or build it from Dockerfile with docker-compose
+* with docker-compose
+     You will need
+    - service-account.json (firebase private key)
+    - SECRET_BASE_KEY (mix phx.gen.secret)
 
 ```sh
-docker-compose build
+docker-compose up --build
 ```
