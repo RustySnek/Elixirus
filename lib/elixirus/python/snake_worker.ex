@@ -32,9 +32,9 @@ defmodule Elixirus.Python.SnakeWorker do
     {:noreply, set_state(state.pid, new_state)}
   end
 
-  def handle_cast(:kill_snake, state) do
-    :ok = :python.stop(state.pid)
-    {:noreply, %{pid: state.pid, state: :dead, update: state.update}}
+  def handle_call(:kill_snake, _from, state) do
+    stop = :python.stop(state.pid)
+    {:noreply, stop, %{pid: state.pid, state: :dead, update: state.update}}
   end
 
   def handle_call({:run, module, func, args}, _from, state) do
@@ -52,7 +52,7 @@ defmodule Elixirus.Python.SnakeWorker do
               Logger.error(exception |> to_string)
               Logger.error(error |> to_string)
               Logger.error(backtrace |> to_string)
-              GenServer.cast(self(), :kill_snake)
+              GenServer.call(self(), :kill_snake)
               Process.send_after(SnakeManager, {:sacrifice_snake, self()}, 200)
               %{error: exception}
 

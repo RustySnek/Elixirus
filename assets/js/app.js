@@ -270,7 +270,7 @@ Hooks.store_token = {
       return
     }
     const user_id = uuidv4();
-    fetch(`/set_token?token=${this.el.value}&notification_token=${this.el.getAttribute('data-notification-token', '')}&user_id=${user_id}`).then(_response => window.location.reload())
+    fetch(`/set_token?token=${this.el.value}&user_id=${user_id}`).then(_response => window.location.reload())
   }
 }
 let liveSocket = new LiveSocket("/live", Socket, { hooks: Hooks, params: { _csrf_token: csrfToken } })

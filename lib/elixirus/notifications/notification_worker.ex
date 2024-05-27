@@ -33,6 +33,6 @@ defmodule Elixirus.Notifications.NotificationWorker do
     end
 
     NotificationsSupervisor.terminate_child(self())
-    {:stop, state}
+    {:stop, :terminate, state}
   end
 end

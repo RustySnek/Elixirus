@@ -34,13 +34,13 @@ defmodule Elixirus.Python.SnakeManager do
   end
 
   def handle_info({:sacrifice_snake, pid}, state) do
-    GenServer.cast(pid, :kill_snake)
+    GenServer.call(pid, :kill_snake)
     DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
     {:noreply, state}
   end
 
   defp _kill_inactive_worker(pid) do
-    GenServer.cast(pid, :kill_snake)
+    GenServer.call(pid, :kill_snake)
     DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
     Logger.info("Cleared unused snake")
   end
