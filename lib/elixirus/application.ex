@@ -3,6 +3,7 @@ defmodule Elixirus.Application do
   # for more information on OTP Applications
   @moduledoc false
   alias Elixirus.TokenWorker
+  alias Base
 
   use Application
 
@@ -50,7 +51,9 @@ defmodule Elixirus.Application do
       adapter: Pigeon.FCM,
       project_id: "elixirus-push",
       service_account_json:
-        File.read!(System.get_env("SERVICE_ACCOUNT_PATH", "service-account.json"))
+        System.get_env("SERVICE_ACCOUNT", "service-account.json")
+        |> Base.decode64!()
+        |> to_string()
     ]
   end
 end
