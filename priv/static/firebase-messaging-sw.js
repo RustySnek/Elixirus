@@ -22,11 +22,3 @@ messaging.onMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
-messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
