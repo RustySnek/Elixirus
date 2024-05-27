@@ -4,6 +4,7 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { messaging } from "./firebase_notifications";
 import { getToken } from "firebase/messaging";
+import { v4 as uuidv4 } from "uuid";
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
 navigator.serviceWorker.register('/firebase-messaging-sw.js', { type: "classic" })
@@ -218,6 +219,8 @@ Hooks.frequency = {
 
 
 }
+
+
 Hooks.highlight_grade = {
 
   mounted() {
@@ -250,12 +253,22 @@ Hooks.expand_links = {
 
   }
 }
+
+Hooks.logout_button = {
+  mounted() {
+    this.el.addEventListener("click", e => {
+      e.preventDefault()
+      const user_id = uuidv4();
+
+      fetch(`/clear_token?user_id=${user_id}`).then(_response => window.location.reload())
+    })
+  }
+}
 Hooks.store_token = {
   updated() {
     if (this.el.value === "") {
       return
     }
-    const { v4: uuidv4 } = require("uuid");
     const user_id = uuidv4();
     fetch(`/set_token?token=${this.el.value}&notification_token=${this.el.getAttribute('data-notification-token', '')}&user_id=${user_id}`).then(_response => window.location.reload())
   }

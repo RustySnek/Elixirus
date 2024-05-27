@@ -42,6 +42,7 @@ defmodule ElixirusWeb.Components.NavHeader do
   end
 
   slot :logo
+  slot :misc
 
   attr :links, :list, required: true
 
@@ -67,23 +68,14 @@ defmodule ElixirusWeb.Components.NavHeader do
           aria-expanded="false"
         >
           <span class="sr-only">Open main menu</span>
-          <svg
-            class="w-6 h-6"
-            aria-hidden="true"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-              clip-rule="evenodd"
-            >
-            </path>
-          </svg>
+          <Heroicons.bars_3 class="w-8" />
         </button>
-        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-          <ul class="flex flex-col p-4 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-4 lg:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 ">
+
+        <div
+          class="hidden w-full mt-4 md:mt-0 md:flex md:w-auto flex-row border rounded-lg border-gray-100 md:border-0"
+          id="navbar-default"
+        >
+          <ul class="flex flex-col p-4 md:flex-row md:space-x-4 lg:space-x-8 md:mt-0 md:text-sm md:font-medium">
             <%= for {title, href, nested_links, _text_classes} <- @links do %>
               <div phx-hook="expand_links" class="flex relative flex-col w-full" id={title}>
                 <.link
@@ -110,6 +102,9 @@ defmodule ElixirusWeb.Components.NavHeader do
               </div>
             <% end %>
           </ul>
+          <div class="md:absolute md:right-10 md:inline flex flex-row justify-between md:p-0 px-4 pb-2 self-center">
+            <%= render_slot(@misc) %>
+          </div>
         </div>
       </div>
     </nav>

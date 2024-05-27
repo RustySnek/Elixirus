@@ -18,35 +18,15 @@
         </.link>
       </div>
     </:logo>
+    <:misc>
+      <.link navigate={~p"/"} hidden>
+        <Heroicons.cog_6_tooth class="w-12 hover:cursor-pointer hover:text-fuchsia-500 transition hover:rotate-90 duration-500" />
+      </.link>
+      <button id="logout-button" phx-hook="logout_button">
+        <Heroicons.arrow_right_on_rectangle class="w-12 hover:cursor-pointer hover:text-red-600 hover:translate-x-2 transition duration-500" />
+      </button>
+    </:misc>
   </.header>
-  <div class="hidden md:block scale-75 lg:scale-100 self-start mt-5 lg:self-center lg:mt-0">
-    <input
-      hidden
-      value={@semester}
-      phx-hook="set_local_storage"
-      name="semester"
-      id="selected_semester"
-    />
-    <button
-      class="self-center ml-auto"
-      phx-click={
-        JS.push(
-          "retrieve_local_storage",
-          value: %{
-            semester:
-              "#{@semester |> String.to_integer() |> ElixirusWeb.Helpers.switch_integer()}"
-          }
-        )
-      }
-    >
-      <div class=" select-none relative w-16 items-center flex justify-center">
-        <span class="font-quicksand text-fuchsia-200 text-3xl font-extrabold">
-          <%= @semester |> String.to_integer() |> Kernel.+(1) %>
-        </span>
-        <.refresh_icon class="absolute top-1/2 -translate-y-1/2 hover:rotate-180 transition" />
-      </div>
-    </button>
-  </div>
 </header>
 <.live_component module={ElixirusWeb.LoginModal} id="login-modal-component" />
 
