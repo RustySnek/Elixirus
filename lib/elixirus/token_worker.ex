@@ -14,15 +14,54 @@ defmodule Elixirus.TokenWorker do
 
   def init(table) do
     Logger.warning("restarted token worker")
-    # Start refresh process after a minute (avoids crashing genserver)
-    Process.send_after(self(), :refresh, 1_000)
+    # Start refresh process after a 15s (avoids crashing genserver)
+    Process.send_after(self(), :refresh, 15_000)
     {:ok, table}
   end
 
+  defp load_initial_notifications(_token, nil) do
+    {nil,
+     %{
+       grades: [],
+       attendance: [],
+       messages: [],
+       announcements: [],
+       schedule: [],
+       homework: []
+     }}
+  end
+
+  defp load_initial_notifications(token, notification_token) do
+    case python(:notifications, :fetch_initial_notifications, [token]) do
+      {:ok, [notifications, seen_ids]} ->
+        notifications
+        |> Map.to_list()
+        |> Enum.filter(&match?({_, [_ | _]}, &1))
+        |> Enum.each(&NotificationsSupervisor.push_notification(&1, notification_token))
+
+        {notification_token, seen_ids}
+
+      error ->
+        Logger.error("Error in initial notification #{notification_token}\n#{error |> inspect()}")
+
+        {nil,
+         %{
+           grades: [],
+           attendance: [],
+           messages: [],
+           announcements: [],
+           schedule: [],
+           homework: []
+         }}
+    end
+  end
+
   def handle_call({:add_token, username, token, ttl, notification_token}, _from, table) do
+    {notification_token, seen_ids} = load_initial_notifications(token, notification_token)
+
     :ets.insert(
       table,
-      {username, token, ttl, notification_token, "", DateTime.now!("Europe/Warsaw")}
+      {username, token, ttl, notification_token, seen_ids, DateTime.now!("Europe/Warsaw")}
     )
 
     {:reply, :ok, table}
@@ -33,12 +72,12 @@ defmodule Elixirus.TokenWorker do
       [] ->
         :ok
 
-      [[name, ttl, notification_token, hash] | _] ->
+      [[name, ttl, notification_token, seen_ids] | _] ->
         unless(name == nil,
           do:
             :ets.insert(
               table,
-              {name, token, ttl, notification_token, hash, DateTime.now!("Europe/Warsaw")}
+              {name, token, ttl, notification_token, seen_ids, DateTime.now!("Europe/Warsaw")}
             )
         )
     end
@@ -51,12 +90,12 @@ defmodule Elixirus.TokenWorker do
       [] ->
         :ok
 
-      [[name, ttl, hash] | _] ->
+      [[name, ttl, seen_ids] | _] ->
         unless(name == nil,
           do:
             :ets.insert(
               table,
-              {name, token, ttl, notification_token, hash, DateTime.now!("Europe/Warsaw")}
+              {name, token, ttl, notification_token, seen_ids, DateTime.now!("Europe/Warsaw")}
             )
         )
     end
@@ -69,12 +108,12 @@ defmodule Elixirus.TokenWorker do
       [] ->
         :ok
 
-      [[name, hash] | _] ->
+      [[name, seen_ids] | _] ->
         unless(name == nil,
           do:
             :ets.insert(
               table,
-              {name, token, ttl, notification_token, hash, DateTime.now!("Europe/Warsaw")}
+              {name, token, ttl, notification_token, seen_ids, DateTime.now!("Europe/Warsaw")}
             )
         )
     end
@@ -95,40 +134,14 @@ defmodule Elixirus.TokenWorker do
 
   def handle_info(:refresh, table), do: execute_token_refresh(table)
 
-  defp execute_push_notifications(notifications, token) do
-    notifications
-    |> Enum.each(fn notification ->
-      NotificationsSupervisor.push_notification(notification, token)
-    end)
-  end
-
-  defp create_notification_hash(notifications) do
-    notifications |> Enum.map_join("", &(&1 |> Map.values() |> Enum.join("")))
-  end
-
-  def set_notification_hash(table, username, new_hash) do
-    case :ets.lookup(table, username) |> Enum.at(0) do
-      {_username, token, ttl, notification_token, old_hash, last_update} ->
-        :ets.insert(table, {username, token, ttl, notification_token, new_hash, last_update})
-        old_hash
-
-      _ ->
-        ""
-    end
-  end
-
-  defp manage_notifications({_, {username, notifications, notification_token}}, table) do
-    if notifications != nil and notification_token not in [nil, ""] do
-      new_hash = create_notification_hash(notifications)
-
-      notification_hash =
-        set_notification_hash(table, username, new_hash)
-
-      if new_hash != notification_hash do
-        execute_push_notifications(notifications, notification_token)
-      end
-    else
-      ""
+  defp manage_notifications({_, {_username, notifications, notification_token}}) do
+    unless notification_token in [nil, ""] do
+      notifications
+      |> Map.to_list()
+      |> Enum.filter(fn {_, notifications} -> notifications != [] end)
+      |> Enum.each(fn notification ->
+        NotificationsSupervisor.push_notification(notification, notification_token)
+      end)
     end
   end
 
@@ -136,23 +149,23 @@ defmodule Elixirus.TokenWorker do
     :ets.tab2list(table)
     |> Task.async_stream(&refresh_token(table, &1), timeout: 120_000)
     |> Task.async_stream(
-      &manage_notifications(&1, table),
+      &manage_notifications(&1),
       timeout: 60_000
     )
     |> Stream.run()
 
-    Process.send_after(self(), :refresh, 15 * 1000)
+    Process.send_after(self(), :refresh, 15 * 60 * 1000)
     {:noreply, table}
   end
 
-  defp refresh_token(table, {username, token, ttl, notification_token, hash, last_update}) do
+  defp refresh_token(table, {username, token, ttl, notification_token, seen_ids, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
     notifications =
       if DateTime.compare(now, Timex.shift(last_update, hours: ttl)) in [:lt, :eq] do
-        case python(:fetchers, :keep_token_alive, [token]) do
-          {:ok, notifications} ->
-            :ets.insert(table, {username, token, ttl, notification_token, hash, now})
+        case python(:notifications, :fetch_new_notifications, [token, seen_ids]) do
+          {:ok, [notifications, seen_ids]} ->
+            :ets.insert(table, {username, token, ttl, notification_token, seen_ids, now})
             notifications
 
           {:error, message} ->
