@@ -154,7 +154,7 @@ defmodule Elixirus.TokenWorker do
     )
     |> Stream.run()
 
-    Process.send_after(self(), :refresh, 15 * 60 * 1000)
+    Process.send_after(self(), :refresh, 10 * 60 * 1000)
     {:noreply, table}
   end
 
