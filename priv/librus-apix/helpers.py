@@ -2,9 +2,10 @@ import os
 from typing import Dict, List, Tuple
 
 from erlport.erlang import set_decoder, set_encoder
-from erlport.erlterms import Atom
+from erlport.erlterms import Atom, Map
 from handle_classes import *
 from librus_apix.client import Client, Token, new_client
+from librus_apix.notifications import NotificationData, NotificationIds
 
 
 def extract_grades(grades):
@@ -45,6 +46,14 @@ def token_encoder(value: Tuple) -> Dict:
 def token_decoder(value):
     if isinstance(value, int) or isinstance(value, float):
         return value
+
+    elif isinstance(value, Map):
+        data = {
+            key.decode("utf-8"): [v.decode("utf-8") for v in val]
+            for key, val in value.items()
+        }
+
+        return data
     return value.decode("utf-8")
 
 

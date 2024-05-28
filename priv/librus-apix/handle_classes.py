@@ -1,8 +1,9 @@
-from librus_apix.attendance import Tuple
-from librus_apix.client import Token, new_client
-from erlport.erlterms import Atom
 import os
 
+from erlport.erlterms import Atom
+from librus_apix.attendance import Tuple
+from librus_apix.client import Token, new_client
+from librus_apix.notifications import NotificationData
 from librus_apix.schedule import Union
 
 
@@ -61,3 +62,16 @@ def handle_grades(subjects):
         ]
         for subject in subjects
     }
+
+
+def handle_notification_data(notification: NotificationData):
+    notification_dict = {}
+    notification_dict["grades"] = handle_grades(notification.grades)
+    notification_dict["attendance"] = handle_attendance(notification.attendance)
+    notification_dict["messages"] = handle_messages(notification.messages)
+    notification_dict["announcements"] = handle_announcements(
+        notification.announcements
+    )
+    notification_dict["schedule"] = handle_schedule(notification.schedule)
+    notification_dict["homework"] = handle_homework(notification.homework)
+    return notification_dict
