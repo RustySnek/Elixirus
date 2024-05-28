@@ -2,7 +2,6 @@
 
 {
   enterShell = ''
-    export SERVICE_ACCOUNT=$(cat service-account.json | base64 | tr -d '\n')
     export MIX_BUN_PATH=$(which bun)
     export PYTHONPATH="$PWD/priv/librus-apix:$PWD/priv/librus-apix/venv/lib/python3.11/site-packages"
   ''; 
