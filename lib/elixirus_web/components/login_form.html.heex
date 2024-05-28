@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-y-10 bg-stone-900 p-10 rounded-2xl xs:max-w-xs">
+<div class="flex flex-col gap-y-10 bg-[#121212] p-10 rounded-2xl xs:max-w-xs mb-32">
   <div class="flex flex-row gap-x-2 justify-center">
     <h1 class="font-quicksand text-6xl md:text-7xl xl:text-8xl font-extrabold text-fuchsia-700">
       Elixir<span class="text-fuchsia-900">us</span>
@@ -30,7 +30,7 @@
     class="flex text-xl flex-col gap-y-6 items-center"
   >
     <input
-      class="bg-[#121212] w-4/5 text-xl rounded border-none"
+      class="bg-[#2a2a2a] w-4/5 text-xl rounded border-none"
       placeholder="username"
       type="text"
       id="form-username"
@@ -39,23 +39,26 @@
       autocomplete="username"
     />
     <input
-      class="bg-[#121212] w-4/5 text-xl rounded border-none"
+      class="bg-[#2a2a2a] w-4/5 text-xl rounded border-none"
       id="form-password"
       autocomplete="current-password"
       placeholder="password"
       type="password"
       name="password"
     />
-    <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
+    <div class="flex flex-col md:flex-row lg:flex-col gap-y-4">
       <div class="flex flex-row items-center justify-evenly">
-        <span class="text-lg mr-2">Keep token alive?</span>
-        <input
-          type="checkbox"
-          class="rounded-full h-5 w-5 text-fuchsia-700"
-          name="save_token"
-          phx-change="save_token"
-          checked={@keep_alive}
-        />
+        <span class="text-lg lg:text-xl mr-2">Keep token alive?</span>
+
+        <div
+          phx-click={JS.push("save_token", target: @myself)}
+          class="w-20 scale-75 lg:scale-100 p-0.5 px-1 rounded-3xl bg-[#1f1f1f]"
+        >
+          <Heroicons.bolt
+            solid
+            class={"w-8 transition duration-250 #{@keep_alive && '!text-yellow-200 translate-x-10'} text-white"}
+          />
+        </div>
         <input
           hidden
           phx-hook="set_local_storage"
@@ -64,7 +67,7 @@
           id="save-token-checkbox"
         />
       </div>
-      <div :if={@keep_alive} class="flex flex-col gap-y-1">
+      <div :if={@keep_alive} class="flex flex-row gap-x-4 scale-75 lg:scale-100">
         <div class="flex flex-row gap-2 items-center justify-center">
           <label for="ttl">TTL:</label>
           <select
@@ -73,34 +76,59 @@
             value={@ttl}
             id="ttl-select"
             name="ttl"
-            class="bg-[#1e1e1e]"
+            class="bg-[#1E1E1E] border-none"
           >
             <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
           </select>
         </div>
-        <div class="flex flex-row gap-2 items-center justify-center">
-          <span class="text-lg mr-2">ntfy.sh Notifications: </span>
+        <div
+          class="flex bg-[#1e1e1e] w-fit mx-auto rounded-3xl py-2 px-4 flex-row gap-2 items-center justify-center"
+          phx-click={JS.push("generate_notification_uuid", target: @myself)}
+        >
+          <span class="text-lg mr-2">ntfy.sh</span>
           <Heroicons.chat_bubble_bottom_center
             :if={!@notification_token}
-            phx-click={JS.push("generate_notification_uuid", target: @myself)}
-            class="w-8 text-red-600 animate-bounce hover:cursor-pointer"
+            solid
+            class="w-8 text-red-600/60 animate-bounce hover:cursor-pointer"
           />
           <Heroicons.chat_bubble_bottom_center
             :if={@notification_token}
-            phx-click={JS.push("clear_notification_uuid", target: @myself)}
-            class="w-8 text-green-600 transition hover:cursor-pointer"
+            solid
+            class="w-8 text-green-600/60 transition hover:cursor-pointer"
           />
         </div>
-        <a
-          :if={@notification_token}
-          href={"ntfy://ntfy.sh/#{@notification_token}"}
-          class="md:hidden block"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open in ntfy.sh
-        </a>
-        <span :if={@notification_token}>Your ntfy.sh topic: <%= @notification_token %></span>
+      </div>
+      <a
+        :if={@notification_token && @keep_alive}
+        href={"ntfy://ntfy.sh/#{@notification_token}"}
+        class="lg:hidden block mx-auto bg-[#1e1e1e] rounded-3xl px-4 py-2"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open in ntfy.sh
+      </a>
+
+      <div
+        :if={@notification_token && @keep_alive}
+        class="lg:flex flex-col gap-y-2 hidden"
+        x-data={~c"{copied: false}"}
+      >
+        <span class="text-sm text-center">
+          Click to copy ntfy.sh topic:
+        </span>
+        <input
+          id="share-copy"
+          x-on:click="
+          navigator.clipboard.writeText($el.value);
+          copied = true;
+          "
+          class="w-full cursor-pointer rounded-3xl bg-[#1e1e1e]"
+          type="url"
+          value={@notification_token}
+          readonly
+        />
+
+        <span class="self-center text-green-600/75" x-show="copied">Copied!</span>
       </div>
     </div>
     <button class="bg-fuchsia-900 hover:brightness-125 transition rounded w-24 h-12 px-4 py-1">

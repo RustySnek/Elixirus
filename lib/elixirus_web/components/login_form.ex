@@ -20,11 +20,14 @@ defmodule ElixirusWeb.LoginForm do
   end
 
   def handle_event("generate_notification_uuid", _params, socket) do
-    {:noreply, assign(socket, :notification_token, "elixirus_#{UUID.uuid4()}")}
-  end
+    socket =
+      if socket.assigns.notification_token == nil do
+        assign(socket, :notification_token, "elixirus_#{UUID.uuid4()}")
+      else
+        assign(socket, :notification_token, nil)
+      end
 
-  def handle_event("clear_notification_uuid", _params, socket) do
-    {:noreply, assign(socket, :notification_token, nil)}
+    {:noreply, socket}
   end
 
   def handle_event("save_token", _params, socket) do
