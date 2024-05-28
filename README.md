@@ -3,12 +3,12 @@
 [![Updated Badge](https://badges.pufler.dev/updated/rustysnek/elixirus)](https://github.com/RustySnek/Elixirus/commits/master/) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/rustysnek/elixirus?style=flat-square) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/rustysnek/elixirus?style=flat-square)
 
 ### 📒 A better replacement for Synergia Learning Managment System web interface
-**Elixirus** is a web application written in Elixir Phoenix for the librus_apix web scraper, providing a superior replacement for the native Librus web interface. Here are some of its standout features:
+**Elixirus** is a web application written in Elixir Phoenix for the librus_apix web scraper, providing a superior replacement for the native Librus web interface.
 
 ### Core Features 🚀
 - **Data Caching**: Efficient data caching for faster load times. ⚡
 - **Token Management**: Flexibly maintains tokens inside *ets* Erlang memory storage, allowing users the option to enable or disable token storing for refreshing purposes 🔒
-- **Push Notifications**: Receive real-time updates with FCM notifications. 📲
+- **Push Notifications**: Receive real-time updates with [ntfy.sh](https://ntfy.sh/) notifications. 📲
 - **Seamless Experience**: Enjoy a smooth and uninterrupted user experience. 🌐
 
 ### Additional Features 🌟
@@ -24,11 +24,10 @@
 
 ### Anti Features 🛑
 - UI design is far from perfect... 💀
-- Notifications are only present when the Token is saved server-side for refreshing purposes 🔒
+- Notifications are only present when the Token is being kept and refreshed server-side 🔒
 
 ## Tech used 🔧
  * [Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view) -  Rich, real-time user experiences with server-rendered HTML  🔥🐦
- * [Pigeon](https://github.com/codedge-llc/pigeon) - HTTP2-compliant wrapper for sending iOS and Android push notifications.  🐦
  * [bun](https://github.com/oven-sh/bun) - Incredibly fast JavaScript runtime, bundler, test runner, and package manager 🥖
  * [erlport](https://github.com/erlport/erlport) - Connecting Elixir with Python 🧪 ❤️ 🐍
  * [librus-apix](https://github.com/RustySnek/librus-apix) - Web Scraper for Librus Synergia written in Python 🪛🐍
@@ -74,7 +73,7 @@ Run `direnv allow` to allow `.envrc` execution
  * ### Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
      Now you can visit [`localhost:4001`](http://localhost:4001) from your browser.
 
-## Deploy  🐋 (currently requires firebase setup, will fix soon tm...)
+## Deploy  🐋 
 ❄️ Check out [example on deploying to remote NixOS machine with Colmena](https://github.com/RustySnek/elixirus-nix/blob/master/elixirus.nix)
 
 🐋 Docker
@@ -86,7 +85,6 @@ docker pull ghcr.io/rustysnek/elixirus:latest
 
 * with docker-compose
      You will need
-    - service-account.json (firebase private key)
     - SECRET_BASE_KEY (mix phx.gen.secret)
 
 ```sh
