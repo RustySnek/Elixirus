@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
+  require Logger
   use ElixirusWeb, :live_view
 
   use ElixirusWeb.SetSemesterLive
@@ -18,12 +19,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :announcements))
           |> assign(:announcements, announcements)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 

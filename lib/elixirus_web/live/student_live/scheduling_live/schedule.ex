@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
+  require Logger
   use ElixirusWeb, :live_view
 
   use ElixirusWeb.SetSemesterLive
@@ -14,12 +15,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
           cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule, 15)
           assign(socket, :schedule, schedule)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 

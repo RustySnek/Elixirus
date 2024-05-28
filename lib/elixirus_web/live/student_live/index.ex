@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.StudentLive.Index do
+  require Logger
   use ElixirusWeb, :live_view
   import Heroicons
   import ElixirusWeb.Helpers
@@ -214,12 +215,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:semester_grades, gpas)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 
@@ -256,12 +257,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
           |> assign(:frequency, frequency)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 
@@ -278,12 +279,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
           |> assign(:schedule, schedule)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 
@@ -335,12 +336,12 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(name, data)
           |> assign(:loadings, List.delete(socket.assigns.loadings, name))
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 

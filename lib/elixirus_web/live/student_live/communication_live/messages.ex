@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
+  require Logger
   use ElixirusWeb, :live_view
   import Elixirus.Python.SnakeWrapper
 
@@ -89,13 +90,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
         %{:send_error => msg} ->
           put_flash(socket, :error, "Error!\n#{msg}")
 
-        %{:token_error => msg} ->
+        %{:token_error => _msg} ->
           socket
           |> assign(:login_required, true)
-          |> put_flash(:error, msg)
           |> push_event("require-login", %{})
 
         %{:error => msg} ->
+          Logger.error(msg)
           put_flash(socket, :error, msg)
       end
 
@@ -191,13 +192,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:sent_messages, messages)
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:sent_messages))
 
-        %{:token_error => msg} ->
+        %{:token_error => _msg} ->
           socket
           |> assign(:login_required, true)
-          |> put_flash(:error, msg)
           |> push_event("require-login", %{})
 
         %{:error => msg} ->
+          Logger.error(msg)
           put_flash(socket, :error, msg)
       end
 
@@ -218,13 +219,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           )
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:recipients))
 
-        %{:token_error => msg} ->
+        %{:token_error => _msg} ->
           socket
           |> assign(:login_required, true)
-          |> put_flash(:error, msg)
           |> push_event("require-login", %{})
 
         %{:error => msg} ->
+          Logger.error(msg)
           put_flash(socket, :error, msg)
       end
 
@@ -237,12 +238,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
         {:ok, content} ->
           assign(socket, :message_content, content)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 
@@ -253,13 +254,13 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     socket =
       case groups do
         %{:error => msg} ->
+          Logger.error(msg)
           socket |> put_flash(:error, msg)
 
-        %{:token_error => msg} ->
+        %{:token_error => _msg} ->
           socket
           |> assign(:login_required, true)
           |> push_event("require-login", %{})
-          |> put_flash(:error, msg)
 
         {:ok, groups} ->
           socket |> assign(:recipient_groups, groups)
@@ -285,12 +286,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:seen_messages, seen)
           |> assign(:unread_messages, unread)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 

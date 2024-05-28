@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
+  require Logger
   use ElixirusWeb, :live_view
   import ElixirusWeb.Helpers
 
@@ -20,12 +21,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
           socket
           |> assign(:grades, grades)
 
-        %{:token_error => message} ->
+        %{:token_error => _message} ->
           assign(socket, :login_required, true)
-          |> put_flash(:error, message)
           |> push_event("require-login", %{})
 
         %{:error => message} ->
+          Logger.error(message)
           put_flash(socket, :error, message)
       end
 
