@@ -3,7 +3,6 @@
     "deps/*"
   ],
   "dependencies": {
-    "firebase": "^10.12.1",
     "heroicons": "^2.0.18",
     "phoenix": "workspace:*",
     "phoenix_html": "workspace:*",

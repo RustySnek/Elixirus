@@ -48,24 +48,6 @@
     />
     <div class="flex flex-col sm:flex-row lg:flex-col gap-2">
       <div class="flex flex-row items-center justify-evenly">
-        <span class="text-lg mr-2">Notifications</span>
-        <Heroicons.x_circle
-          :if={@notification_token == nil}
-          id="notification-req-button"
-          phx-hook="req_notification_perm"
-          class="w-8 text-red-600 hover:cursor-pointer"
-        />
-        <Heroicons.beaker
-          :if={@notification_token in [:loading, nil]}
-          id="notification-loading"
-          class="w-8 text-yellow-600 animate-spin transition hidden"
-        />
-        <Heroicons.check_circle
-          :if={!(@notification_token in [:loading, nil, ""])}
-          class="w-8 text-green-600"
-        />
-      </div>
-      <div class="flex flex-row items-center justify-evenly">
         <span class="text-lg mr-2">Keep token alive?</span>
         <input
           type="checkbox"
@@ -82,21 +64,43 @@
           id="save-token-checkbox"
         />
       </div>
-      <div class="flex flex-col sm:flex-row lg:flex-col gap-2 w-72">
-        <span :if={@keep_alive} class="text-xs">
-          Requests librus every hour to refresh token automatically for <%= @ttl %> hours.
-        </span>
-        <select
-          :if={@keep_alive}
-          phx-hook="set_local_storage"
-          phx-change="change_ttl"
-          value={@ttl}
-          id="ttl-select"
-          name="ttl"
-          class="bg-[#1e1e1e]"
+      <div :if={@keep_alive} class="flex flex-col gap-y-1">
+        <div class="flex flex-row gap-2 items-center justify-center">
+          <label for="ttl">TTL:</label>
+          <select
+            phx-hook="set_local_storage"
+            phx-change="change_ttl"
+            value={@ttl}
+            id="ttl-select"
+            name="ttl"
+            class="bg-[#1e1e1e]"
+          >
+            <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
+          </select>
+        </div>
+        <div class="flex flex-row gap-2 items-center justify-center">
+          <span class="text-lg mr-2">ntfy.sh Notifications: </span>
+          <Heroicons.chat_bubble_bottom_center
+            :if={!@notification_token}
+            phx-click={JS.push("generate_notification_uuid", target: @myself)}
+            class="w-8 text-red-600 animate-bounce hover:cursor-pointer"
+          />
+          <Heroicons.chat_bubble_bottom_center
+            :if={@notification_token}
+            phx-click={JS.push("clear_notification_uuid", target: @myself)}
+            class="w-8 text-green-600 transition hover:cursor-pointer"
+          />
+        </div>
+        <a
+          :if={@notification_token}
+          href={"ntfy://ntfy.sh/#{@notification_token}"}
+          class="md:hidden block"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
-        </select>
+          Open in ntfy.sh
+        </a>
+        <span :if={@notification_token}>Your ntfy.sh topic: <%= @notification_token %></span>
       </div>
     </div>
     <button class="bg-fuchsia-900 hover:brightness-125 transition rounded w-24 h-12 px-4 py-1">

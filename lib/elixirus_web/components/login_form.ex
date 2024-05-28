@@ -4,6 +4,7 @@ defmodule ElixirusWeb.LoginForm do
   import Heroicons
   alias GenServer
   alias Elixirus.TokenWorker
+  alias UUID
 
   def mount(socket) do
     socket =
@@ -18,12 +19,12 @@ defmodule ElixirusWeb.LoginForm do
     {:ok, socket}
   end
 
-  def handle_event("set_notifications_token", %{"token" => notification_token}, socket) do
-    {:noreply, assign(socket, :notification_token, notification_token)}
+  def handle_event("generate_notification_uuid", _params, socket) do
+    {:noreply, assign(socket, :notification_token, "elixirus_#{UUID.uuid4()}")}
   end
 
-  def handle_event("set_notifications_loading", _params, socket) do
-    {:noreply, assign(socket, :notification_token, :loading)}
+  def handle_event("clear_notification_uuid", _params, socket) do
+    {:noreply, assign(socket, :notification_token, nil)}
   end
 
   def handle_event("save_token", _params, socket) do

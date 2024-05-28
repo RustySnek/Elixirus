@@ -145,7 +145,7 @@ defmodule Elixirus.TokenWorker do
     {:noreply, table}
   end
 
-  defp refresh_token(table, {username, token, ttl, notification_token, hash, last_update} = stuff) do
+  defp refresh_token(table, {username, token, ttl, notification_token, hash, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
     notifications =

@@ -1,7 +1,7 @@
 defmodule Elixirus.Notifications.NotificationWorker do
   @moduledoc false
   alias Elixirus.Notifications.NotificationsSupervisor
-  alias Pigeon.FCM.Notification
+  use HTTPoison.Base
 
   use GenServer
   require Logger
@@ -19,17 +19,35 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {notification, token} = state
 
     notify =
-      Notification.new(
-        {:token, token},
-        %{"body" => "#{notification.amount}", "title" => notification.destination}
+      post(
+        "https://ntfy.sh/#{token}",
+        "*#{notification.amount}* #{notification.destination}",
+        [
+          {"Click", "https://elixirus.rustysnek.xyz"},
+          {"Icon", "https://elixirus.rustysnek.xyz/images/cool_snake.ico"},
+          {"Title", "#{notification.destination}"},
+          {"Tags", "skull"},
+          {"Markdown", "yes"},
+          {"Actions",
+           Enum.join(
+             [
+               "view, View in Elixirus, https://elixirus.rustysnek.xyz, clear=true"
+             ],
+             "; "
+           )}
+        ]
       )
-      |> Elixirus.FCM.push()
 
-    Logger.info("Pushed notification")
+    case notify do
+      {:ok, %HTTPoison.Response{status_code: 200, body: _body}} ->
+        Logger.info("Pushed notification")
 
-    if notify.response != :success do
-      Logger.error("Sending notification Failed")
-      notify.error |> inspect() |> Logger.error()
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        Logger.warning("Status code: #{status_code}\n #{body |> inspect}")
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error("Failed to send notification")
+        reason |> inspect() |> Logger.error()
     end
 
     NotificationsSupervisor.terminate_child(self())

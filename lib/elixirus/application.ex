@@ -11,7 +11,6 @@ defmodule Elixirus.Application do
   def start(_type, _args) do
     children = [
       ElixirusWeb.Telemetry,
-      {Elixirus.FCM, fcm_opts()},
       Elixirus.Healthcheck.HealthSupervisor,
       {Elixirus.Python.SnakeSupervisor, []},
       {Elixirus.Notifications.NotificationsSupervisor, []},
@@ -44,16 +43,5 @@ defmodule Elixirus.Application do
   def config_change(changed, _new, removed) do
     ElixirusWeb.Endpoint.config_change(changed, removed)
     :ok
-  end
-
-  defp fcm_opts do
-    [
-      adapter: Pigeon.FCM,
-      project_id: "elixirus-push",
-      service_account_json:
-        System.get_env("SERVICE_ACCOUNT", "service-account.json")
-        |> Base.decode64!()
-        |> to_string()
-    ]
   end
 end
