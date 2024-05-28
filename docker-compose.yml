@@ -2,8 +2,5 @@ services:
   elixirus:
     build: .
     container_name: elixirus
-    volumes:
-      - /tmp/service-account.json:/run/keys/service-account.json:ro
     environment:
       SECRET_KEY_BASE: "mix phx.gen.secret key"
-      SERVICE_ACCOUNT: "Base64Encoded service-account.json" 
