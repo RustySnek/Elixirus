@@ -19,11 +19,11 @@ defmodule Elixirus.Python.SnakeManager do
   def handle_call({:run, module, func, args}, _from, state) do
     case find_ready_worker() do
       {:ok, pid} ->
-        {:reply, GenServer.call(pid, {:run, module, func, args}, 60_000), state}
+        {:reply, GenServer.call(pid, {:run, module, func, args}, :infinity), state}
 
       :none_available ->
         {:ok, pid} = SnakeSupervisor.deploy_snake_worker()
-        {:reply, GenServer.call(pid, {:run, module, func, args}, 60_000), state}
+        {:reply, GenServer.call(pid, {:run, module, func, args}, :infinity), state}
     end
   end
 
@@ -34,7 +34,6 @@ defmodule Elixirus.Python.SnakeManager do
   end
 
   def handle_info({:sacrifice_snake, pid}, state) do
-    GenServer.call(pid, :kill_snake)
     DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
     {:noreply, state}
   end
@@ -60,7 +59,7 @@ defmodule Elixirus.Python.SnakeManager do
     pids = DynamicSupervisor.which_children(SnakeSupervisor)
 
     Enum.each(pids, fn {_id, pid, _type, _modules} ->
-      clean_inactive_workers(GenServer.call(pid, :status), pid)
+      clean_inactive_workers(GenServer.call(pid, :status, :infinity), pid)
     end)
   end
 
@@ -68,7 +67,7 @@ defmodule Elixirus.Python.SnakeManager do
     pids = DynamicSupervisor.which_children(SnakeSupervisor)
 
     Enum.find_value(pids, :none_available, fn {_id, pid, _type, _modules} ->
-      case GenServer.call(pid, :status) do
+      case GenServer.call(pid, :status, :infinity) do
         {:ready, _} ->
           {:ok, pid}
 

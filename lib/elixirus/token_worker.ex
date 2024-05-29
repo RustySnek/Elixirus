@@ -146,7 +146,10 @@ defmodule Elixirus.TokenWorker do
   end
 
   defp execute_token_refresh(table) do
-    :ets.tab2list(table)
+    tokens = :ets.tab2list(table)
+    Logger.info("Refreshing #{length(tokens)} Tokens!")
+
+    tokens
     |> Task.async_stream(&refresh_token(table, &1), timeout: 120_000)
     |> Task.async_stream(
       &manage_notifications(&1),
@@ -169,12 +172,12 @@ defmodule Elixirus.TokenWorker do
             notifications
 
           {:error, message} ->
-            Logger.error(message)
+            Logger.error(message |> inspect)
             :ets.delete(table, username)
             nil
 
           exception ->
-            Logger.error(exception |> Map.get(:error, "") |> to_string())
+            Logger.error(exception |> inspect)
             nil
         end
       else

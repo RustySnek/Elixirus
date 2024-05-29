@@ -38,7 +38,8 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
         GenServer.call(
           TokenWorker,
-          {:extend_lifetime, token |> Map.keys() |> Enum.at(0)}
+          {:extend_lifetime, token |> Map.keys() |> Enum.at(0)},
+          :infinity
         )
 
         conn

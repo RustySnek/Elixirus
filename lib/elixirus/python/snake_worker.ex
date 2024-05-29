@@ -14,7 +14,7 @@ defmodule Elixirus.Python.SnakeWorker do
   def init(_) do
     case :python.start() do
       {:error, reason} ->
-        Logger.error(reason)
+        Logger.error(reason |> inspect)
 
         {:error, :rip_python}
 
@@ -49,15 +49,13 @@ defmodule Elixirus.Python.SnakeWorker do
         error ->
           case error do
             %ErlangError{original: {:python, exception, error, backtrace}} ->
-              Logger.error(exception |> to_string)
-              Logger.error(error |> to_string)
-              Logger.error(backtrace |> to_string)
-              GenServer.call(self(), :kill_snake)
+              Logger.error("#{exception}\n#{error}\nBacktrace: #{backtrace}")
+              :python.stop(state.pid)
               Process.send_after(SnakeManager, {:sacrifice_snake, self()}, 200)
-              %{error: exception}
+              %{error: exception |> to_string}
 
             exception ->
-              Logger.error(exception)
+              Logger.error(exception |> inspect)
               %{error: "Unknown error occured."}
           end
       end
