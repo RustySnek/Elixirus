@@ -121,7 +121,7 @@ defmodule Elixirus.Notifications.NotificationWorker do
 
       case notify do
         {:ok, %HTTPoison.Response{status_code: 200, body: _body}} ->
-          Logger.info("Pushed notification")
+          Logger.info("Pushed notification #{token}")
 
         {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
           Logger.warning("Status code: #{status_code}\n #{body |> inspect}")
