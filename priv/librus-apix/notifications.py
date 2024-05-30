@@ -39,7 +39,6 @@ def fetch_new_notifications(token, payload: Dict):
         schedule=payload["schedule"],
         homework=payload["homework"],
     )
-
     client: Client = create_client(token)
 
     status, notifications = sanitize_fetch(get_new_notification_data, client, seen_ids)

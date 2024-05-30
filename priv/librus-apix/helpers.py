@@ -5,7 +5,7 @@ from erlport.erlang import set_decoder, set_encoder
 from erlport.erlterms import Atom, Map
 from handle_classes import *
 from librus_apix.client import Client, Token, new_client
-from librus_apix.notifications import NotificationData, NotificationIds
+from librus_apix.homework import homework_detail
 
 
 def extract_grades(grades):
@@ -63,7 +63,36 @@ def create_client(token_key: str) -> Client:
     if elixirus_proxy is not None and os.getenv("USE_PROXY") == "yes":
         proxy = {"https": elixirus_proxy, "http": elixirus_proxy}
     token = Token(API_Key=token_key)
-    return new_client(token=token, proxy=proxy)
+    base = "http://127.0.0.1:8000/"
+
+    announcements = f"{base}announcements.html"
+    messages = f"{base}messages.html"
+    sent = f"{base}sent_messages.html"
+    timetable = f"{base}timetable.html"
+    schedule = f"{base}schedule.html"
+    subjects = f"{base}grades.html"
+    attendance = f"{base}attendance.html"
+    homework = f"{base}homework.html"
+    student_info = f"{base}student_info.html"
+    completed = f"{base}completed.html"
+    hw_details = f"{base}homework/"
+
+    return new_client(
+        token=token,
+        proxy=proxy,
+        base_url=base,
+        homework_details_url=hw_details,
+        completed_lessons_url=completed,
+        info_url=student_info,
+        announcements_url=announcements,
+        message_url=messages,
+        send_message_url=sent,
+        timetable_url=timetable,
+        schedule_url=schedule,
+        grades_url=subjects,
+        attendance_url=attendance,
+        homework_url=homework,
+    )
 
 
 def brew_elixir_list(data: List, safe: bool = True, exclude: List[str] = []) -> List:
