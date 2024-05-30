@@ -236,7 +236,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:token_error, _message, socket} ->
           socket
 
-        {:error, _message} ->
+        {:error, _message, socket} ->
           socket
       end
 
@@ -279,7 +279,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:token_error, _message, socket} ->
           socket
 
-        {:error, _message} ->
+        {:error, _message, socket} ->
           socket
       end
 
@@ -301,7 +301,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:token_error, _message, socket} ->
           socket
 
-        {:error, _message} ->
+        {:error, _message, socket} ->
           socket
       end
 
@@ -359,7 +359,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:token_error, _message, socket} ->
           socket
 
-        {:error, _message} ->
+        {:error, _message, socket} ->
           socket
       end
 
