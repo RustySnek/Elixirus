@@ -8,8 +8,11 @@
 ### Core Features 🚀
 - **Data Caching**: Efficient data caching for faster load times. ⚡
 - **Token Management**: Flexibly maintains tokens inside *ets* Erlang memory storage, allowing users the option to enable or disable token storing for refreshing purposes 🔒
-- **Push Notifications**: Receive real-time updates with [ntfy.sh](https://ntfy.sh/) notifications. 📲
 - **Seamless Experience**: Enjoy a smooth and uninterrupted user experience. 🌐
+
+### [Push Notifications](https://github.com/RustySnek/Elixirus/blob/ntfy_notifications/docs/notifications.md) 📲
+- Elixirus supports notifications using [ntfy.sh](https://ntfy.sh/)
+- Setup notifications guide [here](https://github.com/RustySnek/Elixirus/blob/ntfy_notifications/docs/notifications.md)
 
 ### Additional Features 🌟
 - **Attendance Calculation**: Calculate percentage attendance effortlessly. 📊
