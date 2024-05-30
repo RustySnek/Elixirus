@@ -16,6 +16,9 @@ Notifications are only present when `keep token alive` is enabled. By default no
   - Multiple devices can subscribe to the same topic
   
     ![image](https://github.com/RustySnek/Elixirus/assets/73820224/153d685e-bafa-495b-887e-d1040f1c5e47)
+  - On desktop you will have to copy-paste the topic id
+    
+    ![image](https://github.com/RustySnek/Elixirus/assets/73820224/51b44b6c-8347-4e47-871e-9f516388a078)
 
 # Example notifications
 <img src="https://github.com/RustySnek/Elixirus/assets/73820224/1dfa2797-a1da-4759-9329-263f365c802e" width="250" height="250" alt="example notifications"></img>
