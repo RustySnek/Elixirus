@@ -8,12 +8,17 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
 
   alias HtmlSanitizeEx
   import Earmark, only: [as_html!: 1]
+  @asyncs [:load_announcements]
+
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
 
   def handle_async(:load_announcements, {:ok, announcements}, socket) do
     user_id = socket.assigns.user_id
 
     socket =
-      case announcements do
+      case match_basic_errors(socket, announcements, @asyncs) do
         {:ok, announcements} ->
           cache_and_ttl_data(user_id, "announcements", announcements, 15)
 
@@ -21,13 +26,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :announcements))
           |> assign(:announcements, announcements)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}

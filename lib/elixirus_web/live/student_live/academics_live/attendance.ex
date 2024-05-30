@@ -8,11 +8,20 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   import Phoenix.UI.Components.Tooltip
   import Phoenix.UI.Components.Typography
 
+  @asyncs [
+    :load_frequency,
+    :load_attendance
+  ]
+
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_frequency, {:ok, frequency}, socket) do
     user_id = socket.assigns.user_id
 
     socket =
-      case frequency do
+      case match_basic_errors(socket, frequency, @asyncs) do
         {:ok, freq} ->
           freq =
             freq
@@ -29,13 +38,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           |> assign(:frequency, freq)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -45,7 +52,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
     user_id = socket.assigns.user_id
 
     socket =
-      case attendance do
+      case match_basic_errors(socket, attendance, @asyncs) do
         {:ok, attendance, stats} ->
           attendance =
             attendance
@@ -59,13 +66,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :attendance))
           |> assign(:stats, stats)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}

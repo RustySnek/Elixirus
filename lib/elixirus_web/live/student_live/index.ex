@@ -7,6 +7,17 @@ defmodule ElixirusWeb.StudentLive.Index do
   import Elixirus.Python.SnakeWrapper
   import Heroicons, only: [chevron_right: 1, inbox: 1]
 
+  @asyncs [
+    :load_frequency,
+    :load_timetable,
+    :load_schedule,
+    :load_student_data,
+    :load_new_grades,
+    :load_new_attendance,
+    :load_unread_messages,
+    :load_semester_grades
+  ]
+
   defp clean_period_name(period) do
     case period do
       -1 -> "Today"
@@ -204,9 +215,13 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_semester_grades, {:ok, {data, semester}}, socket) do
     socket =
-      case data do
+      case match_basic_errors(socket, data, @asyncs) do
         {:ok, [grades, gpas]} ->
           gpas = sort_gpas(gpas)
 
@@ -218,13 +233,11 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:semester_grades, gpas)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message} ->
+          socket
       end
 
     {:noreply, socket}
@@ -246,7 +259,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     user_id = socket.assigns.user_id
 
     socket =
-      case freq do
+      case match_basic_errors(socket, freq, @asyncs) do
         {:ok, frequency} ->
           frequency =
             frequency
@@ -263,13 +276,11 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
           |> assign(:frequency, frequency)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message} ->
+          socket
       end
 
     {:noreply, socket}
@@ -279,7 +290,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     user_id = socket.assigns.user_id
 
     socket =
-      case schedule do
+      case match_basic_errors(socket, schedule, @asyncs) do
         {:ok, schedule} ->
           cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule, 10)
 
@@ -287,13 +298,11 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
           |> assign(:schedule, schedule)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message} ->
+          socket
       end
 
     {:noreply, socket}
@@ -324,6 +333,8 @@ defmodule ElixirusWeb.StudentLive.Index do
              :load_unread_messages,
              :load_new_grades
            ] do
+    user_id = socket.assigns.user_id
+
     name =
       task_name
       |> Atom.to_string()
@@ -331,7 +342,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       |> String.to_existing_atom()
 
     socket =
-      case data do
+      case match_basic_errors(socket, data, @asyncs) do
         {:ok, data} ->
           cache_name =
             case semester do
@@ -345,13 +356,11 @@ defmodule ElixirusWeb.StudentLive.Index do
           |> assign(name, data)
           |> assign(:loadings, List.delete(socket.assigns.loadings, name))
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message} ->
+          socket
       end
 
     {:noreply, socket}

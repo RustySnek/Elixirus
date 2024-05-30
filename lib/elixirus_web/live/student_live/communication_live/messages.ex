@@ -11,6 +11,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   use ElixirusWeb.SetSemesterLive
   import Earmark, only: [as_html!: 1]
   alias HtmlSanitizeEx
+  @asyncs [:load_messages, :load_sent_messages, :load_group_recipients, :load_recipient_groups]
 
   def find_group(group_name, author, token) do
     {:ok, group} = python(:fetchers, :get_group_recipients, [token, group_name])
@@ -195,22 +196,23 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     {:noreply, socket}
   end
 
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_sent_messages, {:ok, messages}, socket) do
     socket =
-      case messages do
+      case match_basic_errors(socket, messages, @asyncs) do
         {:ok, messages} ->
           socket
           |> assign(:sent_messages, messages)
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:sent_messages))
 
-        %{:token_error => _msg} ->
+        {:token_error, _message, socket} ->
           socket
-          |> assign(:login_required, true)
-          |> push_event("require-login", %{})
 
-        %{:error => msg} ->
-          Logger.error(msg)
-          put_flash(socket, :error, msg)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -218,7 +220,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
   def handle_async(:load_group_recipients, {:ok, recipients}, socket) do
     socket =
-      case recipients do
+      case match_basic_errors(socket, recipients, @asyncs) do
         {:ok, recipients} ->
           socket
           |> assign(
@@ -230,14 +232,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           )
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:recipients))
 
-        %{:token_error => _msg} ->
+        {:token_error, _message, socket} ->
           socket
-          |> assign(:login_required, true)
-          |> push_event("require-login", %{})
 
-        %{:error => msg} ->
-          Logger.error(msg)
-          put_flash(socket, :error, msg)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -245,17 +244,15 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
   def handle_async(:fetch_content, {:ok, content}, socket) do
     socket =
-      case content do
+      case match_basic_errors(socket, content, @asyncs) do
         {:ok, content} ->
           assign(socket, :message_content, content)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -263,15 +260,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
   def handle_async(:load_recipient_groups, {:ok, groups}, socket) do
     socket =
-      case groups do
-        %{:error => msg} ->
-          Logger.error(msg)
-          socket |> put_flash(:error, msg)
-
-        %{:token_error => _msg} ->
+      case match_basic_errors(socket, groups, @asyncs) do
+        {:token_error, _message, socket} ->
           socket
-          |> assign(:login_required, true)
-          |> push_event("require-login", %{})
+
+        {:error, _message, socket} ->
+          socket
 
         {:ok, groups} ->
           socket |> assign(:recipient_groups, groups)
@@ -284,7 +278,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     user_id = socket.assigns.user_id
 
     socket =
-      case messages do
+      case match_basic_errors(socket, messages, @asyncs) do
         {:ok, messages} ->
           {unread, seen} =
             messages
@@ -299,13 +293,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:seen_messages, seen)
           |> assign(:unread_messages, unread)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}

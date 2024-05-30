@@ -11,6 +11,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     sort_grades: "newest",
     grade_query: ""
   }
+  @asyncs [:load_grades]
 
   defp assign_averages(socket, grades) do
     grade_averages =
@@ -227,13 +228,17 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
     {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
   end
 
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
     query = socket.assigns.query
 
     user_id = socket.assigns.user_id
 
     socket =
-      case grades do
+      case match_basic_errors(socket, grades, @asyncs) do
         {:ok, [grades, semester_grades]} ->
           keys = grades |> Map.keys()
           semester_grades = sort_gpas(semester_grades)
@@ -252,13 +257,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           |> assign(:semester_grades, semester_grades)
           |> assign_averages(grades)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}

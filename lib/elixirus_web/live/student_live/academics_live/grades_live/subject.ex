@@ -6,15 +6,21 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   import Elixirus.Python.SnakeWrapper
   import ElixirusWeb.Components.Loadings
 
+  @asyncs [:load_grades]
+
   def fetch_all_grades(token, semester) do
     {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
+  end
+
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
   end
 
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
     user_id = socket.assigns.user_id
 
     socket =
-      case grades do
+      case match_basic_errors(socket, grades, @asyncs) do
         {:ok, [grades, semester_grades]} ->
           semester_grades = sort_gpas(semester_grades)
           cache_and_ttl_data(user_id, "#{semester}-grades", grades, 15)
@@ -23,13 +29,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
           socket
           |> assign(:grades, grades)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}

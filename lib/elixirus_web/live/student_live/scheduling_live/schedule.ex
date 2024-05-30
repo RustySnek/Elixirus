@@ -8,22 +8,26 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   import ElixirusWeb.Helpers
   alias ElixirusWeb.Modal
 
+  @asyncs [:load_schedule]
+
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
     user_id = socket.assigns.user_id
 
     socket =
-      case schedule do
+      case match_basic_errors(socket, schedule, @asyncs) do
         {:ok, schedule} ->
           cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule, 15)
           assign(socket, :schedule, schedule)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
