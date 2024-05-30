@@ -19,10 +19,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
 
   def find_group_and_recipient(socket, author) do
     author = Regex.replace(~r/\(.*?\)*\[.*?\]/, author, "", global: true) |> String.trim()
+    recipient_groups = socket.assigns.recipient_groups
+    token = socket.assigns.token
 
     {_, {name, group}} =
-      Task.async_stream(socket.assigns.recipient_groups, fn group ->
-        find_group(group, author, socket.assigns.token)
+      Task.async_stream(recipient_groups, fn group ->
+        find_group(group, author, token)
       end)
       |> Enum.filter(fn {:ok, {id, _group}} ->
         id != nil
@@ -71,12 +73,17 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   end
 
   def handle_event("send_message", _params, socket) do
+    token = socket.assigns.token
+    title = socket.assigns.compose_title
+    content = socket.assigns.compose_content
+    selected_recipients = socket.assigns.selected_recipients
+
     socket =
       case python(:fetchers, :send_message, [
-             socket.assigns.token,
-             socket.assigns.compose_title,
-             socket.assigns.compose_content,
-             socket.assigns.selected_recipients |> Enum.map(fn {_, id} -> id end)
+             token,
+             title,
+             content,
+             selected_recipients |> Enum.map(fn {_, id} -> id end)
            ]) do
         {:ok, msg} ->
           put_flash(socket, :info, "Sent!\n#{msg}")
@@ -84,7 +91,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
           |> assign(:compose_content, "")
           |> assign(:selected_recipients, MapSet.new())
           |> start_async(:load_sent_messages, fn ->
-            python(:fetchers, :fetch_sent_messages, [socket.assigns.token, 0])
+            python(:fetchers, :fetch_sent_messages, [token, 0])
           end)
 
         %{:send_error => msg} ->
@@ -130,12 +137,14 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   end
 
   def handle_event("select_recipient_group", %{"recipient_group" => group}, socket) do
+    token = socket.assigns.token
+
     socket =
       socket
       |> assign(:group_recipients, %{})
       |> assign(:selected_group, group)
       |> create_fetcher(:load, :group_recipients, fn ->
-        python(:fetchers, :get_group_recipients, [socket.assigns.token, group])
+        python(:fetchers, :get_group_recipients, [token, group])
       end)
 
     {:noreply, socket}
@@ -153,9 +162,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
         %{"msg_id" => id},
         socket
       ) do
+    token = socket.assigns.token
+
     socket =
       socket
-      |> start_async(:fetch_content, fn -> fetch_message_content(socket.assigns.token, id) end)
+      |> start_async(:fetch_content, fn -> fetch_message_content(token, id) end)
 
     {:noreply, socket}
   end
@@ -270,6 +281,8 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   end
 
   def handle_async(:load_messages, {:ok, messages}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case messages do
         {:ok, messages} ->
@@ -277,7 +290,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
             messages
             |> Enum.split_with(fn msg -> msg.unread == true end)
 
-          cache_and_ttl_data(socket.assigns.user_id, "messages", messages, 15)
+          cache_and_ttl_data(user_id, "messages", messages, 15)
 
           socket
           |> assign(:loadings, List.delete(socket.assigns.loadings, :messages))

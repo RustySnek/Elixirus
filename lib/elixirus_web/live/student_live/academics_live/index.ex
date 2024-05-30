@@ -16,10 +16,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
   end
 
   def fetch_data(socket, token, semester) do
-    todays_lessons = handle_cache_data(socket.assigns.user_id, "todays_completed_lessons")
-    grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades-week")
-    attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance-last_login")
-    homework = handle_cache_data(socket.assigns.user_id, "homework")
+    user_id = socket.assigns.user_id
+    todays_lessons = handle_cache_data(user_id, "todays_completed_lessons")
+    grades = handle_cache_data(user_id, "#{semester}-grades-week")
+    attendance = handle_cache_data(user_id, "#{semester}-attendance-last_login")
+    homework = handle_cache_data(user_id, "homework")
 
     socket
     |> assign(:loadings, [])

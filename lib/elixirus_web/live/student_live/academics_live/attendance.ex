@@ -9,6 +9,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   import Phoenix.UI.Components.Typography
 
   def handle_async(:load_frequency, {:ok, frequency}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case frequency do
         {:ok, freq} ->
@@ -21,7 +23,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
                 |> Kernel./(10))
             )
 
-          cache_and_ttl_data(socket.assigns.user_id, "frequency", freq, 10)
+          cache_and_ttl_data(user_id, "frequency", freq, 10)
 
           socket
           |> assign(:frequency, freq)
@@ -40,6 +42,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   end
 
   def handle_async(:load_attendance, {:ok, {attendance, semester}}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case attendance do
         {:ok, attendance, stats} ->
@@ -47,8 +51,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
             attendance
             |> Enum.chunk_by(&Map.get(&1, :date))
 
-          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-attendance", attendance, 10)
-          cache_and_ttl_data(socket.assigns.user_id, "attendance-stats", stats, 10)
+          cache_and_ttl_data(user_id, "#{semester}-attendance", attendance, 10)
+          cache_and_ttl_data(user_id, "attendance-stats", stats, 10)
 
           socket
           |> assign(:attendance, attendance)
@@ -68,15 +72,16 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   end
 
   def handle_event("retrieve_local_storage", %{"semester" => semester} = _params, socket) do
-    attendance = handle_cache_data(socket.assigns.user_id, "#{semester}-attendance")
+    user_id = socket.assigns.user_id
+    token = socket.assigns.token
+    attendance = handle_cache_data(user_id, "#{semester}-attendance")
 
     socket =
       socket
       |> assign(:semester, semester)
       |> assign(:attendance, [])
       |> create_fetcher(attendance, :attendance, fn ->
-        {python(:fetchers, :fetch_all_attendance, [socket.assigns.token, semester, true]),
-         semester}
+        {python(:fetchers, :fetch_all_attendance, [token, semester, true]), semester}
       end)
 
     {:noreply, socket}
