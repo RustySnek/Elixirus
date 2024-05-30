@@ -15,16 +15,24 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {:ok, state, {:continue, :push_notification}}
   end
 
+  defp counts_emoji(true), do: "✅"
+  defp counts_emoji(false), do: "❌"
+
+  defp grade_sign_encode(grade) do
+    grade |> String.replace(~r/[+]/, "%2B") |> String.replace(~r/[-]/, "%2D")
+  end
+
   defp parse_notification(:grades, grade) do
     body =
-      "*#{grade.grade}*<sup>#{grade.weight}</sup> #{grade.category}  Average: #{grade.counts |> to_string}  Teacher: #{grade.teacher}"
+      "#{grade.category} - #{grade.desc}\n#{grade.grade} #{grade.title}\nWeight: #{grade.weight}\nCounts: #{grade.counts |> counts_emoji()}"
 
     headers = [
       {"Click",
        "https://elixirus.rustysnek.xyz/student/academics/subjects/#{grade.title}?grade_id=#{grade.href}&semester=#{grade.semester}"},
-      {"Icon", "https://placehold.co/200x200/f904ef/FFFFFF?font=montserrat&text=#{grade.grade}"},
-      {"Title", "*#{grade.grade}* - #{grade.title}"},
-      {"Tags", "graduation-cap"},
+      {"Icon",
+       "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=#{grade.grade |> grade_sign_encode}"},
+      {"Title", "#{grade.grade} #{grade.title}"},
+      {"Tags", "closed_book"},
       {"Markdown", "yes"}
     ]
 
@@ -32,14 +40,15 @@ defmodule Elixirus.Notifications.NotificationWorker do
   end
 
   defp parse_notification(:attendance, attendance) do
-    body = "#{attendance.subject}  Teacher: #{attendance.teacher}"
+    body =
+      "#{attendance.subject}: #{attendance.type}\nTopic: #{attendance.topic}\nTeacher: #{attendance.teacher}"
 
     headers = [
       {"Click", "https://elixirus.rustysnek.xyz/student/academics/attendance"},
       {"Icon",
-       "https://placehold.co/200x200/f904ef/FFFFFF?font=montserrat&text=#{attendance.symbol}"},
-      {"Title", "*#{attendance.symbol}* - #{attendance.topic}"},
-      {"Tags", "red-circle"},
+       "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=#{attendance.symbol}"},
+      {"Title", "#{attendance.symbol} - #{attendance.subject}"},
+      {"Tags", "x"},
       {"Markdown", "yes"}
     ]
 
@@ -47,11 +56,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
   end
 
   defp parse_notification(:messages, message) do
-    body = "#{message.title} - #{message.author}"
+    body = "#{message.title}\n - #{message.author}"
 
     headers = [
       {"Click", "https://elixirus.rustysnek.xyz/student/communication/messages"},
-      {"Title", "Received a new message from #{message.author}!"},
+      {"Title", "Received a message from #{message.author}!"},
+      {"Icon", "https://elixirus.rustysnek.xyz/images/snake_envelope.jpg"},
       {"Tags", "envelope"},
       {"Markdown", "yes"}
     ]
@@ -65,7 +75,8 @@ defmodule Elixirus.Notifications.NotificationWorker do
     headers = [
       {"Click", "https://elixirus.rustysnek.xyz/student/communication/announcements"},
       {"Title", "#{announcement.title}"},
-      {"Tags", "mega"},
+      {"Icon", "https://elixirus.rustysnek.xyz/images/horn.png"},
+      {"Tags", "postal_horn"},
       {"Markdown", "yes"}
     ]
 
@@ -73,18 +84,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
   end
 
   defp parse_notification(:schedule, event) do
-    time =
-      cond do
-        event.number != "unknown" -> event.hour
-        event.hour != "unknown" -> event.hour
-        true -> ""
-      end
-
-    body = "#{event.subject}  #{time}"
+    body = "#{event.data}"
 
     headers = [
       {"Click", "https://elixirus.rustysnek.xyz/student/scheduling/schedule"},
-      {"Title", "#{event.title}"},
+      {"Title", "#{event.type}"},
+      {"Icon", "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=!"},
       {"Tags", "calendar"},
       {"Markdown", "yes"}
     ]
@@ -94,12 +99,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
 
   defp parse_notification(:homework, homework) do
     body =
-      "#{homework.category}  Due to: #{homework.completion_date}  Teacher: #{homework.teacher}"
+      "#{homework.category}\n#{homework.subject}\nDue to: #{homework.completion_date}\nTeacher: #{homework.teacher}"
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/scheduling/schedule"},
+      {"Click", "https://elixirus.rustysnek.xyz/student/academics/homework"},
       {"Title", "#{homework.lesson}: #{homework.subject}"},
-      {"Tags", "calendar"},
+      {"Tags", "pencil"},
       {"Markdown", "yes"}
     ]
 
