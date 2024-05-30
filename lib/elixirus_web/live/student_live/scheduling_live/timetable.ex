@@ -208,13 +208,22 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   def handle_async(:load_calendar_data, {:ok, events}, socket) do
     user_id = socket.assigns.user_id
 
-    cache_and_ttl_data(
-      user_id,
-      "#{socket.assigns.current_monday}-timetable_calendar",
-      events
-    )
+    socket =
+      case events do
+        %{:error => msg} ->
+          Logger.error("calendar events: #{msg}")
+          socket
 
-    socket = socket |> assign(:calendar_events, events)
+        events ->
+          cache_and_ttl_data(
+            user_id,
+            "#{socket.assigns.current_monday}-timetable_calendar",
+            events
+          )
+
+          socket |> assign(:calendar_events, events)
+      end
+
     {:noreply, socket}
   end
 
