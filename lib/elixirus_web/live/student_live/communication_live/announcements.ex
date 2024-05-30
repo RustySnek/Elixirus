@@ -10,10 +10,12 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
   import Earmark, only: [as_html!: 1]
 
   def handle_async(:load_announcements, {:ok, announcements}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case announcements do
         {:ok, announcements} ->
-          cache_and_ttl_data(socket.assigns.user_id, "announcements", announcements, 15)
+          cache_and_ttl_data(user_id, "announcements", announcements, 15)
 
           socket
           |> assign(:loadings, List.delete(socket.assigns.loadings, :announcements))

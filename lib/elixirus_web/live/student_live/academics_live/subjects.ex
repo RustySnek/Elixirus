@@ -162,7 +162,10 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   end
 
   def handle_event("retrieve_local_storage", %{"semester" => semester} = _params, socket) do
-    data = handle_cache_data(socket.assigns.user_id, "#{semester}-grades")
+    user_id = socket.assigns.user_id
+    data = handle_cache_data(user_id, "#{semester}-grades")
+
+    token = socket.assigns.token
 
     socket =
       socket
@@ -174,7 +177,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       case data do
         :load ->
           socket
-          |> start_async(:load_grades, fn -> fetch_all_grades(socket.assigns.token, semester) end)
+          |> start_async(:load_grades, fn -> fetch_all_grades(token, semester) end)
 
         data ->
           socket |> assign(:grades, data) |> assign(:shown_grades, data) |> assign_averages(data)
@@ -225,6 +228,10 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   end
 
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
+    query = socket.assigns.query
+
+    user_id = socket.assigns.user_id
+
     socket =
       case grades do
         {:ok, [grades, semester_grades]} ->
@@ -232,12 +239,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
           semester_grades = sort_gpas(semester_grades)
 
           keys =
-            keys |> search_subjects(socket.assigns.query)
+            keys |> search_subjects(query)
 
           shown = grades |> Map.take(keys)
 
-          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades, 15)
-          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
+          cache_and_ttl_data(user_id, "semester_grades", semester_grades, 15)
+          cache_and_ttl_data(user_id, "#{semester}-grades", grades, 15)
 
           socket
           |> assign(:grades, grades)

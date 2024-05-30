@@ -19,15 +19,17 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   defp load_schedule(socket, month_year) do
+    token = socket.assigns.token
     [year, month] = month_year |> String.split("-")
 
     start_async(socket, :load_schedule, fn ->
-      {python(:fetchers, :fetch_schedule, [socket.assigns.token, year, month]), year, month}
+      {python(:fetchers, :fetch_schedule, [token, year, month]), year, month}
     end)
   end
 
   defp fetch_schedule(socket, monday) do
     socket = assign(socket, :schedule, %{})
+    user_id = socket.assigns.user_id
 
     [first, second] =
       [monday, monday |> Date.add(6)]
@@ -40,7 +42,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       )
 
     if first == second do
-      schedule = handle_cache_data(socket.assigns.user_id, "#{first}-schedule")
+      schedule = handle_cache_data(user_id, "#{first}-schedule")
 
       case schedule do
         :load -> load_schedule(socket, first)
@@ -48,7 +50,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       end
     else
       [cache_first, cache_second] =
-        [first, second] |> Enum.map(&handle_cache_data(socket.assigns.user_id, "#{&1}-schedule"))
+        [first, second] |> Enum.map(&handle_cache_data(user_id, "#{&1}-schedule"))
 
       socket =
         case cache_first do
@@ -171,10 +173,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case schedule do
         {:ok, schedule} ->
-          cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule, 15)
+          cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule, 15)
 
           assign(
             socket,
@@ -199,8 +203,10 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def handle_async(:load_calendar_data, {:ok, events}, socket) do
+    user_id = socket.assigns.user_id
+
     cache_and_ttl_data(
-      socket.assigns.user_id,
+      user_id,
       "#{socket.assigns.current_monday}-timetable_calendar",
       events
     )
@@ -210,14 +216,16 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def handle_async(:load_timetable, {:ok, timetable}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case timetable do
         {:ok, t} ->
           if socket.assigns.current_monday == socket.assigns.this_monday do
-            cache_and_ttl_data(socket.assigns.user_id, "timetable", t, 30)
+            cache_and_ttl_data(user_id, "timetable", t, 30)
           else
             cache_and_ttl_data(
-              socket.assigns.user_id,
+              user_id,
               "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable",
               t
             )
@@ -242,30 +250,33 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
 
   def handle_event("change_week", %{"days" => days}, socket) do
     current_monday = socket.assigns.current_monday |> Date.add(days |> String.to_integer())
+    user_id = socket.assigns.user_id
+    calendar_id = socket.assigns.calendar_id
+    token = socket.assigns.token
     socket = socket |> assign(:current_monday, current_monday) |> assign(:timetable, [])
 
     timetable =
       if current_monday == socket.assigns.this_monday do
-        handle_cache_data(socket.assigns.user_id, "timetable")
+        handle_cache_data(user_id, "timetable")
       else
         handle_cache_data(
-          socket.assigns.user_id,
+          user_id,
           "#{current_monday |> Date.to_iso8601()}-timetable"
         )
       end
 
     calendar_data =
       handle_cache_data(
-        socket.assigns.user_id,
-        "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable_calendar"
+        user_id,
+        "#{current_monday |> Date.to_iso8601()}-timetable_calendar"
       )
 
     socket =
       cond do
-        calendar_data == :load and socket.assigns.calendar_id != "" ->
+        calendar_data == :load and calendar_id != "" ->
           start_async(socket, :load_calendar_data, fn ->
             fetch_calendar_data(
-              socket.assigns.calendar_id,
+              calendar_id,
               current_monday |> to_string(),
               current_monday |> Date.add(7) |> to_string()
             )
@@ -284,7 +295,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           socket
           |> assign(:loadings, [:timetable | socket.assigns.loadings])
           |> start_async(:load_timetable, fn ->
-            fetch_timetable(socket.assigns.token, current_monday |> to_string())
+            fetch_timetable(token, current_monday |> to_string())
           end)
 
         timetable ->
@@ -300,7 +311,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
         %{"calendar_id" => calendar_id},
         socket
       ) do
-    end_of_week = Date.add(socket.assigns.current_monday, 7)
+    current_monday = socket.assigns.current_monday
+    end_of_week = Date.add(current_monday, 7)
 
     socket =
       socket
@@ -308,7 +320,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> start_async(:load_calendar_data, fn ->
         fetch_calendar_data(
           calendar_id,
-          socket.assigns.current_monday |> to_string(),
+          current_monday |> to_string(),
           end_of_week |> to_string()
         )
       end)
@@ -331,6 +343,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       ) do
     token = handle_api_token(socket, token)
     monday = this_weeks_monday()
+    current_monday = socket.assigns.current_monday
 
     socket =
       socket
@@ -353,7 +366,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     calendar_data =
       handle_cache_data(
         user_id,
-        "#{socket.assigns.current_monday |> Date.to_iso8601()}-timetable_calendar"
+        "#{current_monday |> Date.to_iso8601()}-timetable_calendar"
       )
 
     socket =

@@ -11,12 +11,14 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   end
 
   def handle_async(:load_grades, {:ok, {grades, semester}}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case grades do
         {:ok, [grades, semester_grades]} ->
           semester_grades = sort_gpas(semester_grades)
-          cache_and_ttl_data(socket.assigns.user_id, "#{semester}-grades", grades, 15)
-          cache_and_ttl_data(socket.assigns.user_id, "semester_grades", semester_grades, 15)
+          cache_and_ttl_data(user_id, "#{semester}-grades", grades, 15)
+          cache_and_ttl_data(user_id, "semester_grades", semester_grades, 15)
 
           socket
           |> assign(:grades, grades)
@@ -34,14 +36,16 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   end
 
   def handle_event("retrieve_local_storage", %{"semester" => semester}, socket) do
-    grades = handle_cache_data(socket.assigns.user_id, "#{semester}-grades")
+    user_id = socket.assigns.user_id
+    token = socket.assigns.token
+    grades = handle_cache_data(user_id, "#{semester}-grades")
 
     socket =
       socket
       |> assign(:semester, semester)
       |> assign(:grades, %{})
       |> create_fetcher(grades, :grades, fn ->
-        {python(:fetchers, :fetch_all_grades, [socket.assigns.token, semester]), semester}
+        {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
       end)
 
     {:noreply, socket}

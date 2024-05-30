@@ -33,10 +33,12 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   end
 
   def handle_async(:load_homework, {:ok, homework}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case homework do
         {:ok, homework} ->
-          cache_and_ttl_data(socket.assigns.user_id, "homework", homework, 15)
+          cache_and_ttl_data(user_id, "homework", homework, 15)
           assign(socket, :homework, homework |> Enum.reverse())
 
         %{:token_error => _message} ->
@@ -56,9 +58,11 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   end
 
   def handle_event("view_homework", %{"homework_id" => hw_id}, socket) do
+    token = socket.assigns.token
+
     socket =
       socket
-      |> start_async(:load_details, fn -> fetch_homework_details(socket.assigns.token, hw_id) end)
+      |> start_async(:load_details, fn -> fetch_homework_details(token, hw_id) end)
 
     {:noreply, socket}
   end

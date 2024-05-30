@@ -9,10 +9,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   alias ElixirusWeb.Modal
 
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
+    user_id = socket.assigns.user_id
+
     socket =
       case schedule do
         {:ok, schedule} ->
-          cache_and_ttl_data(socket.assigns.user_id, "#{year}-#{month}-schedule", schedule, 15)
+          cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule, 15)
           assign(socket, :schedule, schedule)
 
         %{:token_error => _message} ->
