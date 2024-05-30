@@ -9,24 +9,27 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   alias ElixirusWeb.Modal
 
   import ElixirusWeb.Components.Loadings
+  @asyncs [:load_details, :load_homework]
 
   def fetch_homework_details(token, id) do
     python(:fetchers, :fetch_homework_details, [token, id])
   end
 
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_details, {:ok, details}, socket) do
     socket =
-      case details do
+      case match_basic_errors(socket, details, @asyncs) do
         {:ok, details} ->
           assign(socket, :details, details)
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -36,18 +39,16 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
     user_id = socket.assigns.user_id
 
     socket =
-      case homework do
+      case match_basic_errors(socket, homework, @asyncs) do
         {:ok, homework} ->
           cache_and_ttl_data(user_id, "homework", homework, 15)
           assign(socket, :homework, homework |> Enum.reverse())
 
-        %{:token_error => _message} ->
-          assign(socket, :login_required, true)
-          |> push_event("require-login", %{})
+        {:token_error, _message, socket} ->
+          socket
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}

@@ -8,6 +8,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
 
   use ElixirusWeb.SetSemesterLive
   import Heroicons, only: [chevron_right: 1, chevron_left: 1, information_circle: 1]
+  @asyncs [:load_schedule, :load_timetable]
 
   defp exclude_empty_days(timetable) do
     timetable
@@ -172,11 +173,15 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     end
   end
 
+  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    {:noreply, socket}
+  end
+
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
     user_id = socket.assigns.user_id
 
     socket =
-      case schedule do
+      case match_basic_errors(socket, schedule, @asyncs) do
         {:ok, schedule} ->
           cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule, 15)
 
@@ -186,13 +191,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
             Map.put(socket.assigns.schedule, "#{year}-#{month}", schedule)
           )
 
-        %{:token_error => _message} ->
+        {:token_error, _message, socket} ->
           socket
-          |> push_event("require-login", %{})
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -219,7 +222,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     user_id = socket.assigns.user_id
 
     socket =
-      case timetable do
+      case match_basic_errors(socket, timetable, @asyncs) do
         {:ok, t} ->
           if socket.assigns.current_monday == socket.assigns.this_monday do
             cache_and_ttl_data(user_id, "timetable", t, 30)
@@ -236,13 +239,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           |> assign(:loadings, socket.assigns.loadings |> List.delete(:timetable))
           |> start_async(:get_indicator, fn -> get_indicator_position(t) end)
 
-        %{:token_error => _message} ->
+        {:token_error, _message, socket} ->
           socket
-          |> push_event("require-login", %{})
 
-        %{:error => message} ->
-          Logger.error(message)
-          put_flash(socket, :error, message)
+        {:error, _message, socket} ->
+          socket
       end
 
     {:noreply, socket}
@@ -343,7 +344,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       ) do
     token = handle_api_token(socket, token)
     monday = this_weeks_monday()
-    current_monday = socket.assigns.current_monday
 
     socket =
       socket
@@ -366,7 +366,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     calendar_data =
       handle_cache_data(
         user_id,
-        "#{current_monday |> Date.to_iso8601()}-timetable_calendar"
+        "#{monday |> Date.to_iso8601()}-timetable_calendar"
       )
 
     socket =

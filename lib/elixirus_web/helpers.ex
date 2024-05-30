@@ -3,6 +3,29 @@ defmodule ElixirusWeb.Helpers do
   Miscellanous functions to help parse data
   """
   use Phoenix.LiveView
+  require Logger
+
+  def match_basic_errors(socket, %{:token_error => message}, asyncs) do
+    socket =
+      Enum.reduce(asyncs, socket, fn loading, socket_acc ->
+        cancel_async(socket_acc, loading, :error)
+      end)
+      |> assign(:login_required, true)
+      |> push_event("require-login", %{})
+
+    {:token_error, message, socket}
+  end
+
+  def match_basic_errors(socket, %{:error => message}, _asyncs) do
+    Logger.error(message)
+    put_flash(socket, :error, message)
+
+    {:error, message, socket}
+  end
+
+  def match_basic_errors(_socket, any, _asyncs) do
+    any
+  end
 
   def sort_gpas(gpas) do
     Enum.sort_by(gpas, fn {_, [_, _, gpa]} ->
