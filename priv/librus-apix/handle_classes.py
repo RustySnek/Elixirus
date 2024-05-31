@@ -70,7 +70,7 @@ def handle_grades(subjects):
 
 def handle_notification_data(notification: NotificationData):
     notification_dict = {}
-    notification_dict["grades"] = handle_grades(notification.grades)
+    notification_dict["grades"] = [grade.__dict__ for grade in notification.grades]
     notification_dict["attendance"] = handle_attendance(notification.attendance)
     notification_dict["messages"] = handle_messages(notification.messages)
     notification_dict["announcements"] = handle_announcements(
