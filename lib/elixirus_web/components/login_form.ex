@@ -64,14 +64,18 @@ defmodule ElixirusWeb.LoginForm do
         %{:ok => token} ->
           notification_token = socket.assigns.notification_token
 
-          unless(keep_alive? == false,
-            do:
-              GenServer.call(
-                TokenWorker,
-                {:add_token, username, token, token_ttl |> String.to_integer(),
-                 notification_token}
-              )
-          )
+          token_ttl =
+            case token_ttl |> to_string |> Integer.parse() do
+              :error -> 2
+              {ttl, _} -> ttl
+            end
+
+          unless keep_alive? == false do
+            GenServer.call(
+              TokenWorker,
+              {:add_token, username, token, token_ttl, notification_token}
+            )
+          end
 
           socket
           |> assign(:token, token |> to_string())

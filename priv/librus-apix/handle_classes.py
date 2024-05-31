@@ -39,6 +39,10 @@ def handle_schedule(schedule):
     return {day: [event.__dict__ for event in schedule[day]] for day in schedule}
 
 
+def handle_recent_schedule(recent_schedule):
+    return [event.__dict__ for event in recent_schedule]
+
+
 def handle_timetable(timetable):
     return [[period.__dict__ for period in weekday] for weekday in timetable]
 
@@ -72,6 +76,6 @@ def handle_notification_data(notification: NotificationData):
     notification_dict["announcements"] = handle_announcements(
         notification.announcements
     )
-    notification_dict["schedule"] = handle_schedule(notification.schedule)
+    notification_dict["schedule"] = handle_recent_schedule(notification.schedule)
     notification_dict["homework"] = handle_homework(notification.homework)
     return notification_dict
