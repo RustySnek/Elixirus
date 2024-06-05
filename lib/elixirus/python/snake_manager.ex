@@ -10,25 +10,52 @@ defmodule Elixirus.Python.SnakeManager do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
-  def init(state) do
+  def init(_) do
     Logger.info("Initialized snake manager")
-    send(self(), :clean_inactive_workers)
-    {:ok, state}
+
+    state = []
+
+    {:ok, state, {:continue, :clean_inactive}}
   end
 
-  def handle_call({:run, module, func, args}, _from, state) do
-    case find_ready_worker() do
-      {:ok, pid} ->
-        {:reply, GenServer.call(pid, {:run, module, func, args}, :infinity), state}
+  def handle_continue(:clean_inactive, state) do
+    send(self(), :clean_inactive_workers)
+    {:noreply, state}
+  end
 
-      :none_available ->
-        {:ok, pid} = SnakeSupervisor.deploy_snake_worker()
-        {:reply, GenServer.call(pid, {:run, module, func, args}, :infinity), state}
-    end
+  def handle_cast({:reply_ready_snake, task}, _state) do
+    state = Task.await(task)
+
+    {:noreply, state}
+  end
+
+  def handle_call(:get_ready_snake, from, state) do
+    task =
+      Task.async(fn ->
+        case state |> List.first() do
+          nil ->
+            result = _deploy_new_snake()
+
+            GenServer.reply(from, result)
+            state
+
+          pid ->
+            {pypid, _update} = GenServer.call(pid, :status)
+            GenServer.reply(from, {pid, pypid})
+            List.delete(state, pid)
+        end
+      end)
+
+    GenServer.cast(self(), {:reply_ready_snake, task})
+    {:noreply, state}
+  end
+
+  def handle_call({:employ_snake, pid}, _from, state) do
+    {:reply, :ok, [pid | state]}
   end
 
   def handle_info(:clean_inactive_workers, state) do
-    clean_inactive_workers()
+    state = clean_inactive_workers(state)
     Process.send_after(self(), :clean_inactive_workers, 10_000 * 60)
     {:noreply, state}
   end
@@ -38,42 +65,38 @@ defmodule Elixirus.Python.SnakeManager do
     {:noreply, state}
   end
 
-  defp _kill_inactive_worker(pid) do
-    GenServer.call(pid, :kill_snake)
+  defp _deploy_new_snake() do
+    case SnakeSupervisor.deploy_snake_worker() do
+      {:ok, pid} ->
+        {pypid, _update} = GenServer.call(pid, :status)
+        {pid, pypid}
+
+      {:error, message} ->
+        Logger.error("Error while creating new snake: #{message}")
+        {:error, message}
+    end
+  end
+
+  defp _kill_inactive_worker(pid, pypid) do
+    :python.stop(pypid)
     DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
     Logger.info("Cleared unused snake")
   end
 
-  defp clean_inactive_workers({:busy, _update}, _pid), do: nil
-  defp clean_inactive_workers({:dead, _update}, pid), do: _kill_inactive_worker(pid)
+  defp clean_inactive_workers(state) do
+    {perpetual_workers, rest} = state |> Enum.split(10)
 
-  defp clean_inactive_workers({:ready, update}, pid) do
-    now = DateTime.now!("Europe/Warsaw")
+    Enum.filter(rest, fn pid ->
+      {pypid, update} = GenServer.call(pid, :status)
+      now = DateTime.now!("Europe/Warsaw")
+      active = DateTime.compare(now, Timex.shift(update, minutes: 15)) != :gt
 
-    unless DateTime.compare(now, Timex.shift(update, minutes: 15)) != :gt do
-      _kill_inactive_worker(pid)
-    end
-  end
-
-  defp clean_inactive_workers() do
-    pids = DynamicSupervisor.which_children(SnakeSupervisor)
-
-    Enum.each(pids, fn {_id, pid, _type, _modules} ->
-      clean_inactive_workers(GenServer.call(pid, :status, :infinity), pid)
-    end)
-  end
-
-  defp find_ready_worker() do
-    pids = DynamicSupervisor.which_children(SnakeSupervisor)
-
-    Enum.find_value(pids, :none_available, fn {_id, pid, _type, _modules} ->
-      case GenServer.call(pid, :status, :infinity) do
-        {:ready, _} ->
-          {:ok, pid}
-
-        _ ->
-          nil
+      unless active do
+        _kill_inactive_worker(pid, pypid)
       end
+
+      active
     end)
+    |> Kernel.++(perpetual_workers)
   end
 end
