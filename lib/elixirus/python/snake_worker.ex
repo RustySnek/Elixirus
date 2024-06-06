@@ -3,7 +3,6 @@ defmodule Elixirus.Python.SnakeWorker do
   🔨🐍
   A brave snake worker slithering across...
   """
-  alias Elixirus.Python.SnakeManager
   use GenServer
   require Logger
 

@@ -13,56 +13,70 @@ defmodule Elixirus.Python.SnakeManager do
   def init(_) do
     Logger.info("Initialized snake manager")
 
-    state = []
+    state = MapSet.new()
 
     {:ok, state, {:continue, :clean_inactive}}
   end
 
   def handle_continue(:clean_inactive, state) do
-    send(self(), :clean_inactive_workers)
+    GenServer.cast(self(), :clean_inactive_workers)
     {:noreply, state}
   end
 
-  def handle_cast({:reply_ready_snake, task}, _state) do
-    state = Task.await(task)
+  def handle_cast({:reply_ready_snake, task}, state) do
+    Task.await(task)
 
     {:noreply, state}
   end
 
-  def handle_call(:get_ready_snake, from, state) do
-    task =
-      Task.async(fn ->
-        case state |> List.first() do
-          nil ->
-            result = _deploy_new_snake()
-
-            GenServer.reply(from, result)
-            state
-
-          pid ->
-            {pypid, _update} = GenServer.call(pid, :status)
-            GenServer.reply(from, {pid, pypid})
-            List.delete(state, pid)
-        end
-      end)
-
-    GenServer.cast(self(), {:reply_ready_snake, task})
-    {:noreply, state}
-  end
-
-  def handle_call({:employ_snake, pid}, _from, state) do
-    {:reply, :ok, [pid | state]}
-  end
-
-  def handle_info(:clean_inactive_workers, state) do
+  def handle_cast(:clean_inactive_workers, state) do
     state = clean_inactive_workers(state)
-    Process.send_after(self(), :clean_inactive_workers, 10_000 * 60)
+    DynamicSupervisor.count_children(SnakeSupervisor)
+    Process.send_after(self(), :clean_inactive_info, 10_000 * 6)
+    {:noreply, state}
+  end
+
+  def handle_info(:clean_inactive_info, state) do
+    GenServer.cast(self(), :clean_inactive_workers)
     {:noreply, state}
   end
 
   def handle_info({:sacrifice_snake, pid}, state) do
     DynamicSupervisor.terminate_child(SnakeSupervisor, pid)
-    {:noreply, state}
+    {:noreply, MapSet.delete(state, pid)}
+  end
+
+  def handle_call(:get_ready_snake, from, state) do
+    available? = state |> Enum.at(0)
+
+    case available? do
+      nil ->
+        task =
+          Task.async(fn ->
+            result = _deploy_new_snake()
+
+            GenServer.reply(from, result)
+          end)
+
+        GenServer.cast(self(), {:reply_ready_snake, task})
+        {:noreply, state}
+
+      pid ->
+        state = MapSet.delete(state, pid)
+
+        task =
+          Task.async(fn ->
+            {pypid, _update} = GenServer.call(pid, :status)
+            GenServer.reply(from, {pid, pypid})
+          end)
+
+        GenServer.cast(self(), {:reply_ready_snake, task})
+        {:noreply, state}
+    end
+  end
+
+  def handle_call({:employ_snake, pid}, _from, state) do
+    {:reply, :ok, MapSet.put(state, pid)}
   end
 
   defp _deploy_new_snake() do
@@ -98,5 +112,6 @@ defmodule Elixirus.Python.SnakeManager do
       active
     end)
     |> Kernel.++(perpetual_workers)
+    |> MapSet.new()
   end
 end

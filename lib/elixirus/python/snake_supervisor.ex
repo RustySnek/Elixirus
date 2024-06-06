@@ -10,7 +10,7 @@ defmodule Elixirus.Python.SnakeSupervisor do
   end
 
   def init(:ok) do
-    DynamicSupervisor.init(strategy: :one_for_one, max_restarts: 0, max_children: 500)
+    DynamicSupervisor.init(strategy: :one_for_one, max_restarts: 0, max_children: 50)
   end
 
   def deploy_snake_worker do

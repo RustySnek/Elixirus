@@ -22,7 +22,9 @@ defmodule Elixirus.Python.SnakeWrapper do
     case GenServer.call(SnakeManager, :get_ready_snake, :infinity) do
       {:error, _} ->
         receive do
-          {:EXIT, _from, reason} -> Logger.warning("EXITED #{reason |> inspect}")
+          {:EXIT, _from, reason} ->
+            Logger.warning("EXITED #{reason |> inspect}")
+            exit(reason)
         after
           1500 ->
             python(module, func, args)
@@ -33,6 +35,7 @@ defmodule Elixirus.Python.SnakeWrapper do
           {:EXIT, _from, type} ->
             _slay_python_worker(pid, pypid)
             Logger.warning("EXITED #{type |> inspect}")
+            exit(type)
         after
           150 ->
             try do
