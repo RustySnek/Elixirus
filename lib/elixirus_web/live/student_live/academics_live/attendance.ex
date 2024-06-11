@@ -3,7 +3,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
   use ElixirusWeb, :live_view
 
   import ElixirusWeb.Helpers
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
 
   import Phoenix.UI.Components.Tooltip
   import Phoenix.UI.Components.Typography
@@ -86,7 +87,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:semester, semester)
       |> assign(:attendance, [])
       |> create_fetcher(attendance, :attendance, fn ->
-        {python(:fetchers, :fetch_all_attendance, [token, semester, true]), semester}
+        {SnakeArgs.from_params(:fetchers, :fetch_all_attendance, [token, semester, true]) |> python!(:infinity), semester}
       end)
 
     {:noreply, socket}
@@ -120,7 +121,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:login_required, false)
       |> assign(:page_title, "Attendance")
       |> create_fetcher(frequency, :frequency, fn ->
-        python(:fetchers, :fetch_attendance_frequency, [token])
+        SnakeArgs.from_params(:fetchers, :fetch_attendance_frequency, [token]) |> python!(:infinity)
       end)
 
     {:ok, socket}

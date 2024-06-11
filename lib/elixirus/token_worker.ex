@@ -6,7 +6,8 @@ defmodule Elixirus.TokenWorker do
   require Logger
   alias Elixirus.Notifications.NotificationsSupervisor
   alias Timex
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, args, name: __MODULE__)
@@ -32,7 +33,7 @@ defmodule Elixirus.TokenWorker do
   end
 
   defp load_initial_notifications(token, notification_token) do
-    case python(:notifications, :fetch_initial_notifications, [token]) do
+    case SnakeArgs.from_params(:notifications, :fetch_initial_notifications, [token]) |> python!(:infinity) do
       {:ok, [notifications, seen_ids]} ->
         notifications
         |> Map.to_list()
@@ -166,7 +167,7 @@ defmodule Elixirus.TokenWorker do
 
     notifications =
       if DateTime.compare(now, Timex.shift(last_update, hours: ttl)) in [:lt, :eq] do
-        case python(:notifications, :fetch_new_notifications, [token, seen_ids]) do
+        case SnakeArgs.from_params(:notifications, :fetch_new_notifications, [token, seen_ids]) |> python!(:infinity) do
           {:ok, [notifications, seen_ids]} ->
             :ets.insert(table, {username, token, ttl, notification_token, seen_ids, now})
             notifications

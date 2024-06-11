@@ -1,7 +1,8 @@
 defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   require Logger
   use ElixirusWeb, :live_view
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
   import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
 
@@ -225,7 +226,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   end
 
   def fetch_all_grades(token, semester) do
-    {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
+    {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(:infinity), semester}
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do

@@ -3,7 +3,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   use ElixirusWeb, :live_view
 
   use ElixirusWeb.SetSemesterLive
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
 
   import ElixirusWeb.Helpers
   alias ElixirusWeb.Modal
@@ -52,7 +53,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
       |> assign(:month, month)
       |> assign(:page_title, "Schedule #{year}-#{month}")
       |> create_fetcher(schedule, :schedule, fn ->
-        {python(:fetchers, :fetch_schedule, [token, year, month]), year, month}
+        {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(:infinity), year, month}
       end)
 
     {:ok, socket}

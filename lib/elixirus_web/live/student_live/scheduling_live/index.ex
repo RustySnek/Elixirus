@@ -1,6 +1,7 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Index do
   use ElixirusWeb, :live_view
-  # import Elixirus.Python.SnakeWrapper
+  #import Venomous
+  #alias Venomous.SnakeArgs
   import ElixirusWeb.Helpers
   use ElixirusWeb.SetSemesterLive
 

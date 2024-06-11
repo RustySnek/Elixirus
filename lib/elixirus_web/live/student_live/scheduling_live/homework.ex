@@ -2,7 +2,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   require Logger
   use ElixirusWeb, :live_view
   use ElixirusWeb.SetSemesterLive
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
   import ElixirusWeb.Helpers
 
   import Heroicons
@@ -12,7 +13,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   @asyncs [:load_details, :load_homework]
 
   def fetch_homework_details(token, id) do
-    python(:fetchers, :fetch_homework_details, [token, id])
+    SnakeArgs.from_params(:fetchers, :fetch_homework_details, [token, id])|>python!(:infinity)
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
@@ -114,7 +115,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
       |> assign(:details, %{})
       |> assign(:page_title, "Homework")
       |> create_fetcher(homework, :homework, fn ->
-        python(:fetchers, :fetch_homework, [api_token, monday, next_monday])
+        SnakeArgs.from_params(:fetchers, :fetch_homework, [api_token, monday, next_monday])|>python!(:infinity)
       end)
 
     {:ok, socket}

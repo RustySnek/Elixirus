@@ -2,6 +2,7 @@ defmodule ElixirusWeb.LoginForm do
   @moduledoc false
   use ElixirusWeb, :live_component
   import Heroicons
+  require Logger
   alias GenServer
   alias Elixirus.TokenWorker
   alias UUID
@@ -57,7 +58,7 @@ defmodule ElixirusWeb.LoginForm do
     keep_alive? = socket.assigns.keep_alive
     token_ttl = socket.assigns.ttl
 
-    get_token = Elixirus.Python.SnakeWrapper.python(:helpers, :create_token, [username, password])
+    get_token = Venomous.SnakeArgs.from_params(:helpers, :create_token, [username, password]) |> Venomous.python(:infinity)
 
     socket =
       case get_token do
@@ -84,6 +85,10 @@ defmodule ElixirusWeb.LoginForm do
         %{:error => error_message} ->
           socket
           |> assign(:error_message, error_message |> to_string())
+          |> assign(:username, username)
+        %Venomous.SnakeError{exception: exception, error: error, backtrace: backtrace} ->
+          Logger.error("#{exception}\n#{error}\nBacktrace: #{backtrace}")
+          socket |> assign(:error_message, "Internal server error. Please try again later.")
           |> assign(:username, username)
       end
 
