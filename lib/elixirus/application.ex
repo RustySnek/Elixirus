@@ -12,12 +12,8 @@ defmodule Elixirus.Application do
     children = [
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
-      {Elixirus.Python.SnakeSupervisor, []},
       {Elixirus.Notifications.NotificationsSupervisor, []},
-      Supervisor.child_spec({Elixirus.Python.SnakeManager, []},
-        id: Elixirus.Python.SnakeManager,
-        restart: :permanent
-      ),
+      {Venomous.SnakeSupervisor, [strategy: :one_for_one, max_restarts: 0, max_children: 100]},
       Supervisor.child_spec({TokenWorker, :ets.new(:token_storage, [:set, :public])},
         id: TokenWorker,
         restart: :permanent
