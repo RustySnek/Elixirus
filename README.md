@@ -43,7 +43,7 @@ Run `direnv allow` to allow `.envrc` execution
 ## Prerequisites ❗
  * bun
  * erlang
- * elixir 1.16.1
+ * elixir 1.16.3
  * python 3.11
  * pip
 
