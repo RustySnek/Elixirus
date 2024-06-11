@@ -35,6 +35,7 @@ defmodule Elixirus.MixProject do
       {:phoenix, "~> 1.7.10"},
       {:html_sanitize_ex, "~> 1.4"},
       {:earmark, "~> 1.4"},
+      {:venomous, "~> 0.2"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},

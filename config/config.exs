@@ -21,6 +21,17 @@ config :elixirus, ElixirusWeb.Endpoint,
   pubsub_server: Elixirus.PubSub,
   live_view: [signing_salt: "UkfzIumN"]
 
+config :venomous, :snake_manager, %{
+  erlport_encoder: %{
+    module: :helpers,
+    func: :setup_data_types,
+    args: []
+  },
+  snake_ttl_minutes: 15,
+  perpetual_workers: 10,
+  cleaner_interval: 60_000
+}
+
 # Configure esbuild (the version is required)
 config :bun,
   path: System.get_env("MIX_BUN_PATH"),
