@@ -7,7 +7,7 @@
   ''; 
   packages = with pkgs; [
     bun
-    elixir_1_15
+    elixir_1_16
     erlang
     elixir-ls
     python311
