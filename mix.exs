@@ -33,6 +33,7 @@ defmodule Elixirus.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.7.10"},
+      {:bandit, "~> 1.0"},
       {:html_sanitize_ex, "~> 1.4"},
       {:earmark, "~> 1.4"},
       {:venomous, "~> 0.2"},
@@ -59,7 +60,6 @@ defmodule Elixirus.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:plug_cowboy, "~> 2.5"},
       {:redirect, "~> 0.4.0"}
     ]
   end
