@@ -13,7 +13,7 @@ config :elixirus,
 # Configures the endpoint
 config :elixirus, ElixirusWeb.Endpoint,
   url: [host: "localhost"],
-  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: ElixirusWeb.ErrorHTML, json: ElixirusWeb.ErrorJSON],
     layout: false
