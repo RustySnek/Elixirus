@@ -4,7 +4,8 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
 
   use ElixirusWeb.SetSemesterLive
   import ElixirusWeb.Helpers
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
 
   alias HtmlSanitizeEx
   import Earmark, only: [as_html!: 1]
@@ -54,7 +55,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
       |> assign(:user_id, user_id)
       |> assign(:token, token)
       |> create_fetcher(announcements, :announcements, fn ->
-        python(:fetchers, :fetch_announcements, [token])
+        SnakeArgs.from_params(:fetchers, :fetch_announcements, [token]) |> python!(:infinity)
       end)
 
     {:ok, socket}

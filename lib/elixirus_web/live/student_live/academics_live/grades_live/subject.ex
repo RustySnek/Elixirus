@@ -3,13 +3,14 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
   use ElixirusWeb, :live_view
   import ElixirusWeb.Helpers
 
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
   import ElixirusWeb.Components.Loadings
 
   @asyncs [:load_grades]
 
   def fetch_all_grades(token, semester) do
-    {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
+    {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(:infinity), semester}
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
@@ -49,7 +50,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.GradesLive.Subject do
       |> assign(:semester, semester)
       |> assign(:grades, %{})
       |> create_fetcher(grades, :grades, fn ->
-        {python(:fetchers, :fetch_all_grades, [token, semester]), semester}
+        {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(:infinity), semester}
       end)
 
     {:noreply, socket}

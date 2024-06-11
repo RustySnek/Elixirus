@@ -1,7 +1,8 @@
 defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   require Logger
   use ElixirusWeb, :live_view
-  import Elixirus.Python.SnakeWrapper
+  import Venomous
+  alias Venomous.SnakeArgs
 
   import ElixirusWeb.Helpers
   alias Heroicons
@@ -14,7 +15,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   @asyncs [:load_messages, :load_sent_messages, :load_group_recipients, :load_recipient_groups]
 
   def find_group(group_name, author, token) do
-    {:ok, group} = python(:fetchers, :get_group_recipients, [token, group_name])
+    {:ok, group} = SnakeArgs.from_params(:fetchers, :get_group_recipients, [token, group_name]) |> python!(:infinity)
     {group[author], group_name}
   end
 
@@ -44,11 +45,11 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
   end
 
   def fetch_messages(token, page) do
-    python(:fetchers, :fetch_messages, [token, page])
+    SnakeArgs.from_params(:fetchers, :fetch_messages, [token, page]) |> python!(:infinity)
   end
 
   def fetch_message_content(token, id) do
-    python(:fetchers, :fetch_message_content, [token, id])
+    SnakeArgs.from_params(:fetchers, :fetch_message_content, [token, id]) |> python!(:infinity)
   end
 
   def handle_event("write_message", %{"content" => content, "title" => title}, socket) do
@@ -80,19 +81,19 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
     selected_recipients = socket.assigns.selected_recipients
 
     socket =
-      case python(:fetchers, :send_message, [
+      case SnakeArgs.from_params(:fetchers, :send_message, [
              token,
              title,
              content,
              selected_recipients |> Enum.map(fn {_, id} -> id end)
-           ]) do
+           ]) |> python!() do
         {:ok, msg} ->
           put_flash(socket, :info, "Sent!\n#{msg}")
           |> assign(:compose_title, "")
           |> assign(:compose_content, "")
           |> assign(:selected_recipients, MapSet.new())
           |> start_async(:load_sent_messages, fn ->
-            python(:fetchers, :fetch_sent_messages, [token, 0])
+            SnakeArgs.from_params(:fetchers, :fetch_sent_messages, [token, 0]) |> python!(:infinity)
           end)
 
         %{:send_error => msg} ->
@@ -145,7 +146,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:group_recipients, %{})
       |> assign(:selected_group, group)
       |> create_fetcher(:load, :group_recipients, fn ->
-        python(:fetchers, :get_group_recipients, [token, group])
+        SnakeArgs.from_params(:fetchers, :get_group_recipients, [token, group]) |> python!(:infinity)
       end)
 
     {:noreply, socket}
@@ -335,10 +336,10 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Messages do
       |> assign(:compose_content, "")
       |> assign(:page_title, "Messages")
       |> create_fetcher(:load, :recipient_groups, fn ->
-        python(:fetchers, :get_recipient_groups, [api_token])
+        SnakeArgs.from_params(:fetchers, :get_recipient_groups, [api_token]) |> python!(:infinity)
       end)
       |> create_fetcher(sent, :sent_messages, fn ->
-        python(:fetchers, :fetch_sent_messages, [api_token, 0])
+        SnakeArgs.from_params(:fetchers, :fetch_sent_messages, [api_token, 0]) |> python!(:infinity)
       end)
 
     socket =
