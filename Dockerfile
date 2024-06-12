@@ -52,7 +52,7 @@ FROM ${RUNNER_IMAGE}
 COPY priv priv
 RUN apt-get update -y && \
   apt-get install -y \
-      build-essential zlib1g-dev libncurses5-dev \
+      build-essential zlib1g-dev procps libncurses5-dev \
       libgdbm-dev libnss3-dev libssl-dev libreadline-dev \
       libffi-dev wget software-properties-common \
       openssl locales ca-certificates && \
