@@ -1,6 +1,6 @@
 beautifulsoup4==4.12.2
 bs4==0.0.1
-certifi==2023.11.17
+certifi==2024.7.4
 charset-normalizer==3.3.2
 erlport==0.6
 idna==3.7
