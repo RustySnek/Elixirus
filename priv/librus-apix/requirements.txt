@@ -8,4 +8,4 @@ librus-apix==1.0.6
 lxml==4.9.3
 requests==2.32.2
 soupsieve==2.5
-urllib3==2.1.0
+urllib3==2.2.2
