@@ -37,20 +37,20 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Index do
     |> assign(:week_attendance, [])
     |> assign(:homework, [])
     |> create_fetcher(grades, :week_grades, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_week_grades, [token, semester]) |> python!(:infinity), semester}
+      {SnakeArgs.from_params(:fetchers, :fetch_week_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
     end)
     |> create_fetcher(todays_lessons, :completed_lessons, fn ->
-      SnakeArgs.from_params(:fetchers, :fetch_todays_completed_lessons, [token]) |> python!(:infinity)
+      SnakeArgs.from_params(:fetchers, :fetch_todays_completed_lessons, [token]) |> python!(python_timeout: :infinity)
     end)
     |> create_fetcher(homework, :homework, fn ->
       monday = this_weeks_monday() |> Date.add(-14)
       next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
       monday = monday |> Calendar.strftime("%Y-%m-%d")
 
-      SnakeArgs.from_params(:fetchers, :fetch_homework, [token, monday, next_monday]) |> python!(:infinity)
+      SnakeArgs.from_params(:fetchers, :fetch_homework, [token, monday, next_monday]) |> python!(python_timeout: :infinity)
     end)
     |> create_fetcher(attendance, :week_attendance, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_week_attendance, [token, semester]) |> python!(:infinity), semester}
+      {SnakeArgs.from_params(:fetchers, :fetch_week_attendance, [token, semester]) |> python!(python_timeout: :infinity), semester}
     end)
   end
 

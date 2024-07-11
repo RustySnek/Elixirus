@@ -55,7 +55,7 @@ defmodule ElixirusWeb.StudentLive.CommunicationLive.Announcements do
       |> assign(:user_id, user_id)
       |> assign(:token, token)
       |> create_fetcher(announcements, :announcements, fn ->
-        SnakeArgs.from_params(:fetchers, :fetch_announcements, [token]) |> python!(:infinity)
+        SnakeArgs.from_params(:fetchers, :fetch_announcements, [token]) |> python!(python_timeout: :infinity)
       end)
 
     {:ok, socket}

@@ -226,7 +226,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   end
 
   def fetch_all_grades(token, semester) do
-    {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(:infinity), semester}
+    {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do

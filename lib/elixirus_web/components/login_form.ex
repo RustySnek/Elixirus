@@ -58,7 +58,7 @@ defmodule ElixirusWeb.LoginForm do
     keep_alive? = socket.assigns.keep_alive
     token_ttl = socket.assigns.ttl
 
-    get_token = Venomous.SnakeArgs.from_params(:helpers, :create_token, [username, password]) |> Venomous.python(:infinity)
+    get_token = Venomous.SnakeArgs.from_params(:helpers, :create_token, [username, password]) |> Venomous.python(python_timeout: :infinity)
 
     socket =
       case get_token do

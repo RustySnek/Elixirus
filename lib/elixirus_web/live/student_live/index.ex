@@ -149,33 +149,33 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> assign(:unread_messages, [])
     |> assign(:semester_grades, [])
     |> create_fetcher(averages, :semester_grades, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(:infinity), semester}
+      {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
     end)
     |> create_fetcher(unread_messages, :unread_messages, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_all_messages, [token]) |> python!(:infinity), nil}
+      {SnakeArgs.from_params(:fetchers, :fetch_all_messages, [token]) |> python!(python_timeout: :infinity), nil}
     end)
     |> create_fetcher(attendance, :new_attendance, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_new_attendance, [token, semester]) |> python!(:infinity), semester}
+      {SnakeArgs.from_params(:fetchers, :fetch_new_attendance, [token, semester]) |> python!(python_timeout: :infinity), semester}
     end)
     |> create_fetcher(new_grades, :new_grades, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_new_grades, [token, semester]) |> python!(:infinity), semester}
+      {SnakeArgs.from_params(:fetchers, :fetch_new_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
     end)
     |> create_fetcher(
       student_data,
       :student_data,
       fn ->
-        {SnakeArgs.from_params(:fetchers, :fetch_student_data, [token])|>python!(:infinity), nil}
+        {SnakeArgs.from_params(:fetchers, :fetch_student_data, [token])|>python!(python_timeout: :infinity), nil}
       end
     )
     |> create_fetcher(schedule, :schedule, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(:infinity), year, month}
+      {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(python_timeout: :infinity), year, month}
     end)
     |> create_fetcher(timetable, :timetable, fn ->
-      {SnakeArgs.from_params(:overview, :handle_overview_timetable, [token, this_weeks_monday() |> to_string]) |> python!(:infinity),
+      {SnakeArgs.from_params(:overview, :handle_overview_timetable, [token, this_weeks_monday() |> to_string]) |> python!(python_timeout: :infinity),
        nil}
     end)
     |> create_fetcher(frequency, :frequency, fn ->
-      SnakeArgs.from_params(:fetchers, :fetch_attendance_frequency, [token])|>python!(:infinity)
+      SnakeArgs.from_params(:fetchers, :fetch_attendance_frequency, [token])|>python!(python_timeout: :infinity)
     end)
   end
 
@@ -194,7 +194,7 @@ defmodule ElixirusWeb.StudentLive.Index do
            calendar_id,
            this_weeks_monday(),
            end_of_week
-         ]) |> python!(:infinity), nil}
+         ]) |> python!(python_timeout: :infinity), nil}
       end)
 
     {:noreply, socket}

@@ -33,7 +33,7 @@ defmodule Elixirus.TokenWorker do
   end
 
   defp load_initial_notifications(token, notification_token) do
-    case SnakeArgs.from_params(:notifications, :fetch_initial_notifications, [token]) |> python!(:infinity) do
+    case SnakeArgs.from_params(:notifications, :fetch_initial_notifications, [token]) |> python!(python_timeout: :infinity) do
       {:ok, [notifications, seen_ids]} ->
         notifications
         |> Map.to_list()
@@ -167,7 +167,7 @@ defmodule Elixirus.TokenWorker do
 
     notifications =
       if DateTime.compare(now, Timex.shift(last_update, hours: ttl)) in [:lt, :eq] do
-        case SnakeArgs.from_params(:notifications, :fetch_new_notifications, [token, seen_ids]) |> python!(:infinity) do
+        case SnakeArgs.from_params(:notifications, :fetch_new_notifications, [token, seen_ids]) |> python!(python_timeout: :infinity) do
           {:ok, [notifications, seen_ids]} ->
             :ets.insert(table, {username, token, ttl, notification_token, seen_ids, now})
             notifications

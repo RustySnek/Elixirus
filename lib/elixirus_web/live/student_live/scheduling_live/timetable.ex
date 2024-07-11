@@ -25,7 +25,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     [year, month] = month_year |> String.split("-")
 
     start_async(socket, :load_schedule, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(:infinity), year, month}
+      {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(python_timeout: :infinity), year, month}
     end)
   end
 
@@ -139,11 +139,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def fetch_calendar_data(cal_id, date_from, date_to) do
-    SnakeArgs.from_params(:calendar_handler, :get_google_calendar_events, [cal_id, date_from, date_to])|>python!(:infinity)
+    SnakeArgs.from_params(:calendar_handler, :get_google_calendar_events, [cal_id, date_from, date_to])|>python!(python_timeout: :infinity)
   end
 
   def fetch_timetable(token, monday) do
-    SnakeArgs.from_params(:overview, :handle_overview_timetable, [token, monday])|>python!(:infinity)
+    SnakeArgs.from_params(:overview, :handle_overview_timetable, [token, monday])|>python!(python_timeout: :infinity)
   end
 
   def get_indicator_position(timetable) do
