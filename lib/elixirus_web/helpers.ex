@@ -2,10 +2,41 @@ defmodule ElixirusWeb.Helpers do
   @moduledoc """
   Miscellanous functions to help parse data
   """
+  alias Elixirus.Types.Period
   use Phoenix.LiveView
   require Logger
 
-  def match_basic_errors(socket, %{:token_error => message}, asyncs) do
+  def get_current_weekday(date \\ Date.utc_today()) do
+    date
+    |> Date.day_of_week()
+    |> Kernel.-(1)
+  end
+
+  def get_next_period(periods, %DateTime{} = now \\ warsaw_now()) do
+    Enum.filter(periods, fn %Period{date_from: date_from} ->
+      [hour, minute] = String.split(date_from, ":")
+
+      period_datetime_from = %{
+        now
+        | hour: String.to_integer(hour),
+          minute: String.to_integer(minute)
+      }
+
+      DateTime.compare(period_datetime_from, now) == :gt
+    end)
+  end
+
+  def next_timetable_events_today(timetable, %DateTime{} = now \\ warsaw_now()) do
+    timetable
+    |> Enum.at(get_current_weekday(now) - 4)
+    |> get_next_period(now)
+  end
+
+  def nonempty_periods(periods) do
+    Enum.reject(periods, fn %Period{subject: subject} -> subject == "" end)
+  end
+
+  def match_basic_errors(socket, {:token_error, message}, asyncs) do
     socket =
       Enum.reduce(asyncs, socket, fn loading, socket_acc ->
         cancel_async(socket_acc, loading, :error)
@@ -16,12 +47,18 @@ defmodule ElixirusWeb.Helpers do
     {:token_error, message, socket}
   end
 
-  def match_basic_errors(socket, %{:error => message}, _asyncs) do
+  def match_basic_errors(socket, {:error, message}, _asyncs) do
     Logger.error(message)
     put_flash(socket, :error, message)
 
     {:error, message, socket}
   end
+
+  def match_basic_errors(socket, %Venomous.SnakeError{} = err, _asyncs) do
+    {:error, err, socket}
+  end
+
+  def match_basic_errors(socket, {:killed, reason}, _asyncs), do: {:error, reason, socket}
 
   def match_basic_errors(_socket, any, _asyncs) do
     any
@@ -167,12 +204,20 @@ defmodule ElixirusWeb.Helpers do
     "#{percentage * 3.6}deg"
   end
 
-  def create_fetcher(socket, cache_data, name, load_func) do
+  def create_fetcher(x, y, z, l), do: nil
+
+  def create_fetcher(socket, user_id, cache_data, name, load_func) do
     case cache_data do
       :load ->
-        socket
-        |> assign(:loadings, [name | socket.assigns.loadings])
-        |> start_async(:"load_#{name}", load_func)
+        case Hammer.check_rate("#{name}:#{user_id}", 60_000, 5) do
+          {:allow, _count} ->
+            socket
+            |> assign(:loadings, [name | socket.assigns.loadings])
+            |> start_async(:"load_#{name}", load_func)
+
+          {:deny, _limit} ->
+            socket |> put_flash(:error, "Rate limit exceeded!")
+        end
 
       data ->
         assign(socket, name, data)

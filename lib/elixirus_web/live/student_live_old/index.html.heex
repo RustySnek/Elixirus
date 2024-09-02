@@ -1,0 +1,271 @@
+<div class="flex lg:grid grid-cols-4 gap-x-4 lg:order-1 flex-col mx-4 gap-y-12">
+  <div class="min-w-full flex md:flex-row gap-y-4 flex-col lg:place-self-center col-span-2 justify-between lg:space-x-6 xl:justify-center xl:gap-x-8 lg:w-1/2 items-center">
+    <div :if={@frequency == []} class="circle animate-pulse"></div>
+    <div :if={@frequency != []} class="relative xs:scale-90 xl:scale-125">
+      <div class="circle percentage w-full">
+        <div
+          class="percentage-bar"
+          phx-hook="frequency"
+          id="overall_freq"
+          name={
+            @frequency
+            |> Enum.at(2)
+            |> percentage_to_deg()
+          }
+          style="--progress-value: 360deg;"
+        >
+        </div>
+      </div>
+      <span class="top-2/3 left-1/3 -translate-y-[140%] absolute">
+        <%= @frequency |> Enum.at(2) %>%
+      </span>
+    </div>
+    <!-- End attendance circle -->
+    <div :if={@student_data != %{}} class="flex flex-col text-lg md:text-xl xl:text-2xl">
+      <p>
+        <%= @student_data.name %> Semester: <%= @semester
+        |> String.to_integer()
+        |> Kernel.+(1) %>
+      </p>
+      <p>
+        <%= @student_data.class_name %> - <%= @student_data.tutor %>
+      </p>
+      <p>Your number: <%= @student_data.number %></p>
+      <p>Lucky number: <%= @student_data.lucky_number %></p>
+      <p :if={@semester_grades != %{}}>
+        Overall Average: <%= calculate_gpa_from_averages(@semester_grades)
+        |> to_string
+        |> String.slice(0, 4) %>
+      </p>
+    </div>
+  </div>
+  <!-- End of the first block-->
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#events-chevron")
+      |> JS.toggle_class("hidden", to: "#overview-events")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-3 border-fuchsia-600 border-2"
+  >
+    <div class="text-center flex flex-row relative">
+      <span class="mx-auto">Events</span>
+      <.chevron_right
+        id="events-chevron"
+        class="w-8 lg:hidden inline absolute transition right-0 self-center"
+      />
+    </div>
+    <div class="space-y-4 mt-4 lg:block hidden lg:h-[370px] overflow-y-auto" id="overview-events">
+      <div
+        :if={
+          [:timetable, :schedule, :timetable_calendar] |> Enum.any?(&Enum.member?(@loadings, &1))
+        }
+        class="space-y-6 animate-pulse"
+      >
+        <div :for={_ <- 0..5} class="h-40 bg-purple-800/50"></div>
+      </div>
+      <div
+        :if={
+          [:timetable, :schedule, :timetable_calendar]
+          |> Enum.any?(&Enum.member?(@loadings, &1))
+          |> Kernel.!()
+        }
+        class="space-y-6"
+      >
+        <div
+          :for={
+            {period, events} <-
+              handle_timetable_events(@timetable, @schedule, @timetable_calendar, @day)
+              |> Map.to_list()
+          }
+          class="space-y-4 border p-4"
+        >
+          <span class="text-xl font-bold -ml-2 -mt-2">
+            <%= clean_period_name(period) %>
+          </span>
+          <div
+            :for={event <- events}
+            class=" h-20 last:bg-purple-800/90 bg-red-800 p-2"
+            class="overflow-x-hidden"
+          >
+            <span class="line-clamp-1">
+              <%= event.title %>
+            </span>
+            <span class="line-clamp-1">
+              <%= event.subject %>
+            </span>
+            <span class="line-clamp-1 text-end text-sm text-gray-300">
+              <%= event.timeframe %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end of events -->
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#grades-chevron")
+      |> JS.toggle_class("hidden", to: "#avg-grades-events")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer lg:order-4 p-4 border-fuchsia-600 border-2"
+  >
+    <div class="text-center flex flex-row relative">
+      <span class="mx-auto">Averages</span>
+      <.chevron_right
+        id="grades-chevron"
+        class="w-8 inline absolute transition lg:hidden right-0 self-center"
+      />
+    </div>
+    <div
+      class="space-y-4 mt-4 hidden lg:block lg:h-[370px] overflow-y-auto"
+      id="avg-grades-events"
+    >
+      <div :if={:semester_grades in @loadings} class="space-y-4 animate-pulse">
+        <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
+      </div>
+
+      <div
+        :for={{subject, gpas} <- @semester_grades}
+        class={" h-20 #{averages_color(gpas |> Enum.at(-1))} px-2"}
+      >
+        <div class="grid grid-cols-4 space-x-2">
+          <span class="col-span-3 line-clamp-2">
+            <%= subject %>
+          </span>
+          <div class="flex flex-col text-end">
+            <span :for={gpa <- gpas} class="last:font-bold">
+              <%= gpa %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End of grades -->
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#message-chevron")
+      |> JS.toggle_class("hidden", to: "#unread-messages")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 col-span-2 lg:order-2 border-fuchsia-600 border-2"
+  >
+    <div class="text-center flex flex-row relative">
+      <span class="mx-auto">Unread messages</span>
+      <.chevron_right
+        id="message-chevron"
+        class="lg:hidden w-8 inline absolute transition right-0 self-center"
+      />
+    </div>
+
+    <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-48 lg:block" id="unread-messages">
+      <div
+        :if={(:unread_messages in @loadings) |> Kernel.not() && @unread_messages == []}
+        class="flex fond-quicksand text-3xl font-bold text-gray-500/25 flex-col justify-center items-center h-full"
+      >
+        You've read them all!
+      </div>
+
+      <div
+        :for={_ <- 0..5}
+        :if={:unread_messages in @loadings}
+        class=" animate-pulse bg-purple-800/50 h-24"
+      >
+      </div>
+
+      <div
+        :for={message <- @unread_messages}
+        class=" sm:h-24  bg-purple-900/90 hover:bg-purple-900/80 transition p-2 flex flex-col justify-between"
+      >
+        <span>
+          <%= message.title %>
+        </span>
+        <span class="text-sm text-gray-500">
+          <%= message.author %>
+        </span>
+      </div>
+    </div>
+  </div>
+  <!-- End of messages -->
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#new-grades-chevron")
+      |> JS.toggle_class("hidden", to: "#new-grades")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-5 border-fuchsia-600 border-2"
+  >
+    <div class="text-center flex flex-row relative">
+      <span class="mx-auto">New grades</span>
+      <.chevron_right
+        id="new-grades-chevron"
+        class="lg:hidden w-8 inline absolute transition right-0 self-center"
+      />
+    </div>
+    <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-[370px] lg:block" id="new-grades">
+      <div
+        :if={
+          (:new_grades in @loadings) |> Kernel.not() &&
+            @new_grades |> Map.values() |> List.flatten() == []
+        }
+        class="flex flex-col justify-center items-center h-full"
+      >
+        <.inbox class="w-48 text-gray-500/10" />
+      </div>
+
+      <div :if={:new_grades in @loadings} class="space-y-4 animate-pulse">
+        <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
+      </div>
+
+      <div
+        :for={grade <- @new_grades |> Map.values() |> List.flatten()}
+        class=" h-20 bg-purple-900/90 p-2"
+      >
+        <div class="flex flex-row gap-x-2">
+          <span class="font-bold text-xl">
+            <%= grade.grade %>
+          </span>
+          <span>
+            <%= grade.category %>
+          </span>
+        </div>
+        <span class="line-clamp-1 text-sm text-gray-500">
+          <%= grade.title %>
+        </span>
+        <span class="line-clamp-1 text-sm text-gray-500">
+          <%= grade.teacher %>
+        </span>
+      </div>
+    </div>
+  </div>
+  <!-- End of new grades-->
+  <div
+    phx-click={
+      JS.toggle_class("rotate-90", to: "#absence-chevron")
+      |> JS.toggle_class("hidden", to: "#latest-absence")
+    }
+    class="space-y-4 lg:cursor-default cursor-pointer p-4 lg:order-6 border-fuchsia-600 border-2"
+  >
+    <div class="text-center flex flex-row relative">
+      <span class="mx-auto">Latest absence</span>
+      <.chevron_right
+        id="absence-chevron"
+        class="lg:hidden w-8 inline absolute transition right-0 self-center"
+      />
+    </div>
+    <div class="space-y-4 mt-4 hidden overflow-y-auto lg:h-[370px] lg:block" id="latest-absence">
+      <div
+        :if={(:new_attendance in @loadings) |> Kernel.not() && @new_attendance == []}
+        class="flex flex-col justify-center items-center h-full"
+      >
+        <.inbox class="w-48 text-gray-500/10" />
+      </div>
+      <div :if={:new_attendance in @loadings} class="space-y-4 animate-pulse">
+        <div :for={_ <- 0..5} class="h-20 bg-purple-800/50"></div>
+      </div>
+
+      <div :for={absence <- @new_attendance} class=" h-20 bg-purple-900/90 p-2">
+        <%= absence.topic %>
+      </div>
+    </div>
+  </div>
+  <!-- end of new attendance -->
+</div>

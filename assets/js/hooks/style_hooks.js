@@ -1,4 +1,14 @@
 let StyleHooks = {};
+
+StyleHooks.expand_click = {
+  mounted() {
+    this.el.addEventListener("click", _ => {
+      const classes = ["absolute", "w-full", "left-0", "h-full", "top-0", "my-1"]
+      classes.forEach((name) => this.el.classList.toggle(name))
+    })
+  }
+}
+
 StyleHooks.frequency = {
   mounted() {
     const deg = this.el.getAttribute("name")

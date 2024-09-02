@@ -4,8 +4,8 @@ defmodule Elixirus.MixProject do
   def project do
     [
       app: :elixirus,
-      version: "0.1.0",
-      elixir: "~> 1.14",
+      version: "0.2.0",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -13,8 +13,6 @@ defmodule Elixirus.MixProject do
     ]
   end
 
-  # Configuration for the OTP application.
-  #
   # Type `mix help compile.app` for more information.
   def application do
     [
@@ -36,7 +34,8 @@ defmodule Elixirus.MixProject do
       {:bandit, "~> 1.0"},
       {:html_sanitize_ex, "~> 1.4"},
       {:earmark, "~> 1.4"},
-      {:venomous, "~> 0.4.1"},
+      {:venomous, "~> 0.6.3"},
+      {:hammer, "~> 6.1"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},

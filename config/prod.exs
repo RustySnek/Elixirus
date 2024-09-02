@@ -7,6 +7,9 @@ import Config
 # before starting your production server.
 config :elixirus, ElixirusWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :hammer,
+  backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4, cleanup_interval_ms: 60_000 * 10]}
+
 # Do not print debug messages in production
 config :logger, level: :info
 # Runtime production configuration, including reading

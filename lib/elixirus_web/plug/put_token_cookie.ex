@@ -29,7 +29,7 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
     case cookie do
       nil ->
         conn
-        |> put_session(:token, %{"not:found": []})
+        |> put_session(:token, %{})
         |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
 

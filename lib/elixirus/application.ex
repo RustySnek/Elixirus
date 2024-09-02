@@ -13,7 +13,7 @@ defmodule Elixirus.Application do
       ElixirusWeb.Telemetry,
       Elixirus.Healthcheck.HealthSupervisor,
       {Elixirus.Notifications.NotificationsSupervisor, []},
-      {Venomous.SnakeSupervisor, [strategy: :one_for_one, max_restarts: 0, max_children: 100]},
+      {Venomous.SnakeSupervisor, [strategy: :one_for_one, max_children: 100]},
       Supervisor.child_spec({TokenWorker, :ets.new(:token_storage, [:set, :public])},
         id: TokenWorker,
         restart: :permanent

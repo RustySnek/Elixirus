@@ -31,22 +31,22 @@ AuthHooks.login_form = {
   },
   mounted() {
     let renderer = document.getElementById("login-modal-renderer")
-    const observer = new MutationObserver((mutations, observer) => {
-      let username = localStorage.getItem("username") || "";
+    let username = localStorage.getItem("username") || "";
+    let password_input = this.el.querySelector('#form-password');
+    let username_input = this.el.querySelector('#form-username');
+    if (username !== "") {
+      username_input.value = username
+      password_input.focus()
+    } else {
+      username_input.focus()
+    }
 
-      let username_input = this.el.querySelector('#form-username');
+
+    const observer = new MutationObserver((mutations, observer) => {
+
       username_input.addEventListener('input', () => {
         localStorage.setItem("username", username_input.value);
       });
-      let password_input = this.el.querySelector('#form-password');
-      if (username !== "") {
-        username_input.value = username
-
-        password_input.focus()
-      } else {
-        username_input.focus()
-
-      }
     })
     let config = { attributes: true, attributeFilter: ['class'] };
     observer.observe(renderer, config)

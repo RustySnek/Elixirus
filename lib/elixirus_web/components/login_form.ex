@@ -1,5 +1,7 @@
 defmodule ElixirusWeb.LoginForm do
   @moduledoc false
+  alias Elixirus.Types.Token
+  alias Elixirus.Types.Client
   use ElixirusWeb, :live_component
   import Heroicons
   require Logger
@@ -58,11 +60,11 @@ defmodule ElixirusWeb.LoginForm do
     keep_alive? = socket.assigns.keep_alive
     token_ttl = socket.assigns.ttl
 
-    get_token = Venomous.SnakeArgs.from_params(:helpers, :create_token, [username, password]) |> Venomous.python(python_timeout: :infinity)
+    client = Client.get_client(username, password)
 
     socket =
-      case get_token do
-        %{:ok => token} ->
+      case client do
+        {:ok, %Client{token: %Token{API_Key: token}}} ->
           notification_token = socket.assigns.notification_token
 
           token_ttl =
@@ -82,14 +84,20 @@ defmodule ElixirusWeb.LoginForm do
           |> assign(:token, token |> to_string())
           |> assign(:username, username)
 
-        %{:error => error_message} ->
+        {:error, error_message} ->
           socket
-          |> assign(:error_message, error_message |> to_string())
+          |> assign(:error_message, error_message)
           |> assign(:username, username)
+
         %Venomous.SnakeError{exception: exception, error: error, backtrace: backtrace} ->
           Logger.error("#{exception}\n#{error}\nBacktrace: #{backtrace}")
-          socket |> assign(:error_message, "Internal server error. Please try again later.")
+
+          socket
+          |> assign(:error_message, "Internal server error. Please try again later.")
           |> assign(:username, username)
+
+        err ->
+          Logger.error("Unknown error occured while authenticating: #{inspect(err)}")
       end
 
     {:noreply, socket}

@@ -1,267 +1,207 @@
 defmodule ElixirusWeb.StudentLive.Index do
   require Logger
+  alias Elixirus.Types.Message
+  alias Elixirus.Types.Event
+  alias Venomous.SnakeArgs
   use ElixirusWeb, :live_view
-  import Heroicons
+  alias Elixirus.Types.Client
   import ElixirusWeb.Helpers
 
-  import Venomous
-  alias Venomous.SnakeArgs
-  import Heroicons, only: [chevron_right: 1, inbox: 1]
-
   @asyncs [
-    :load_frequency,
-    :load_timetable,
-    :load_schedule,
-    :load_student_data,
+    :load_announcements,
     :load_new_grades,
-    :load_new_attendance,
-    :load_unread_messages,
-    :load_semester_grades
+    :load_final_avg,
+    :load_frequency,
+    :load_student_info,
+    :load_messages,
+    :load_averages,
+    :load_timetable,
+    :load_attendance,
+    :load_schedule
   ]
 
-  defp clean_period_name(period) do
-    case period do
-      -1 -> "Today"
-      period -> period
+  defp year_average(grades) do
+    avgs =
+      grades
+      |> Enum.map(fn semester ->
+        semester |> Map.values() |> Enum.map(&count_average(&1))
+      end)
+      |> List.flatten()
+
+    case length(avgs) do
+      0 ->
+        0.0
+
+      len ->
+        avgs
+        |> Enum.reduce(0, fn avg, acc -> acc + avg end)
+        |> Kernel./(len)
     end
   end
 
-  defp averages_color(final_gpa) do
-    case final_gpa do
-      "-" ->
-        "bg-gray-900/80"
-
-      gpa ->
-        gpa = String.to_float(gpa)
-
-        cond do
-          Kernel.<(gpa, 3.0) and Kernel.>(gpa, 2.0) ->
-            "bg-amber-700"
-
-          Kernel.<=(gpa, 2.0) ->
-            "bg-red-700"
-
-          true ->
-            "bg-purple-900/90"
-        end
-    end
-  end
-
-  defp handle_timetable_events(timetable, schedule, _calendar, day) do
-    now = warsaw_now()
-
-    weekday =
-      now
-      |> Date.day_of_week()
-      |> Kernel.-(1)
-
-    todays_lessons =
-      timetable
-      |> Enum.at(weekday)
-      |> Enum.filter(&(&1 |> Map.get(:subject) != ""))
-      |> Enum.reduce(%{}, fn event, acc ->
-        number = event.number
-
-        event_map = %{
-          title: event.subject,
-          subject: event.teacher_and_classroom,
-          timeframe:
-            event.date_from
-            |> Kernel.<>("-")
-            |> Kernel.<>(event.date_to),
-          data: event.info
-        }
-
-        update_events =
-          case acc |> Map.get(number) do
-            nil -> [event_map]
-            events -> [event_map | events]
-          end
-
-        acc |> Map.put(number, update_events)
-      end)
-
-    schedule[day]
-    |> Enum.reduce(todays_lessons, fn event, acc ->
-      number = event.number
-
-      number =
-        case number |> to_string() |> Integer.parse() do
-          {number, _} -> number
-          _ -> -1
-        end
-
-      event_map = %{
-        title: event.title,
-        subject: event.subject,
-        timeframe: event.hour,
-        data: event.data
-      }
-
-      update_events =
-        case acc |> Map.get(number) do
-          nil -> [event_map]
-          events -> [event_map | events]
-        end
-
-      acc |> Map.put(number, update_events)
-    end)
-  end
-
-  def calculate_gpa_from_averages(averages) do
-    sum =
-      averages
-      |> Enum.map(fn {_, avgs} -> avgs |> List.last() end)
-      |> Enum.filter(&(&1 != "-"))
-
-    sum
-    |> Enum.reduce(0, fn avg, acc -> avg |> String.to_float() |> Kernel.+(acc) end)
-    |> Kernel./(length(sum) |> max(1))
-  end
-
-  def fetch_data(socket, token, semester) do
-    user_id = socket.assigns.user_id
-    attendance = handle_cache_data(user_id, "#{semester}-new_attendance")
-    student_data = handle_cache_data(user_id, "student_data")
-    new_grades = handle_cache_data(user_id, "#{semester}-new_grades")
-    averages = handle_cache_data(user_id, "semester_grades")
-    unread_messages = handle_cache_data(user_id, "unread_messages")
-    timetable = handle_cache_data(user_id, "timetable")
-    frequency = handle_cache_data(user_id, "frequency")
-    year = socket.assigns.year
-    month = socket.assigns.month
-
-    schedule =
-      handle_cache_data(
-        user_id,
-        "#{year}-#{month}-schedule"
-      )
-
-    socket
-    |> assign(:loadings, [])
-    |> assign(:new_grades, %{})
-    |> assign(:timetable, [])
-    |> assign(:frequency, [])
-    |> assign(:schedule, [])
-    |> assign(:new_attendance, [])
-    |> assign(:student_data, %{})
-    |> assign(:events, [])
-    |> assign(:unread_messages, [])
-    |> assign(:semester_grades, [])
-    |> create_fetcher(averages, :semester_grades, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
-    end)
-    |> create_fetcher(unread_messages, :unread_messages, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_all_messages, [token]) |> python!(python_timeout: :infinity), nil}
-    end)
-    |> create_fetcher(attendance, :new_attendance, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_new_attendance, [token, semester]) |> python!(python_timeout: :infinity), semester}
-    end)
-    |> create_fetcher(new_grades, :new_grades, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_new_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
-    end)
-    |> create_fetcher(
-      student_data,
-      :student_data,
-      fn ->
-        {SnakeArgs.from_params(:fetchers, :fetch_student_data, [token])|>python!(python_timeout: :infinity), nil}
-      end
-    )
-    |> create_fetcher(schedule, :schedule, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(python_timeout: :infinity), year, month}
-    end)
-    |> create_fetcher(timetable, :timetable, fn ->
-      {SnakeArgs.from_params(:overview, :handle_overview_timetable, [token, this_weeks_monday() |> to_string]) |> python!(python_timeout: :infinity),
-       nil}
-    end)
-    |> create_fetcher(frequency, :frequency, fn ->
-      SnakeArgs.from_params(:fetchers, :fetch_attendance_frequency, [token])|>python!(python_timeout: :infinity)
-    end)
-  end
-
-  def handle_event(
-        "connect_calendar",
-        %{"calendar_id" => calendar_id},
-        socket
-      ) do
-    end_of_week = Date.add(this_weeks_monday(), 7)
-
-    socket =
-      socket
-      |> assign(:calendar_id, calendar_id)
-      |> start_async(:load_timetable_calendar, fn ->
-        {SnakeArgs.from_params(:calendar_handler, :get_google_calendar_events, [
-           calendar_id,
-           this_weeks_monday(),
-           end_of_week
-         ]) |> python!(python_timeout: :infinity), nil}
-      end)
-
+  def handle_async(task, {:ok, {:killed, _reason}}, socket) when task in @asyncs do
     {:noreply, socket}
   end
 
-  def handle_event("retrieve_local_storage", %{"calendar_id" => calendar_id}, socket) do
-    socket =
-      socket
-      |> assign(:calendar_id, calendar_id)
-
-    handle_event("connect_calendar", %{"calendar_id" => calendar_id}, socket)
-  end
-
-  def handle_event("retrieve_local_storage", %{"semester" => semester}, socket) do
-    socket =
-      socket
-      |> assign(:semester, semester)
-
+  def handle_info({:EXIT, _pid, reason}, socket) do
     {:noreply, socket}
   end
 
-  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
-    {:noreply, socket}
-  end
-
-  def handle_async(:load_semester_grades, {:ok, {data, semester}}, socket) do
+  def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
     socket =
-      case match_basic_errors(socket, data, @asyncs) do
-        {:ok, [grades, gpas]} ->
-          gpas = sort_gpas(gpas)
-
+      case match_basic_errors(socket, schedule, @asyncs) do
+        {:ok, schedule} ->
           user_id = socket.assigns.user_id
-          cache_and_ttl_data(user_id, "semester_grades", gpas, 15)
-          cache_and_ttl_data(user_id, "#{semester}-grades", grades, 15)
+          cache_and_ttl_data(user_id, "schedule", schedule)
 
           socket
-          |> assign(:semester_grades, gpas)
-          |> assign(:loadings, List.delete(socket.assigns.loadings, :semester_grades))
+          |> assign(:schedule, schedule)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
 
-        {:token_error, _message, socket} ->
-          socket
-
-        {:error, _message, socket} ->
+        {_err, _msg, socket} ->
           socket
       end
 
     {:noreply, socket}
   end
 
-  def handle_async(:load_new_grades, {:ok, {{:ok, [grades, _]}, semester}}, socket) do
-    user_id = socket.assigns.user_id
-    cache_and_ttl_data(user_id, "#{semester}-new_grades", grades)
-
+  def handle_async(:load_final_avg, {:ok, grades}, socket) do
     socket =
-      socket
-      |> assign(:loadings, List.delete(socket.assigns.loadings, :new_grades))
-      |> assign(:new_grades, grades)
+      case match_basic_errors(socket, grades, @asyncs) do
+        {:ok, {[first, second] = grades, gpas, _descriptive}} ->
+          user_id = socket.assigns.user_id
+          final = year_average(grades)
+          cache_and_ttl_data(user_id, "0-grades", first)
+          cache_and_ttl_data(user_id, "1-grades", second)
+          cache_and_ttl_data(user_id, "averages", gpas)
+          cache_and_ttl_data(user_id, "final_average", final)
+
+          socket
+          |> assign(:final_avg, final)
+          |> assign(:averages, gpas)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :final_avg))
+
+        {_err, _msg, socket} ->
+          socket
+      end
 
     {:noreply, socket}
   end
 
-  def handle_async(:load_frequency, {:ok, freq}, socket) do
-    user_id = socket.assigns.user_id
-
+  def handle_async(:load_messages, {:ok, messages}, socket) do
     socket =
-      case match_basic_errors(socket, freq, @asyncs) do
+      case match_basic_errors(socket, messages, @asyncs) do
+        {:ok, messages} ->
+          user_id = socket.assigns.user_id
+
+          {unread, read} =
+            Enum.split_with(messages, fn %Message{unread: unread} -> unread == true end)
+
+          cache_and_ttl_data(user_id, "messages", messages, 15)
+          cache_and_ttl_data(user_id, "unread_messages", unread, 15)
+          cache_and_ttl_data(user_id, "seen_messages", read, 15)
+
+          socket
+          |> assign(:messages, unread)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :messages))
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_averages, {:ok, averages}, socket) do
+    socket =
+      case match_basic_errors(socket, averages, @asyncs) do
+        {:ok, averages} ->
+          socket
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_timetable, {:ok, timetable}, socket) do
+    socket =
+      case match_basic_errors(socket, timetable, @asyncs) do
+        {:ok, timetable} ->
+          user_id = socket.assigns.user_id
+
+          cache_and_ttl_data(user_id, "timetable", timetable)
+
+          socket
+          |> assign(:timetable, timetable)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :timetable))
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_attendance, {:ok, attendance}, socket) do
+    socket =
+      case match_basic_errors(socket, attendance, @asyncs) do
+        {:ok, attendance, stats} ->
+          user_id = socket.assigns.user_id
+
+          cache_and_ttl_data(user_id, "attendance", attendance, 10)
+          cache_and_ttl_data(user_id, "attendance-stats", stats, 10)
+
+          socket
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :attendance))
+          |> assign(:attendance, attendance)
+          |> assign(:attendance_stats, stats)
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_student_info, {:ok, student_info}, socket) do
+    socket =
+      case match_basic_errors(socket, student_info, @asyncs) do
+        {:ok, student_info} ->
+          user_id = socket.assigns.user_id
+          cache_and_ttl_data(user_id, "student_info", student_info, 30)
+
+          socket
+          |> assign(:student_info, student_info)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :student_info))
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_new_grades, {:ok, grades}, socket) do
+    socket =
+      case match_basic_errors(socket, grades, @asyncs) do
+        {:ok, grades} ->
+          socket
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_async(:load_frequency, {:ok, [status, freq]}, socket) do
+    socket =
+      case match_basic_errors(socket, {status, freq}, @asyncs) do
         {:ok, frequency} ->
+          user_id = socket.assigns.user_id
+
           frequency =
             frequency
             |> Tuple.to_list()
@@ -271,131 +211,196 @@ defmodule ElixirusWeb.StudentLive.Index do
                 |> Kernel./(10))
             )
 
-          cache_and_ttl_data(user_id, "frequency", frequency, 10)
+          cache_and_ttl_data(user_id, "frequency", frequency, 15)
 
           socket
+          |> assign(:final_frequency, frequency |> Enum.at(2))
           |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
-          |> assign(:frequency, frequency)
 
-        {:token_error, _message, socket} ->
-          socket
-
-        {:error, _message, socket} ->
+        {_err, _msg, socket} ->
           socket
       end
 
     {:noreply, socket}
   end
 
-  def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
-    user_id = socket.assigns.user_id
-
+  def handle_async(:load_announcements, {:ok, announcements}, socket) do
     socket =
-      case match_basic_errors(socket, schedule, @asyncs) do
-        {:ok, schedule} ->
-          cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule, 10)
-
-          socket
-          |> assign(:loadings, List.delete(socket.assigns.loadings, :schedule))
-          |> assign(:schedule, schedule)
-
-        {:token_error, _message, socket} ->
+      case match_basic_errors(socket, announcements, @asyncs) do
+        {:ok, announcements} ->
           socket
 
-        {:error, _message, socket} ->
+        {_err, _msg, socket} ->
           socket
       end
 
     {:noreply, socket}
   end
 
-  def handle_async(:load_unread_messages, {:ok, {{:ok, unread_messages}, _}}, socket) do
-    user_id = socket.assigns.user_id
-    cache_and_ttl_data(user_id, "messages", unread_messages |> Enum.take(50), 10)
+  defp calendar_data(:load), do: []
+  defp calendar_data(data), do: data
 
-    unread =
-      unread_messages |> Enum.filter(fn msg -> msg |> Map.get(:unread) |> Kernel.==(true) end)
-
-    cache_and_ttl_data(user_id, "unread_messages", unread, 15)
-
-    socket =
-      socket
-      |> assign(:loadings, List.delete(socket.assigns.loadings, :unread_messages))
-      |> assign(:unread_messages, unread)
-
-    {:noreply, socket}
+  defp setup(socket) do
+    socket
+    |> assign(:final_avg, 0.0)
+    |> assign(:final_frequency, 100.0)
+    |> assign(:student_info, nil)
+    |> assign(:timetable, nil)
+    |> assign(:schedule, nil)
+    |> assign(:messages, [])
   end
 
-  def handle_async(task_name, {:ok, {data, semester}}, socket)
-      when task_name in [
-             :load_new_attendance,
-             :load_student_data,
-             :load_timetable,
-             :load_unread_messages,
-             :load_new_grades
-           ] do
-    user_id = socket.assigns.user_id
-
-    name =
-      task_name
-      |> Atom.to_string()
-      |> String.replace_prefix("load_", "")
-      |> String.to_existing_atom()
-
-    socket =
-      case match_basic_errors(socket, data, @asyncs) do
-        {:ok, data} ->
-          cache_name =
-            case semester do
-              nil -> name |> Atom.to_string()
-              sem -> "#{sem}-#{Atom.to_string(name)}"
-            end
-
-          cache_and_ttl_data(user_id, cache_name, data)
-
-          socket
-          |> assign(name, data)
-          |> assign(:loadings, List.delete(socket.assigns.loadings, name))
-
-        {:token_error, _message, socket} ->
-          socket
-
-        {:error, _message, socket} ->
-          socket
-      end
-
-    {:noreply, socket}
+  def mount(_params, %{"token" => token}, socket) when map_size(token) == 0 do
+    {:ok, setup(socket) |> push_event("require-login", %{})}
   end
 
-  def mount(
-        _params,
-        %{"token" => api_token, "user_id" => user_id, "semester" => semester},
-        socket
-      ) do
-    api_token = handle_api_token(socket, api_token)
-
-    calendar_data = handle_cache_data(user_id, "timetable_calendar")
-
+  def mount(_params, %{"token" => token, "user_id" => user_id, "semester" => semester}, socket) do
+    token = handle_api_token(socket, token)
+    %Client{} = client = Client.get_client(token)
     {{year, month, day}, _} = :calendar.local_time()
 
-    socket =
-      case calendar_data do
-        :load -> assign(socket, :timetable_calendar, [])
-        cal_data -> assign(socket, :timetable_calendar, cal_data)
-      end
+    announcements = handle_cache_data(user_id, "announcements")
+    frequency = handle_cache_data(user_id, "frequency")
+    new_grades = handle_cache_data(user_id, "new_grades")
+    final_avg = handle_cache_data(user_id, "final_average")
+    student_info = handle_cache_data(user_id, "student_info")
+    unread_messages = handle_cache_data(user_id, "unread_messages")
+    attendance = handle_cache_data(user_id, "attendance")
+    timetable = handle_cache_data(user_id, "timetable")
+    calendar_data = user_id |> handle_cache_data("timetable_calendar") |> calendar_data()
+
+    schedule =
+      handle_cache_data(
+        user_id,
+        "#{year}-#{month}-schedule"
+      )
 
     socket =
       socket
+      |> setup()
       |> assign(:day, day)
       |> assign(:month, month)
       |> assign(:year, year)
-      |> assign(:token, api_token)
-      |> assign(:user_id, user_id)
-      |> assign(:semester, semester)
-      |> assign(:login_required, false)
       |> assign(:page_title, "Home")
-      |> fetch_data(api_token, semester)
+      |> assign(:loadings, [])
+      |> assign(:user_id, user_id)
+      |> create_fetcher(user_id, announcements, :announcements, fn ->
+        SnakeArgs.from_params(:elixirus, :announcements, [client]) |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, new_grades, :new_grades, fn ->
+        SnakeArgs.from_params(:elixirus, :new_grades, [client, semester])
+        |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, final_avg, :final_avg, fn ->
+        SnakeArgs.from_params(:elixirus, :grades, [client])
+        |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, frequency, :frequency, fn ->
+        SnakeArgs.from_params(:elixirus, :frequency, [client])
+        |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, student_info, :student_info, fn ->
+        SnakeArgs.from_params(:elixirus, :student_info, [client])
+        |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, unread_messages, :messages, fn ->
+        SnakeArgs.from_params(:elixirus, :received, [client])
+        |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, attendance, :attendance, fn ->
+        SnakeArgs.from_params(:elixirus, :attendance, [client, true])
+        |> Venomous.python!()
+      end)
+      |> create_fetcher(user_id, schedule, :schedule, fn ->
+        {SnakeArgs.from_params(:elixirus, :schedule, [client, year, month])
+         |> Venomous.python!(), year, month}
+      end)
+      |> create_fetcher(user_id, timetable, :timetable, fn ->
+        SnakeArgs.from_params(:elixirus, :timetable, [
+          client,
+          this_weeks_monday() |> to_string
+        ])
+        |> Venomous.python!()
+      end)
 
     {:ok, socket}
+  end
+
+  defp unread_message(assigns) do
+    ~H"""
+    <div class="flex-col flex justify-between bg-fg rounded-md px-2 py-1">
+      <h3><%= @message.title %></h3>
+      <div class="flex flex-col flex-wrap mt-1">
+        <span class="text-sm self-end"><%= @message.author %></span>
+        <span class="text-sm self-end"><%= @message.date %></span>
+      </div>
+    </div>
+    """
+  end
+
+  defp today_schedule(%{schedule: _schedule} = assigns) do
+    ~H"""
+    <div class="p-1 rounded-md flex flex-col gap-x-2 bg-fg gap-y-2">
+      <div
+        :for={event = %Event{} <- @schedule}
+        class="flex flex-col w-32 max-w-32 w-full rounded-md px-2"
+      >
+        <span class="break-all">
+          <%= event.title %> | <%= event.subject %>
+        </span>
+        <div :if={event.hour != "unknown"} class="flex flex-row justify-between flex-wrap break-all">
+          <span>Time</span><span><%= event.hour %></span>
+        </div>
+        <div :if={event.number != "unknown"} class="flex flex-row justify-between flex-wrap break-all">
+          <span>Period</span><span><%= event.number %></span>
+        </div>
+        <div :for={{key, val} <- event.data} class="flex flex-row justify-between flex-wrap break-all">
+          <span><%= key %></span><span><%= val %></span>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp next_up(%{period: nil} = assigns) do
+    ~H"""
+    """
+  end
+
+  defp next_up(%{period: %Elixirus.Types.Period{} = period} = assigns) do
+    assigns = assign(assigns, :info, period.info)
+
+    ~H"""
+    <div class="bg-fg h-20 rounded-md flex flex-row gap-x-2 relative">
+      <div class="flex flex-col bg-lighterbg rounded-md p-1 justify-between">
+        <span class="xs:text-sm line-clamp-2 break-all">
+          <%= @period.subject %>zasdhjdaasdasdhjzxc1
+        </span>
+        <span class="xs:text-sm truncate">
+          <%= @period.number %>. <%= @period.date_from %> - <%= @period.date_to %>
+        </span>
+      </div>
+      <div :if={@info != %{}} class="flex overflow-x-auto">
+        <div
+          :for={
+            info <-
+              @info
+              |> Map.values()
+              |> Enum.filter(&Kernel.!=(&1, ""))
+          }
+          class="flex flex-row gap-x-1 h-full"
+        >
+          <div
+            :for={{value, idx} <- Map.values(info) |> Enum.with_index()}
+            phx-hook="expand_click"
+            id={"info-#{idx}"}
+            class="line-clamp-3 flex-wrap break-all flex bg-lighterbg w-24 max-w-24 p-1 rounded-md my-1"
+          >
+            Zastepstwo z x na<%= value %>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
   end
 end

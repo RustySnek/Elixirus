@@ -23,13 +23,16 @@ config :elixirus, ElixirusWeb.Endpoint,
 
 config :venomous, :snake_manager, %{
   erlport_encoder: %{
-    module: :helpers,
+    module: :client,
     func: :setup_data_types,
     args: []
   },
   snake_ttl_minutes: 15,
   perpetual_workers: 10,
-  cleaner_interval: 60_000
+  cleaner_interval: 60_000,
+  python_opts: [
+    module_paths: ["priv/python/librus-apix", "priv/python/"]
+  ]
 }
 
 # Configure esbuild (the version is required)

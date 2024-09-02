@@ -1,10 +1,5 @@
 <.flash_group flash={@flash} />
-<header
-  phx-hook="retrieve_local_storage"
-  name="semester"
-  id="main_header"
-  class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 lg:mx-8 flex flex-row justify-between items-center"
->
+<header class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 lg:mx-8 flex flex-row justify-between items-center">
   <.header links={links()}>
     <:logo>
       <div class="flex flex-row space-x-4">
@@ -30,6 +25,6 @@
 </header>
 <.live_component module={ElixirusWeb.LoginModal} id="login-modal-component" />
 
-<main class="pt-10 xs:pt-6">
+<main class="pt-10 xs:pt-6 xs:px-2 px-4">
   <%= @inner_content %>
 </main>
