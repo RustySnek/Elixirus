@@ -19,6 +19,12 @@ window.addEventListener('phx:require-login', e => {
   const modal = document.getElementById('login-modal-renderer')
   modal.classList.remove("hidden")
 })
+window.addEventListener('beforeunload', (event) => {
+  if (!navigator.onLine) {
+    event.preventDefault();
+    event.returnValue = ''; // This prompts the user with a confirmation dialog
+  }
+});
 
 liveSocket.connect()
 window.liveSocket = liveSocket
