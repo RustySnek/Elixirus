@@ -23,4 +23,7 @@
   <div :for={message <- @messages}>
     <.unread_message message={message} />
   </div>
+  <div :for={a <- @attendance |> Enum.at(@semester, [])}>
+    <.attendance attendance={a} />
+  </div>
 </div>

@@ -247,6 +247,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> assign(:student_info, nil)
     |> assign(:timetable, nil)
     |> assign(:schedule, nil)
+    |> assign(:attendance, [])
     |> assign(:messages, [])
   end
 
@@ -275,9 +276,16 @@ defmodule ElixirusWeb.StudentLive.Index do
         "#{year}-#{month}-schedule"
       )
 
+    semester =
+      case semester |> Integer.parse() do
+        {:error, _} -> 0
+        {semester, _} -> semester
+      end
+
     socket =
       socket
       |> setup()
+      |> assign(:semester, semester)
       |> assign(:day, day)
       |> assign(:month, month)
       |> assign(:year, year)
@@ -333,6 +341,18 @@ defmodule ElixirusWeb.StudentLive.Index do
       <div class="flex flex-col flex-wrap mt-1">
         <span class="text-sm self-end"><%= @message.author %></span>
         <span class="text-sm self-end"><%= @message.date %></span>
+      </div>
+    </div>
+    """
+  end
+
+  defp attendance(assigns) do
+    ~H"""
+    <div class="flex-row flex justify-between bg-fg rounded-md px-2 py-1">
+      <h3 class="w-8"><%= @attendance.symbol %></h3>
+      <div class="flex flex-col flex-wrap mt-1">
+        <span class="text-sm self-end"><%= @attendance.symbol %></span>
+        <span class="text-sm self-end"><%= @attendance.symbol %></span>
       </div>
     </div>
     """
