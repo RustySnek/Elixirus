@@ -26,7 +26,25 @@
   <div :for={a <- @attendance |> Enum.at(@semester, [])}>
     <.attendance attendance={a} />
   </div>
-  <div :for={g <- @grades}>
+  <div :for={
+    g <-
+      @grades ++
+        [
+          %Elixirus.Types.Grade{
+            desc: "test",
+            grade: "4+",
+            date: "2024-04-04",
+            title: "Fizyka",
+            counts: true,
+            weight: 3,
+            category: "Kartkowka",
+            teacher: "Mr Brown"
+          }
+        ]
+  }>
     <.grade grade={g} />
+  </div>
+  <div :for={{a, idx} <- @announcements |> Enum.with_index()}>
+    <.announcement idx={idx} announcement={a} />
   </div>
 </div>

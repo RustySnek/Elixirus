@@ -186,10 +186,11 @@ defmodule ElixirusWeb.StudentLive.Index do
       case match_basic_errors(socket, grades, @asyncs) do
         {:ok, grades} ->
           user_id = socket.assigns.user_id
-          cache_and_ttl_data(user_id, "new_grades", grades)
+          new_grades = grades |> Map.values() |> List.flatten()
+          cache_and_ttl_data(user_id, "new_grades", new_grades)
 
           socket
-          |> assign(:grades, grades)
+          |> assign(:grades, new_grades)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :grades))
 
         {_err, _msg, socket} ->
@@ -231,7 +232,12 @@ defmodule ElixirusWeb.StudentLive.Index do
     socket =
       case match_basic_errors(socket, announcements, @asyncs) do
         {:ok, announcements} ->
+          user_id = socket.assigns.user_id
+          cache_and_ttl_data(user_id, "announcements", announcements, 20)
+
           socket
+          |> assign(:announcements, announcements)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :frequency))
 
         {_err, _msg, socket} ->
           socket
@@ -251,6 +257,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> assign(:timetable, nil)
     |> assign(:schedule, nil)
     |> assign(:attendance, [])
+    |> assign(:announcements, [])
     |> assign(:grades, [])
     |> assign(:messages, [])
   end
@@ -338,13 +345,42 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:ok, socket}
   end
 
+  defp announcement(assigns) do
+    ~H"""
+    <div class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative">
+      <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
+        Announcement
+      </span>
+      <h3 class="text-sm"><%= @announcement.title %></h3>
+      <article
+        id={"#{@idx}announcement-wrapper"}
+        phx-hook="new_page_link"
+        class="lg:text-lg text-sm announcement_link z-10"
+      >
+        <%= @announcement.description
+        |> Earmark.as_html!()
+        |> HtmlSanitizeEx.html5()
+        |> Phoenix.HTML.raw() %>
+      </article>
+      <div class="flex flex-col flex-wrap mt-1">
+        <span class="text-sm xs:text-xs self-end"><%= @announcement.author %></span>
+        <span class="text-sm xs:text-xs self-end"><%= @announcement.date %></span>
+      </div>
+    </div>
+    """
+  end
+
   defp unread_message(assigns) do
     ~H"""
-    <div class="flex-col flex justify-between bg-fg rounded-md px-2 py-1">
-      <h3><%= @message.title %></h3>
+    <div class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative">
+      <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
+        Message
+      </span>
+
+      <h3 class="text-sm"><%= @message.title %></h3>
       <div class="flex flex-col flex-wrap mt-1">
-        <span class="text-sm self-end"><%= @message.author %></span>
-        <span class="text-sm self-end"><%= @message.date %></span>
+        <span class="text-sm xs:text-xs self-end"><%= @message.author %></span>
+        <span class="text-sm xs:text-xs self-end"><%= @message.date %></span>
       </div>
     </div>
     """
@@ -369,10 +405,13 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp today_schedule(%{schedule: _schedule} = assigns) do
     ~H"""
-    <div class="p-1 rounded-md flex flex-col gap-x-2 bg-fg gap-y-2">
+    <div class="p-1 rounded-md flex flex-col gap-x-2 bg-fg gap-y-2 relative">
+      <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
+        Event
+      </span>
       <div
         :for={event = %Event{} <- @schedule}
-        class="flex flex-col w-32 max-w-32 w-full rounded-md px-2"
+        class="flex flex-col w-32 max-w-32 w-full rounded-md px-2 text-sm"
       >
         <span class="break-all">
           <%= event.title %> | <%= event.subject %>
@@ -393,6 +432,22 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp grade(assigns) do
     ~H"""
+    <div class="flex-row flex justify-between bg-fg rounded-md px-2 py-1 relative">
+      <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
+        Grade
+      </span>
+      <div>
+        <h3><%= @grade.grade %> <%= @grade.title %></h3>
+        <span class="xs:text-xs text-sm w-8">
+          <%= @grade.category %>
+        </span>
+      </div>
+      <div class="flex flex-col flex-wrap mt-1 self-end">
+        <span class="text-sm xs:text-xs self-end">Weight: <strong><%= @grade.weight %></strong></span>
+        <span class="text-sm xs:text-xs self-end"><%= @grade.teacher %></span>
+        <span class="text-sm xs:text-xs self-end"><%= @grade.date %></span>
+      </div>
+    </div>
     """
   end
 
@@ -406,6 +461,10 @@ defmodule ElixirusWeb.StudentLive.Index do
 
     ~H"""
     <div class="bg-fg h-20 rounded-md flex flex-row gap-x-2 relative">
+      <span class="select-none absolute opacity-10 inset-0 flex items-center justify-end mr-2 font-bold text-xl">
+        Up next
+      </span>
+
       <div class="flex flex-col bg-lighterbg rounded-md p-1 justify-between">
         <span class="xs:text-sm line-clamp-2 break-all">
           <%= @period.subject %>
@@ -414,7 +473,7 @@ defmodule ElixirusWeb.StudentLive.Index do
           <%= @period.number %>. <%= @period.date_from %> - <%= @period.date_to %>
         </span>
       </div>
-      <div :if={@info != %{}} class="flex overflow-x-auto">
+      <div :if={@info != %{}} class="flex overflow-x-auto z-10">
         <div
           :for={
             info <-
