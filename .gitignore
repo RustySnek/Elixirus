@@ -1,6 +1,7 @@
 
 # Devenv
 __pycache__
+priv/python/librus-apix
 venv/
 .env
 .devenv*

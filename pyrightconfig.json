@@ -1,0 +1,5 @@
+{
+  "include": ["./priv/python/**/*.py"],
+  "extraPaths": ["./priv/python"]
+}
+
