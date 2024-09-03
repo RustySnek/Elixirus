@@ -14,11 +14,8 @@ from librus_apix.messages import Message
 from librus_apix.schedule import Event, schedule_detail
 from librus_apix.student_information import StudentInformation
 from librus_apix.timetable import Period
-from venomous import (
-    VenomousTrait,
-    decode_basic_types_strings,
-    encode_basic_type_strings,
-)
+from venomous import (VenomousTrait, decode_basic_types_strings,
+                      encode_basic_type_strings)
 
 
 @dataclass
@@ -86,8 +83,6 @@ class ClientStruct(VenomousTrait, Client):
             self,
             self.token,
             base_url=base_url,
-            announcements_url=base_url + "/announcements.html",
-            timetable_url=base_url + "/timetable.html",
             schedule_url=base_url + "/schedule.html",
             attendance_url=base_url + "/attendance.html",
         )

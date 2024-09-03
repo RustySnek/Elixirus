@@ -26,4 +26,7 @@
   <div :for={a <- @attendance |> Enum.at(@semester, [])}>
     <.attendance attendance={a} />
   </div>
+  <div :for={g <- @grades}>
+    <.grade grade={g} />
+  </div>
 </div>
