@@ -58,6 +58,14 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
+  def handle_async(:load_calendar, {:ok, calendar}, socket) do
+    calendar = calendar |> Map.values() |> List.flatten()
+    user_id = socket.assigns.user_id
+    cache_and_ttl_data(user_id, "today_calendar", calendar)
+
+    {:noreply, assign(socket, :calendar_events, calendar)}
+  end
+
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
     socket =
       case match_basic_errors(socket, schedule, @asyncs) do
@@ -258,9 +266,6 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
-  defp calendar_data(:load), do: []
-  defp calendar_data(data), do: data
-
   defp setup(socket) do
     socket
     |> assign(:final_avg, 0.0)
@@ -279,11 +284,14 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:ok, setup(socket) |> push_event("require-login", %{})}
   end
 
-  def mount(_params, %{"token" => token, "user_id" => user_id, "semester" => semester}, socket) do
+  def mount(
+        _params,
+        %{"token" => token, "user_id" => user_id, "semester" => semester} = session,
+        socket
+      ) do
     token = handle_api_token(socket, token)
     %Client{} = client = Client.get_client(token)
     {{year, month, day}, _} = :calendar.local_time()
-
     announcements = handle_cache_data(user_id, "announcements")
     frequency = handle_cache_data(user_id, "frequency")
     new_grades = handle_cache_data(user_id, "new_grades")
@@ -292,7 +300,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     unread_messages = handle_cache_data(user_id, "unread_messages")
     attendance = handle_cache_data(user_id, "last_attendance")
     timetable = handle_cache_data(user_id, "timetable")
-    calendar_data = user_id |> handle_cache_data("timetable_calendar") |> calendar_data()
+    calendar_data = handle_cache_data(user_id, "today_calendar")
 
     schedule =
       handle_cache_data(
@@ -304,6 +312,26 @@ defmodule ElixirusWeb.StudentLive.Index do
       case semester |> Integer.parse() do
         {:error, _} -> 0
         {semester, _} -> semester
+      end
+
+    socket =
+      case calendar_data do
+        :load ->
+          if calendar_id = session["calendar_id"] do
+            start_async(socket, :load_calendar, fn ->
+              SnakeArgs.from_params(:calendar_handler, :get_google_calendar_events, [
+                calendar_id,
+                "#{year}-#{month}-#{day}",
+                "#{year}-#{month}-#{day + 12}"
+              ])
+              |> Venomous.python!()
+            end)
+          else
+            socket
+          end
+
+        data ->
+          assign(socket, :calendar_events, data)
       end
 
     socket =

@@ -12,10 +12,16 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
   def call(conn, _opts) do
     conn = fetch_cookies(conn)
 
-    cookie = conn.cookies["api_token"]
+    token = conn.cookies["api_token"]
+
+    conn =
+      case conn.cookies["calendar_id"] do
+        nil -> conn
+        calendar -> put_session(conn, :calendar_id, calendar)
+      end
 
     user_id =
-      conn.cookies |> Map.get("user_id", make_ref() |> :erlang.ref_to_list() |> to_string())
+      conn.cookies |> Map.get("user_id", UUID.uuid4())
 
     {_, month, _} = Date.to_erl(Date.utc_today())
 
@@ -26,15 +32,15 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
         "0"
       end
 
-    case cookie do
+    case token do
       nil ->
         conn
         |> put_session(:token, %{})
         |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
 
-      cookie ->
-        token = Plug.Conn.Query.decode(cookie)
+      token ->
+        token = Plug.Conn.Query.decode(token)
 
         GenServer.call(
           TokenWorker,
