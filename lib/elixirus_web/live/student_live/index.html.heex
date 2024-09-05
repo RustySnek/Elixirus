@@ -1,7 +1,10 @@
 <div class="flex flex-col gap-y-4">
+  <div hidden phx-hook="retrieve_local_storage" name="discards" id="discard-handler"></div>
   <div class="grid grid-cols-7 gap-x-4 text-lg">
     <div :if={@student_info} class="col-span-2 flex flex-row gap-x-4">
-      <div class="text-center bg-fg rounded-md w-full"><%= @student_info.number %></div>
+      <div class={"text-center bg-fg #{@student_info.number == @student_info.lucky_number && "!bg-fuchsia-600"} rounded-md w-full"}>
+        <%= @student_info.number %>
+      </div>
       <div class="text-center bg-fg rounded-md w-full"><%= @student_info.lucky_number %></div>
     </div>
     <div :if={@final_frequency} class="col-span-2 text-center bg-fg rounded-md w-full">
@@ -17,34 +20,48 @@
       @timetable |> next_timetable_events_today() |> nonempty_periods() |> Enum.at(0)
     } />
   </div>
-  <div :if={@schedule}>
-    <.today_schedule schedule={@schedule |> Map.get(@day, [])} />
+  <div :if={events = @schedule && Map.get(@schedule, @day)}>
+    <.today_schedule schedule={events} />
   </div>
-  <div :for={message <- @messages}>
-    <.unread_message message={message} />
-  </div>
-  <div :for={a <- @attendance |> Enum.at(@semester, [])}>
-    <.attendance attendance={a} />
-  </div>
-  <div :for={
-    g <-
-      @grades ++
-        [
-          %Elixirus.Types.Grade{
-            desc: "test",
-            grade: "4+",
-            date: "2024-04-04",
-            title: "Fizyka",
-            counts: true,
-            weight: 3,
-            category: "Kartkowka",
-            teacher: "Mr Brown"
-          }
-        ]
-  }>
-    <.grade grade={g} />
-  </div>
-  <div :for={{a, idx} <- @announcements |> Enum.with_index()}>
-    <.announcement idx={idx} announcement={a} />
-  </div>
+  <.unread_message
+    :for={message <- @messages}
+    :if={@discards && !(message.href in Map.get(@discards, "message", []))}
+    message={message}
+  />
+
+  <.attendance
+    :for={a <- @attendance}
+    :if={@discards && !(a.href in Map.get(@discards, "attendance", []))}
+    attendance={a}
+  />
+  <.grade
+    :for={
+      g <-
+        @grades ++
+          [
+            %Elixirus.Types.Grade{
+              desc: "test",
+              grade: "4+",
+              date: "2024-04-04",
+              title: "Fizyka",
+              counts: true,
+              weight: 3,
+              category: "Kartkowka",
+              teacher: "Mr Brown",
+              href: "1312123132"
+            }
+          ]
+    }
+    :if={@discards && !(g.href in Map.get(@discards, "grade", []))}
+    grade={g}
+  />
+  <.announcement
+    :for={{a, idx} <- @announcements |> Enum.with_index()}
+    :if={
+      @discards &&
+        !((a.title <> a.date) in Map.get(@discards, "announcement", []))
+    }
+    idx={idx}
+    announcement={a}
+  />
 </div>

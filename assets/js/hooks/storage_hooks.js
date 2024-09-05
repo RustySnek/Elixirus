@@ -10,6 +10,11 @@ StorageHooks.retrieve_local_storage = {
   mounted() {
     let name = this.el.getAttribute("name")
     let item = localStorage.getItem(name)
+    try {
+      item = JSON.parse(item)
+    } catch {
+      console.warn("Error in retrieving local storage key")
+    }
     if (name === "semester" && item === undefined || name === "semester" && item === null) {
       let currentMonth = new Date().getMonth() + 1
       let result = (currentMonth >= 2 && currentMonth < 9) ? "1" : "0"

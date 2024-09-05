@@ -1,5 +1,7 @@
 defmodule ElixirusWeb.StudentLive.Index do
   require Logger
+  alias Elixirus.Types.Announcement
+  alias Elixirus.Types.Grade
   alias Elixirus.Types.Message
   alias Elixirus.Types.Event
   alias Venomous.SnakeArgs
@@ -39,11 +41,20 @@ defmodule ElixirusWeb.StudentLive.Index do
     end
   end
 
-  def handle_async(task, {:ok, {:killed, _reason}}, socket) when task in @asyncs do
+  def handle_info({:EXIT, _pid, reason}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info({:EXIT, _pid, reason}, socket) do
+  def handle_event("retrieve_local_storage", %{"discards" => discards}, socket)
+      when is_map(discards) do
+    {:noreply, assign(socket, :discards, discards)}
+  end
+
+  def handle_event("retrieve_local_storage", %{"discards" => _discards}, socket) do
+    {:noreply, assign(socket, :discards, %{})}
+  end
+
+  def handle_async(task, {:ok, {:killed, _reason}}, socket) when task in @asyncs do
     {:noreply, socket}
   end
 
@@ -149,6 +160,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       case match_basic_errors(socket, attendance, @asyncs) do
         {:ok, attendance} ->
           user_id = socket.assigns.user_id
+          attendance = List.flatten(attendance)
 
           cache_and_ttl_data(user_id, "last_attendance", attendance, 10)
 
@@ -260,6 +272,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     |> assign(:announcements, [])
     |> assign(:grades, [])
     |> assign(:messages, [])
+    |> assign(:discards, nil)
   end
 
   def mount(_params, %{"token" => token}, socket) when map_size(token) == 0 do
@@ -347,7 +360,12 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp announcement(assigns) do
     ~H"""
-    <div class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative">
+    <div
+      discard-type="announcement"
+      phx-hook="swipe_discard"
+      id={@announcement.title <> @announcement.date}
+      class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative"
+    >
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Announcement
       </span>
@@ -372,7 +390,12 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp unread_message(assigns) do
     ~H"""
-    <div class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative">
+    <div
+      discard-type="message"
+      phx-hook="swipe_discard"
+      id={@message.href}
+      class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative"
+    >
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Message
       </span>
@@ -388,7 +411,12 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp attendance(assigns) do
     ~H"""
-    <div class="flex-row flex justify-between bg-fg rounded-md px-2 py-1">
+    <div
+      discard-type="attendance"
+      phx-hook="swipe_discard"
+      id={@attendance.href}
+      class="flex-row flex justify-between bg-fg rounded-md px-2 py-1"
+    >
       <div>
         <h3 class="w-8"><%= @attendance.symbol %></h3>
         <span class="xs:text-xs text-sm w-8">
@@ -432,7 +460,12 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp grade(assigns) do
     ~H"""
-    <div class="flex-row flex justify-between bg-fg rounded-md px-2 py-1 relative">
+    <div
+      discard-type="grade"
+      phx-hook="swipe_discard"
+      id={@grade.href}
+      class="flex-row flex justify-between bg-fg rounded-md px-2 py-1 relative"
+    >
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Grade
       </span>

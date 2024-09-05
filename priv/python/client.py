@@ -85,8 +85,6 @@ class ClientStruct(VenomousTrait, Client):
         Client.__init__(
             self,
             self.token,
-            base_url=base_url,
-            schedule_url=base_url + "/schedule.html",
         )
         return self
 
