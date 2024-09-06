@@ -37,20 +37,7 @@
   <.grade
     :for={
       g <-
-        @grades ++
-          [
-            %Elixirus.Types.Grade{
-              desc: "test",
-              grade: "4+",
-              date: "2024-04-04",
-              title: "Fizyka",
-              counts: true,
-              weight: 3,
-              category: "Kartkowka",
-              teacher: "Mr Brown",
-              href: "1312123132"
-            }
-          ]
+        @grades
     }
     :if={@discards && !(g.href in Map.get(@discards, "grade", []))}
     grade={g}

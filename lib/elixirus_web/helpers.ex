@@ -27,8 +27,6 @@ defmodule ElixirusWeb.Helpers do
   end
 
   def next_timetable_events_today(timetable, %DateTime{} = now \\ warsaw_now()) do
-    now = now |> DateTime.add(-10, :hour)
-
     timetable
     |> Enum.at(get_current_weekday(now))
     |> get_next_period(now)
