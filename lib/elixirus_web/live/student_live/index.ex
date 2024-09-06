@@ -313,6 +313,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:error, _} -> 0
         {semester, _} -> semester
       end
+    
 
     socket =
       case calendar_data do
@@ -382,6 +383,12 @@ defmodule ElixirusWeb.StudentLive.Index do
         ])
         |> Venomous.python!()
       end)
+    socket = case frequency do
+        [_, _, final] -> assign(socket, :final_frequency, final)
+
+        _ ->
+        socket
+    end
 
     {:ok, socket}
   end

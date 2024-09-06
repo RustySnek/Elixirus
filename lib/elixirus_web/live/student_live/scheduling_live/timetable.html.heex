@@ -52,7 +52,13 @@
     <div :for={_ <- 0..12} class="bg-fuchsia-600/5 rounded-lg animate-pulse w-full h-[90px]">
     </div>
   </div>
-  <div :if={@timetable != []} class="relative w-full  flex flex-col">
+  <div
+    :if={@timetable != []}
+    id="timetable-box"
+    phx-hook="scroll_top"
+    top={(current_next_period(@timetable) * 125) |> dbg}
+    class="relative w-full  flex flex-col"
+  >
     <div class="flex -z-40 flex-col w-full  gap-y-4">
       <div class="opacity-0 h-12">Weekday</div>
       <div :for={period <- hd(@timetable)} class="w-full">
@@ -68,7 +74,10 @@
         </div>
       </div>
     </div>
-    <div class="overflow-x-auto w-full absolute gap-x-10 justify-between md:snap-none snap-x snap-mandatory  px-20  flex-row flex">
+    <div
+      x-init={"$el.scrollLeft = #{270 * get_current_weekday()};"}
+      class="overflow-x-auto w-full absolute gap-x-10 justify-between md:snap-none snap-x snap-mandatory  px-20  flex-row flex"
+    >
       <div :for={weekday <- @timetable} class="
       w-auto snap-center relative
        ">

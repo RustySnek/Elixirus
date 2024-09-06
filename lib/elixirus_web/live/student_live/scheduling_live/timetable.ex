@@ -1,5 +1,7 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   require Logger
+  alias Elixirus.Types.Period
+  alias Elixirus.Types.Client
   use ElixirusWeb, :live_view
   import Venomous
   alias Venomous.SnakeArgs
@@ -11,6 +13,16 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   import Heroicons, only: [chevron_right: 1, chevron_left: 1, information_circle: 1]
   @asyncs [:load_schedule, :load_timetable]
 
+  defp current_next_period(timetable) do
+    case Enum.at(timetable, get_current_weekday()) |> get_next_period() do
+      [%Period{number: num} | _rest] ->
+        num
+
+      _ ->
+        0
+    end
+  end
+
   defp exclude_empty_days(timetable) do
     timetable
     |> Enum.filter(fn weekday ->
@@ -21,11 +33,12 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   defp load_schedule(socket, month_year) do
-    token = socket.assigns.token
+    client = socket.assigns.client
     [year, month] = month_year |> String.split("-")
 
     start_async(socket, :load_schedule, fn ->
-      {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(python_timeout: :infinity), year, month}
+      {SnakeArgs.from_params(:elixirus, :schedule, [client, year, month])
+       |> python!(python_timeout: 20_000), year, month}
     end)
   end
 
@@ -139,11 +152,17 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def fetch_calendar_data(cal_id, date_from, date_to) do
-    SnakeArgs.from_params(:calendar_handler, :get_google_calendar_events, [cal_id, date_from, date_to])|>python!(python_timeout: :infinity)
+    SnakeArgs.from_params(:calendar_handler, :get_google_calendar_events, [
+      cal_id,
+      date_from,
+      date_to
+    ])
+    |> python!(python_timeout: 20_000)
   end
 
-  def fetch_timetable(token, monday) do
-    SnakeArgs.from_params(:overview, :handle_overview_timetable, [token, monday])|>python!(python_timeout: :infinity)
+  def fetch_timetable(client, monday) do
+    SnakeArgs.from_params(:elixirus, :timetable, [client, monday])
+    |> python!(python_timeout: 20_000)
   end
 
   def get_indicator_position(timetable) do
@@ -179,6 +198,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   end
 
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
+    dbg(schedule)
     user_id = socket.assigns.user_id
 
     socket =
@@ -263,7 +283,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     current_monday = socket.assigns.current_monday |> Date.add(days |> String.to_integer())
     user_id = socket.assigns.user_id
     calendar_id = socket.assigns.calendar_id
-    token = socket.assigns.token
+    client = socket.assigns.client
     socket = socket |> assign(:current_monday, current_monday) |> assign(:timetable, [])
 
     timetable =
@@ -306,7 +326,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           socket
           |> assign(:loadings, [:timetable | socket.assigns.loadings])
           |> start_async(:load_timetable, fn ->
-            fetch_timetable(token, current_monday |> to_string())
+            fetch_timetable(client, current_monday |> to_string())
           end)
 
         timetable ->
@@ -353,15 +373,16 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
         socket
       ) do
     token = handle_api_token(socket, token)
+    %Client{} = client = Client.get_client(token)
     monday = this_weeks_monday()
 
     socket =
       socket
       |> assign(:user_id, user_id)
       |> assign(:semester, semester)
-      |> assign(:token, token)
       |> assign(:this_monday, monday)
       |> assign(:current_monday, monday)
+      |> assign(:client, client)
       |> assign(:indicator, "hidden")
       |> assign(:timetable, [])
       |> assign(:loadings, [])
@@ -394,7 +415,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           socket
           |> assign(:loadings, [:timetable | socket.assigns.loadings])
           |> start_async(:load_timetable, fn ->
-            fetch_timetable(token, monday |> to_string())
+            fetch_timetable(client, monday |> to_string())
           end)
 
         tt ->

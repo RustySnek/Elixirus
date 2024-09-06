@@ -2,6 +2,10 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   color-scheme: dark;
 }
@@ -12,7 +16,7 @@
 }
 
 .announcement_link a:hover {
-  color: white; 
+  color: white;
 }
 
 .circle {
@@ -21,6 +25,7 @@
   cursor: default;
   transform: rotate(180deg);
 }
+
 .circle:before {
   position: absolute;
   content: "";
@@ -29,12 +34,14 @@
   background: transparent;
   border-radius: 100%;
 }
+
 .circle .percentage-bar {
   width: 160px;
   height: 160px;
   position: absolute;
-          clip-path: inset(0 0 0 45%);
+  clip-path: inset(0 0 0 45%);
 }
+
 .circle .percentage-bar:before {
   position: absolute;
   content: "";
@@ -44,22 +51,28 @@
   border-radius: 100%;
 
 }
+
 .circle:before {
   width: 139px;
   height: 139px;
   border-width: 16px;
 }
-.circle .percentage-bar:before, .circle .percentage-bar:after {
+
+.circle .percentage-bar:before,
+.circle .percentage-bar:after {
   width: 140px;
   height: 140px;
   border-width: 18px;
   transform: rotate(0deg);
   transition-duration: 750ms;
 }
+
 .circle.percentage .percentage-bar:before {
   transform: rotate(var(--progress-value));
 }
+
 .percentage-bar:after {
   transform: rotate(var(--progress-value));
 }
+
 /* This file is for your main application CSS */

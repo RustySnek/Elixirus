@@ -1,5 +1,12 @@
 let StyleHooks = {};
 
+StyleHooks.scroll_top = {
+  mounted() {
+    const top_scroll = this.el.getAttribute("top")
+    window.scrollTo(0, parseInt(top_scroll) || 0
+    )
+  }
+}
 StyleHooks.expand_click = {
   mounted() {
     this.el.addEventListener("click", _ => {
