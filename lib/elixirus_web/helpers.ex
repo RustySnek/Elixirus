@@ -12,15 +12,19 @@ defmodule ElixirusWeb.Helpers do
     |> Kernel.-(1)
   end
 
-  def get_next_period(periods, %DateTime{} = now \\ warsaw_now()) do
+  def get_next_period(periods, now \\ warsaw_now())
+  def get_next_period(nil, _now), do: 0
+
+  def get_next_period(periods, %DateTime{} = now) do
     Enum.filter(periods, fn %Period{date_from: date_from} ->
       [hour, minute] = String.split(date_from, ":")
 
-      period_datetime_from = %{
-        now
-        | hour: String.to_integer(hour),
-          minute: String.to_integer(minute)
-      }
+      period_datetime_from =
+        %{
+          now
+          | hour: String.to_integer(hour),
+            minute: String.to_integer(minute)
+        }
 
       DateTime.compare(period_datetime_from, now) == :gt
     end)
@@ -159,9 +163,7 @@ defmodule ElixirusWeb.Helpers do
     DateTime.now!(timezone)
   end
 
-  def this_weeks_monday(date \\ warsaw_now()) do
-    date |> Date.beginning_of_week()
-  end
+  defdelegate this_weeks_monday(date \\ warsaw_now()), to: Date, as: :beginning_of_week
 
   def handle_api_token(socket, token) do
     case token |> Map.keys() do

@@ -1,62 +1,64 @@
 <div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
 <div class="flex flex-col md:flex-row gap-x-4 mb-6 justify-center">
-  <span class="self-center text-center">Connect your school's google calendar!</span>
-  <form
-    phx-submit="connect_calendar"
-    class="flex flex-row xs:flex-col gap-4 self-center md:mt-0 mt-2"
-  >
-    <input
-      placeholder="calendar id / email"
-      class="bg-[#1f1f1f] rounded-2xl border-fuchsia-800 border-2"
-      type="text"
-      name="calendar_id"
-      value={@calendar_id}
-      id="calendar_id"
-      phx-hook="set_local_storage"
-    />
-    <button>
-      Connect
-    </button>
-  </form>
-  <div class="flex flex-row justify-between mx-4 mt-2 items-center">
-    <button
-      :if={(:timetable in @loadings) |> Kernel.!()}
-      phx-click="change_week"
-      phx-value-days="-7"
-    >
-      <.chevron_left class="w-10" />
-    </button>
+  <div class="flex flex-row items-center justify-between xs:-mt-4 sm:-mt-8">
+    <form phx-change="connect_calendar" class="flex flex-row xs:flex-col gap-4 self-center">
+      <input
+        placeholder="google calendar id/email"
+        phx-debounce={500}
+        class="bg-[#1f1f1f] rounded-lg border-fuchsia-800 border-2 xs:text-sm"
+        type="text"
+        name="calendar_id"
+        value={@calendar_id}
+        id="calendar_id"
+        phx-hook="set_local_storage"
+      />
+    </form>
     <button
       :if={(:timetable in @loadings) |> Kernel.!() && @current_monday != @this_monday}
       phx-click="change_week"
       phx-value-days={@this_monday |> Date.diff(@current_monday)}
     >
-      <span class="font-semibold text-fuchsia-500 hover:text-purple-700">
+      <span class="sm:font-semibold  border-red-800 border-2 rounded-lg flex h-10 items-center px-2">
         <%= @current_monday |> Date.to_iso8601() %>
       </span>
     </button>
-    <span :if={:timetable in @loadings || @current_monday == @this_monday}>
+    <span
+      :if={:timetable in @loadings || @current_monday == @this_monday}
+      class="border-fuchsia-800 border-2 rounded-lg flex h-10 items-center px-2"
+    >
       <%= @current_monday |> Date.to_iso8601() %>
     </span>
+  </div>
+  <div class="flex flex-row justify-between mx-4 mt-2 items-center">
     <button
       :if={(:timetable in @loadings) |> Kernel.!()}
       phx-click="change_week"
+      class="bg-fuchsia-800 px-2 py-1 rounded-lg w-24"
+      phx-value-days="-7"
+    >
+      <span>previous</span>
+    </button>
+    <div
+      :if={:timetable in @loadings}
+      class="mx-auto w-8 h-8 rounded-full border-l border-t border-fuchsia-600 animate-spin-fast duration-[10]"
+    >
+    </div>
+    <button
+      :if={(:timetable in @loadings) |> Kernel.!()}
+      phx-click="change_week"
+      class="bg-fuchsia-800 px-2 py-1 rounded-lg w-24"
       phx-value-days="7"
     >
-      <.chevron_right class="w-10" />
+      <span>next</span>
     </button>
   </div>
 </div>
 <div class="flex flex-col w-full h-full">
-  <div :if={@timetable == []} class="mt-16 flex flex-col items-center justify-center space-y-8">
-    <div :for={_ <- 0..12} class="bg-fuchsia-600/5 rounded-lg animate-pulse w-full h-[90px]">
-    </div>
-  </div>
   <div
     :if={@timetable != []}
     id="timetable-box"
     phx-hook="scroll_top"
-    top={(current_next_period(@timetable) * 125) |> dbg}
+    top={current_next_period(@timetable) * 125}
     class="relative w-full  flex flex-col"
   >
     <div class="flex -z-40 flex-col w-full  gap-y-4">
@@ -75,7 +77,7 @@
       </div>
     </div>
     <div
-      x-init={"$el.scrollLeft = #{270 * get_current_weekday()};"}
+      x-init={"$el.scrollLeft = #{weekday_scroll_left()};"}
       class="overflow-x-auto w-full absolute gap-x-10 justify-between md:snap-none snap-x snap-mandatory  px-20  flex-row flex"
     >
       <div :for={weekday <- @timetable} class="
@@ -132,10 +134,10 @@
                   class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
                 >
                   <span class="mb-2 text-lg font-bold">
-                    <%= event.summary %>
+                    <%= event["summary"] %>
                   </span>
                   <br />
-                  <span><%= event.description |> HtmlSanitizeEx.html5() |> raw %></span>
+                  <span><%= event["description"] |> HtmlSanitizeEx.html5() |> raw %></span>
                 </div>
               </div>
             </.live_component>
@@ -283,8 +285,8 @@
     </div>
 
     <div
-      style={@indicator}
-      class=" absolute right-0 translate-y-12 bg-pink-700 opacity-50 h-[3px] z-30  w-full transform"
+      style={@indicator.result |> dbg}
+      class="absolute right-0 translate-y-12 bg-pink-700 opacity-50 h-[3px] z-30  w-full transform"
     >
     </div>
   </div>
