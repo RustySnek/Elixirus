@@ -14,6 +14,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      animation: {
+        'spin-fast': 'spin 0.3s linear infinite'
+      },
       screens: {
         xs: { "max": "400px" }
       },
