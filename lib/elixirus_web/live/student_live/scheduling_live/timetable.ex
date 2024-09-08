@@ -331,8 +331,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
         %{"semester" => semester, "token" => token, "user_id" => user_id},
         socket
       ) do
-    token = handle_api_token(socket, token)
-    %Client{} = client = Client.get_client(token)
+    %Client{} =
+      client =
+      socket
+      |> handle_api_token(token)
+      |> Client.get_client()
 
     monday =
       case get_current_weekday() do
