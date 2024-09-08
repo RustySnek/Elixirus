@@ -30,29 +30,30 @@ defmodule ElixirusWeb.Router do
     scope "/student" do
       pipe_through :api_token
       live "/", StudentLive.Index
+      live "/announcements", StudentLive.Announcements
 
-      scope "/scheduling" do
-        live "/", StudentLive.SchedulingLive.Timetable
-        live "/timetable", StudentLive.SchedulingLive.Timetable
-        live "/schedule", StudentLive.SchedulingLive.Schedule
+      scope "/messages" do
+        live "/", StudentLive.Messages
+        live "/send", StudentLive.Messages, :send_message
+        live "/:message_id", StudentLive.Messages, :view
       end
 
-      scope "/communication" do
-        live "/messages", StudentLive.CommunicationLive.Messages
-        live "/announcements", StudentLive.CommunicationLive.Announcements
-      end
+      # scope "/scheduling" do
+      #   live "/", StudentLive.SchedulingLive.Timetable
+      #   live "/timetable", StudentLive.SchedulingLive.Timetable
+      #   live "/schedule", StudentLive.SchedulingLive.Schedule
+      # end
 
-      scope "/academics" do
-        live "/", StudentLive.AcademicsLive.Index
-        live "/attendance", StudentLive.AcademicsLive.Attendance
-        live "/homework", StudentLive.AcademicsLive.Homework
-        live "/announcements", StudentLive.AcademicsLive.Announcements
+      #  scope "/academics" do
+      #    live "/", StudentLive.AcademicsLive.Index
+      #    live "/attendance", StudentLive.AcademicsLive.Attendance
+      #    live "/homework", StudentLive.AcademicsLive.Homework
+      #    
 
-        scope "/subjects" do
-          live "/", StudentLive.AcademicsLive.Subjects
-          live "/:subject", StudentLive.AcademicsLive.GradesLive.Subject
-        end
-      end
+      #    scope "/subjects" do
+      #      live "/", StudentLive.AcademicsLive.Subjects
+      #      live "/:subject", StudentLive.AcademicsLive.GradesLive.Subject
+      #    end
     end
   end
 
