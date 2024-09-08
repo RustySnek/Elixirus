@@ -10,7 +10,7 @@ from librus_apix.completed_lessons import Lesson
 from librus_apix.exceptions import AuthorizationError
 from librus_apix.grades import Gpa, Grade
 from librus_apix.homework import Homework
-from librus_apix.messages import Message
+from librus_apix.messages import Message, MessageData
 from librus_apix.schedule import Event, schedule_detail
 from librus_apix.student_information import StudentInformation
 from librus_apix.timetable import Period
@@ -44,6 +44,11 @@ class LessonStruct(VenomousTrait, Lesson):
 @dataclass
 class MessageStruct(VenomousTrait, Message):
     __struct__: Atom = Atom(b"Elixir.Elixirus.Types.Message")
+
+
+@dataclass
+class MessageDataStruct(VenomousTrait, MessageData):
+    __struct__: Atom = Atom(b"Elixir.Elixirus.Types.MessageData")
 
 
 @dataclass
@@ -81,11 +86,7 @@ class ClientStruct(VenomousTrait, Client):
     @staticmethod
     def from_dict(dic, structs={}):
         self = VenomousTrait.from_dict.__func__(ClientStruct, dic, structs)
-        base_url = "http://127.0.0.1:8000"
-        Client.__init__(
-            self,
-            self.token,
-        )
+        Client.__init__(self, self.token)
         return self
 
     def into_erl(self) -> Dict:
@@ -120,6 +121,7 @@ venomous_structs = {
     Atom(b"Elixir.Elixirus.Types.Homework"): HomeworkStruct,
     Atom(b"Elixir.Elixirus.Types.Lesson"): LessonStruct,
     Atom(b"Elixir.Elixirus.Types.Message"): MessageStruct,
+    Atom(b"Elixir.Elixirus.Types.MessageData"): MessageDataStruct,
     Atom(b"Elixir.Elixirus.Types.Period"): PeriodStruct,
     Atom(b"Elixir.Elixirus.Types.StudentInformation"): StudentInformationStruct,
 }
@@ -168,6 +170,8 @@ def encoder(value: Any) -> Any:
         return LessonStruct.from_dict(value.__dict__).into_erl()
     if isinstance(value, Message):
         return MessageStruct.from_dict(value.__dict__).into_erl()
+    if isinstance(value, MessageData):
+        return MessageDataStruct.from_dict(value.__dict__).into_erl()
     if isinstance(value, Period):
         return PeriodStruct.from_dict(value.__dict__).into_erl()
     if isinstance(value, StudentInformation):

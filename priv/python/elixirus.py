@@ -13,7 +13,14 @@ from librus_apix.exceptions import (
     TokenKeyError,
 )
 from librus_apix.grades import get_grades
-from librus_apix.messages import get_received
+from librus_apix.messages import (
+    get_received,
+    get_recipients,
+    get_sent,
+    message_content,
+    recipient_groups,
+    send_message,
+)
 from librus_apix.schedule import get_schedule
 from librus_apix.student_information import get_student_information
 from librus_apix.timetable import get_timetable
@@ -70,9 +77,38 @@ def student_info(client: Client):
     return status.value, info
 
 
+def msg_content(client: Client, msg_id: str):
+    status, content = sanitize_fetch(message_content, client, msg_id)
+    return status.value, content
+
+
 def received(client: Client, page: int = 0):
     status, msgs = sanitize_fetch(get_received, client, page)
     return status.value, msgs
+
+
+def sent(client: Client, page: int = 0):
+    status, msgs = sanitize_fetch(get_sent, client, page)
+    return status.value, msgs
+
+
+def send(client: Client, title: str, content: str, recipients: list):
+    status, msg = sanitize_fetch(send_message, client, title, content, recipients)
+    if status.value == RETURN_ATOM.ok:
+        was_sent, msg = msg
+        if was_sent == False:
+            return Atom(b"send_error"), msg
+    return status.value, msg
+
+
+def message_groups(client: Client):
+    status, groups = sanitize_fetch(recipient_groups, client)
+    return status.value, groups
+
+
+def group_recipients(client: Client, group: str):
+    status, recipients = sanitize_fetch(get_recipients, client, group)
+    return status.value, recipients
 
 
 def get_attendance_stats(attendance):
