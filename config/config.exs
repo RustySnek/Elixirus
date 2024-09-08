@@ -10,6 +10,7 @@ import Config
 config :elixirus,
   generators: [timestamp_type: :utc_datetime]
 
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 # Configures the endpoint
 config :elixirus, ElixirusWeb.Endpoint,
   url: [host: "localhost"],
