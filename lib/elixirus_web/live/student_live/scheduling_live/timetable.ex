@@ -11,7 +11,7 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   import ElixirusWeb.Helpers
 
   use ElixirusWeb.SetSemesterLive
-  import Heroicons, only: [chevron_right: 1, chevron_left: 1, information_circle: 1]
+  import Heroicons, only: [information_circle: 1]
   @asyncs [:load_schedule, :load_timetable]
 
   defp weekday_scroll_left() do
@@ -21,8 +21,8 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     end
   end
 
-  defp current_next_period(timetable) do
-    case Enum.at(timetable, get_current_weekday()) |> get_next_period() do
+  defp current_next_period_number(timetable) do
+    case timetable |> Enum.at(get_current_weekday()) |> get_next_period() do
       [%Period{number: num} | _rest] ->
         num
 
@@ -110,51 +110,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
     end
   end
 
-  defp not_within_range?(current_time, time_range) do
-    [time_from, time_to] = time_range
-
-    compare_from = DateTime.compare(current_time, time_from)
-    compare_to = DateTime.compare(current_time, time_to)
-    compare_from < 0 and compare_to > 0
-  end
-
-  def calculate_timeline_percentage(time_from, time_to) do
-    [from_hour, from_minute] =
-      time_from
-      |> String.split(":")
-      |> Enum.map(&String.to_integer(&1))
-
-    [to_hour, to_minute] =
-      time_to
-      |> String.split(":")
-      |> Enum.map(&String.to_integer(&1))
-
-    current_time = warsaw_now()
-    time_from = %DateTime{current_time | hour: from_hour, minute: from_minute, second: 0}
-    time_to = %DateTime{current_time | hour: to_hour, minute: to_minute, second: 0}
-
-    if not_within_range?(current_time, [time_from, time_to]) do
-      0
-    else
-      total_seconds =
-        DateTime.diff(time_to, time_from, :second)
-        |> abs()
-
-      elapsed_seconds =
-        DateTime.diff(current_time, time_from, :second)
-        |> abs()
-
-      elapsed_seconds =
-        if elapsed_seconds > total_seconds, do: total_seconds, else: elapsed_seconds
-
-      percentage =
-        (elapsed_seconds / total_seconds * 100)
-        |> round()
-
-      percentage - 0.5
-    end
-  end
-
   defp load_calendar(socket, :load), do: socket
 
   defp load_calendar(socket, calendar_data),
@@ -204,19 +159,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
   defp load_timetable(socket, timetable) do
     socket
     |> assign(:timetable, exclude_empty_days(timetable))
-    |> assign_async(:indicator, fn ->
-      {:ok, %{indicator: get_indicator_position(timetable)}}
-    end)
-  end
-
-  def get_indicator_position([timetable | _rest]) do
-    %Period{date_from: date_from} = hd(timetable)
-    %Period{date_to: date_to} = List.last(timetable)
-
-    case calculate_timeline_percentage(date_from, date_to) do
-      0 -> "visibility: hidden;"
-      percentage -> "top: #{percentage}%;"
-    end
   end
 
   def calculate_minute_difference(time_from_str, time_to_str)
@@ -308,9 +250,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
           socket
           |> assign(:timetable, exclude_empty_days(timetable))
           |> assign(:loadings, List.delete(socket.assigns.loadings, :timetable))
-          |> assign_async(:indicator, fn ->
-            {:ok, %{indicator: get_indicator_position(timetable)}}
-          end)
 
         {:token_error, _message, socket} ->
           socket
@@ -394,7 +333,15 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       ) do
     token = handle_api_token(socket, token)
     %Client{} = client = Client.get_client(token)
-    monday = this_weeks_monday()
+
+    monday =
+      case get_current_weekday() do
+        n when n < 5 ->
+          this_weeks_monday()
+
+        _ ->
+          warsaw_now() |> DateTime.add(4, :day) |> this_weeks_monday()
+      end
 
     timetable = handle_cache_data(user_id, "timetable")
 
@@ -411,7 +358,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> assign(:this_monday, monday)
       |> assign(:current_monday, monday)
       |> assign(:client, client)
-      |> assign(:indicator, "hidden")
       |> assign(:timetable, [])
       |> assign(:loadings, [])
       |> assign(:show_period_modal, false)
@@ -423,5 +369,191 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
       |> load_timetable(timetable)
 
     {:ok, socket}
+  end
+
+  defp weekday_modal(assigns) do
+    ~H"""
+    <.live_component module={Modal} id={"#{@weekday.weekday}-googlecalendar"}>
+      <div class="gap-y-2 flex flex-col items-center md:max-w-3xl max-w-xs xs:max-w-[250px]">
+        <div
+          :for={
+            event <-
+              @schedule
+              |> get_events_inside_day(@weekday.date)
+          }
+          class="bg-[#1E1E1E] rounded-2xl px-4 py-2 md:max-w-3xl max-w-xs xs:max-w-[250px]"
+        >
+          <div class="flex flex-col text-center space-y-2 mb-3">
+            <span class="text-lg text-center text-fuchsia-700 font-bold">
+              <%= event.title %>
+            </span>
+            <span class="text-lg text-fuchsia-400 font-bold font-italic break-words">
+              <%= event.subject %>
+            </span>
+          </div>
+          <div class="flex flex-col text-center">
+            <span
+              :for={
+                item <-
+                  event
+                  |> Map.get(:data)
+                  |> Map.values()
+                  |> Enum.reverse()
+              }
+              :if={item != "unknown"}
+            >
+              <%= item %>
+            </span>
+          </div>
+        </div>
+        <div
+          :for={
+            event <-
+              @calendar_events
+          }
+          class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
+        >
+          <span class="mb-2 text-lg font-bold">
+            <%= event["summary"] %>
+          </span>
+          <br />
+          <span><%= event["description"] |> HtmlSanitizeEx.html5() |> raw %></span>
+        </div>
+      </div>
+    </.live_component>
+    """
+  end
+
+  defp weekday_button(assigns) do
+    ~H"""
+    <button
+      phx-click={ElixirusWeb.Modal.show_modal_js("#{@weekday.weekday}-googlecalendar")}
+      phx-target={"##{@weekday.weekday}-googlecalendar"}
+      class={"
+      text-center h-12 w-full rounded-2xl border-fuchsia-700 
+      border-2 font-semibold flex flex-col items-center 
+      justify-center text-2xl
+      #{@calendar_events != [] && "!bg-orange-500/10"}
+    "}
+    >
+      <%= @weekday.weekday %>
+    </button>
+    """
+  end
+
+  defp period_modal(assigns) do
+    ~H"""
+    <.live_component
+      :if={@period.subject != ""}
+      module={Modal}
+      id={"#{@period.weekday}-#{@period.number}"}
+    >
+      <div class="bg-[#1E1E1E] mx-5 md:max-w-3xl max-w-xs xs:max-w-[250px] overflow-y-auto rounded-2xl absolute z-40">
+        <div
+          :for={
+            event <-
+              get_events_inside_period(@schedule, @period)
+          }
+          class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
+        >
+          <div class="flex flex-col text-center space-y-2 mb-3">
+            <span class="text-lg text-center text-fuchsia-700 font-bold">
+              <%= event.title %>
+            </span>
+            <span
+              :if={
+                event.subject !=
+                  event.title
+              }
+              class="text-fuchsia-400 font-bold font-italic text-lg"
+            >
+              <%= event.subject %>
+            </span>
+          </div>
+          <div class="flex flex-col text-center">
+            <span
+              :for={
+                item <-
+                  event
+                  |> Map.get(:data)
+                  |> Map.values()
+                  |> Enum.reverse()
+              }
+              :if={item != "unknown"}
+            >
+              <%= item %>
+            </span>
+          </div>
+        </div>
+
+        <div class="p-4 flex flex-col text-center items-center justify-center gap-y-1 lg:gap-y-4">
+          <span class="text-base lg:text-lg font-bold">
+            <%= @period.weekday %>
+          </span>
+
+          <span class="break-words lg:text-lg font-bold w-full">
+            <%= @period.subject %>
+          </span>
+          <div
+            :for={
+              info <-
+                @period.info
+                |> Map.values()
+            }
+            :if={info != ""}
+            class="flex flex-col border-red-700 border rounded-2xl p-2"
+          >
+            <span :for={
+              val <-
+                info
+                |> Map.values()
+            }>
+              <%= val %>
+            </span>
+          </div>
+
+          <span>
+            Lesson: <%= @period.number %>
+          </span>
+          <span>
+            <%= @period.teacher_and_classroom %>
+          </span>
+          <span>
+            <%= @period.date %>
+          </span>
+        </div>
+      </div>
+    </.live_component>
+    """
+  end
+
+  defp period(assigns) do
+    ~H"""
+    <button
+      disabled={@period.subject == ""}
+      phx-click={ElixirusWeb.Modal.show_modal_js("#{@period.weekday}-#{@period.number}")}
+      phx-target={"##{@period.weekday}-#{@period.number}"}
+      class={"
+                hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
+                duration-100 border-2 border-fuchsia-600 rounded-2xl
+                #{ @period.subject == "" &&"!border-none !bg-inherit"}
+                #{ @period.info |> Map.keys() |> length() > 0 && "!border-red-700"}
+                "}
+    >
+      <span class="flex-shrink text-center font-bold text-red-600">
+        <%= @period.info |> Map.keys() |> Enum.join(", ") %>
+      </span>
+      <div class="flex-grow">
+        <span class="line-clamp-1">
+          <%= @period.subject %>
+        </span>
+      </div>
+      <span class="text-sm text-gray-500 ">
+        <%= @period.teacher_and_classroom
+        |> String.split("s.")
+        |> List.last() %>
+      </span>
+    </button>
+    """
   end
 end

@@ -58,7 +58,7 @@
     :if={@timetable != []}
     id="timetable-box"
     phx-hook="scroll_top"
-    top={current_next_period(@timetable) * 125}
+    top={current_next_period_number(@timetable) * 125}
     class="relative w-full  flex flex-col"
   >
     <div class="flex -z-40 flex-col w-full  gap-y-4">
@@ -80,86 +80,25 @@
       x-init={"$el.scrollLeft = #{weekday_scroll_left()};"}
       class="overflow-x-auto w-full absolute gap-x-10 justify-between md:snap-none snap-x snap-mandatory  px-20  flex-row flex"
     >
-      <div :for={weekday <- @timetable} class="
+      <div
+        :for={weekday <- @timetable}
+        :if={
+          first_period =
+            List.first(weekday)
+        }
+        class="
       w-auto snap-center relative
-       ">
+       "
+      >
         <div class="flex h-full gap-y-4 flex-col ">
-          <div>
-            <.live_component
-              module={Modal}
-              id={"#{weekday |> List.first() |> Map.get(:weekday)}-googlecalendar"}
-            >
-              <div class="gap-y-2 flex flex-col items-center md:max-w-3xl max-w-xs xs:max-w-[250px]">
-                <div
-                  :for={
-                    event <-
-                      @schedule
-                      |> get_events_inside_day(weekday |> List.first() |> Map.get(:date))
-                  }
-                  class="bg-[#1E1E1E] rounded-2xl px-4 py-2 md:max-w-3xl max-w-xs xs:max-w-[250px]"
-                >
-                  <div class="flex flex-col text-center space-y-2 mb-3">
-                    <span class="text-lg text-center text-fuchsia-700 font-bold">
-                      <%= event.title %>
-                    </span>
-                    <span class="text-lg text-fuchsia-400 font-bold font-italic break-words">
-                      <%= event.subject %>
-                    </span>
-                  </div>
-                  <div class="flex flex-col text-center">
-                    <span
-                      :for={
-                        item <-
-                          event
-                          |> Map.get(:data)
-                          |> Map.values()
-                          |> Enum.reverse()
-                      }
-                      :if={item != "unknown"}
-                    >
-                      <%= item %>
-                    </span>
-                  </div>
-                </div>
-                <div
-                  :for={
-                    event <-
-                      @calendar_events
-                      |> events_inside_timeframe(
-                        weekday
-                        |> List.first()
-                        |> Map.get(:date)
-                      )
-                  }
-                  class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
-                >
-                  <span class="mb-2 text-lg font-bold">
-                    <%= event["summary"] %>
-                  </span>
-                  <br />
-                  <span><%= event["description"] |> HtmlSanitizeEx.html5() |> raw %></span>
-                </div>
-              </div>
-            </.live_component>
+          <div :if={weekday_events = events_inside_timeframe(@calendar_events, first_period.date)}>
+            <.weekday_modal
+              weekday={first_period}
+              calendar_events={weekday_events}
+              schedule={@schedule}
+            />
 
-            <button
-              phx-click={
-                ElixirusWeb.Modal.show_modal_js(
-                  "#{weekday |> List.first() |> Map.get(:weekday)}-googlecalendar"
-                )
-              }
-              phx-target={"##{weekday |> List.first() |> Map.get(:weekday)}-googlecalendar"}
-              class={"text-center h-12 w-full rounded-2xl border-fuchsia-700 border-2 font-semibold flex flex-col items-center justify-center text-2xl
-#{ @calendar_events |>
-                    inside_event_timeframe?(
-                    weekday |> List.first() |> Map.get(:date)
-                  
-                   ) && "!bg-orange-500/10"
-              }
-          "}
-            >
-              <%= weekday |> List.first() |> Map.get(:weekday) %>
-            </button>
+            <.weekday_button weekday={first_period} calendar_events={weekday_events} />
           </div>
           <div :for={period <- weekday} class="w-72 xs:w-60 text-justify">
             <div :if={event_inside_period?(@schedule, period)} class="absolute">
@@ -169,125 +108,14 @@
               />
             </div>
             <div class="w-full overflow-x-hidden">
-              <.live_component
-                :if={period.subject != ""}
-                module={Modal}
-                id={"#{period.weekday}-#{period.number}"}
-              >
-                <div class="bg-[#1E1E1E] mx-5 md:max-w-3xl max-w-xs xs:max-w-[250px] overflow-y-auto rounded-2xl absolute z-40">
-                  <div
-                    :for={
-                      event <-
-                        get_events_inside_period(@schedule, period)
-                    }
-                    class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
-                  >
-                    <div class="flex flex-col text-center space-y-2 mb-3">
-                      <span class="text-lg text-center text-fuchsia-700 font-bold">
-                        <%= event.title %>
-                      </span>
-                      <span
-                        :if={
-                          event.subject !=
-                            event.title
-                        }
-                        class="text-fuchsia-400 font-bold font-italic text-lg"
-                      >
-                        <%= event.subject %>
-                      </span>
-                    </div>
-                    <div class="flex flex-col text-center">
-                      <span
-                        :for={
-                          item <-
-                            event
-                            |> Map.get(:data)
-                            |> Map.values()
-                            |> Enum.reverse()
-                        }
-                        :if={item != "unknown"}
-                      >
-                        <%= item %>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="p-4 flex flex-col text-center items-center justify-center gap-y-1 lg:gap-y-4">
-                    <span class="text-base lg:text-lg font-bold">
-                      <%= period.weekday %>
-                    </span>
-
-                    <span class="break-words lg:text-lg font-bold w-full">
-                      <%= period.subject %>
-                    </span>
-                    <div
-                      :for={
-                        info <-
-                          period.info
-                          |> Map.values()
-                      }
-                      :if={info != ""}
-                      class="flex flex-col border-red-700 border rounded-2xl p-2"
-                    >
-                      <span :for={
-                        val <-
-                          info
-                          |> Map.values()
-                      }>
-                        <%= val %>
-                      </span>
-                    </div>
-
-                    <span>
-                      Lesson: <%= period.number %>
-                    </span>
-                    <span>
-                      <%= period.teacher_and_classroom %>
-                    </span>
-                    <span>
-                      <%= period.date %>
-                    </span>
-                  </div>
-                </div>
-              </.live_component>
-
-              <button
-                disabled={period.subject == ""}
-                phx-click={ElixirusWeb.Modal.show_modal_js("#{period.weekday}-#{period.number}")}
-                phx-target={"##{period.weekday}-#{period.number}"}
-                class={"
-                hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
-                duration-100 border-2 border-fuchsia-600 rounded-2xl
-                #{ period.subject == "" &&"!border-none !bg-inherit"}
-                #{ period.info |> Map.keys() |> length() > 0 && "!border-red-700"}
-                               "}
-              >
-                <span class="flex-shrink text-center font-bold text-red-600">
-                  <%= period.info |> Map.keys() |> Enum.join(", ") %>
-                </span>
-                <div class="flex-grow">
-                  <span class="line-clamp-1">
-                    <%= period.subject %>
-                  </span>
-                </div>
-                <span class="text-sm text-gray-500 ">
-                  <%= period.teacher_and_classroom
-                  |> String.split("s.")
-                  |> List.last() %>
-                </span>
-              </button>
+              <.period_modal period={period} schedule={@schedule} />
+              <.period period={period} />
               <div style={"height: #{2* calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <div
-      style={@indicator.result |> dbg}
-      class="absolute right-0 translate-y-12 bg-pink-700 opacity-50 h-[3px] z-30  w-full transform"
-    >
     </div>
   </div>
 </div>
