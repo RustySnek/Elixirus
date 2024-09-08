@@ -1,0 +1,184 @@
+<!-- SEND MSGS -->
+<div :if={@live_action == :send_message} class="mx-4 md:mx-10" id="send-message-view">
+  <div class="flex flex-col gap-y-4">
+    <div class="flex flex-row">
+      <.link
+        class="w-20 rounded-2xl bg-fg hover:bg-fuchsia-700 transition"
+        patch={~p"/student/messages?search=#{@search}"}
+      >
+        <Heroicons.arrow_left class="w-10 mx-auto" />
+      </.link>
+    </div>
+    <form
+      class="flex flex-col gap-x-8 gap-y-4 xl:flex-row xl:justify-center"
+      id="pick-recipients-form"
+      phx-hook="recipients_form"
+    >
+      <div class="flex-col flex md:grid md:grid-cols-2 gap-2">
+        <div :for={group <- @recipient_groups |> dbg} class="flex flex-row items-center">
+          <label class="border items-center border-fuchsia-700 rounded-full py-1 px-2 overflow-x-hidden flex flex-row gap-x-1">
+            <input
+              class="md:w-5 md:h-5 accent-fuchsia-600 text-fuchsia-600 bg-[#1E1E1E] border-none"
+              type="radio"
+              phx-change="select_recipient_group"
+              name="recipient_group"
+              checked={@selected_group |> Kernel.==(group)}
+              value={group}
+            />
+            <span><%= group %></span>
+          </label>
+        </div>
+      </div>
+      <input
+        :if={@selected_group != ""}
+        type="text"
+        autocomplete="off"
+        id="recipient-name-input"
+        list="recipient_options"
+        placeholder="select name"
+        name="name"
+        phx-change="pick_recipient"
+        phx-debounce={100}
+        class="bg-[#121212] h-12 lg:w-1/3"
+      />
+      <datalist id="recipient_options">
+        <option :for={{name, _recipient_id} <- @group_recipients}><%= name %></option>
+      </datalist>
+      <div :if={@selected_recipients != MapSet.new()} class=" border border-fuchsia-600 p-4">
+        <ul class="sm:grid flex flex-col md:grid-cols-3 xl:grid-cols-2 sm:grid-cols-2 gap-y-1 gap-x-10 overflow-y-auto">
+          <li :for={{recipient, id} <- @selected_recipients} class="h-fit">
+            <span
+              class="cursor-pointer hover:text-red-600 text-lg"
+              phx-value-recipient={recipient}
+              phx-value-recipient_id={id}
+              phx-click="remove_recipient"
+              class="line-clamp-1 overflow-x-auto"
+            >
+              <%= recipient %>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </form>
+    <form
+      :if={@selected_recipients != MapSet.new()}
+      phx-change="write_message"
+      class="flex flex-col gap-y-4 items-center xl:mt-10"
+    >
+      <input
+        onkeydown="return event.key != 'Enter'"
+        placeholder="title"
+        type="text"
+        value={@compose_title}
+        name="title"
+        class="bg-[#121212] text-xl md:text-2xl xl:max-w-3xl 2xl:max-w-5xl lg:max-w-xl w-full"
+      />
+      <textarea
+        placeholder="content"
+        id="content-area"
+        phx-hook="handle_textarea"
+        name="content"
+        type="text"
+        class="bg-[#121212] text-lg md:text-xl lg:h-96 h-40 xl:max-w-3xl 2xl:max-w-5xl lg:max-w-xl w-full "
+      ><%= @compose_content%></textarea>
+      <button
+        id="send-message-button"
+        phx-hook="form_confirmation"
+        disabled={@compose_title == "" || @compose_content == ""}
+        class="w-28 h-10 rounded-2xl bg-purple-900 hover:bg-fuchsia-700 transition"
+      >
+        <div class="flex flex-row justify-center gap-x-2">
+          <Heroicons.arrow_up class="w-5" /><span>Send</span>
+        </div>
+      </button>
+    </form>
+  </div>
+</div>
+<!-- Inbox -->
+<div
+  :if={@messages != [] && @live_action == nil}
+  id="message-view"
+  class="flex flex-col gap-x-10 md:max-h-[80vh] mx-4 md:mx-10 "
+>
+  <.visibility_opts visibility={@visibility} />
+  <div
+    :if={@messages != []}
+    class="
+    flex flex-col w-full translate-x-none 
+    opacity-100 items-center gap-y-4 
+    overflow-x-hidden md:overflow-y-auto md:pb-0 pb-20"
+  >
+    <div class="flex flex-row items-center gap-1">
+      <form phx-change="search_message">
+        <input
+          phx-debounce={150}
+          name="query"
+          type="text"
+          value={@search}
+          placeholder="Search"
+          class="h-10 rounded-md border-fuchsia-600 border bg-fg w-fit"
+        />
+      </form>
+      <div class="flex flex-row justify-start md:hidden w-full">
+        <.link patch={~p"/student/messages/send"}>
+          <div class="flex flex-col items-center text-xs">
+            <div class="flex flex-row">
+              <Heroicons.envelope class="w-6" />
+              <Heroicons.arrow_up class="w-6" />
+            </div>
+            <span>Send Message</span>
+          </div>
+        </.link>
+      </div>
+    </div>
+    <.message :for={message <- @shown_messages} message={message} />
+  </div>
+</div>
+
+<div :if={@live_action == :view && !@content} class="flex flex-col">
+  <div class="flex flex-row justify-between items-center gap-x-4 break-words">
+    <.link patch={~p"/student/messages?search=#{@search}"} class="self-start">
+      <Heroicons.arrow_left class="w-10" />
+    </.link>
+    <div class="flex flex-col w-full">
+      <div class="bg-gray-600 animate-pulse rounded-br-none h-6 w-full rounded-lg"></div>
+      <div class="bg-gray-600 self-end rounded-t-none animate-pulse h-6 w-3/4 rounded-lg"></div>
+    </div>
+  </div>
+  <div class="mt-8 flex flex-col gap-y-1">
+    <div class="bg-gray-600 animate-pulse h-6 w-1/2 rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-6 w-3/4 rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-6 w-full rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-6 w-full rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-6 w-3/4 rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-6 w-3/4 rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-6 w-1/2 rounded-lg"></div>
+    <div class="bg-gray-600 animate-pulse h-4 mt-1 w-2/5 self-end rounded-lg"></div>
+  </div>
+</div>
+<div
+  :if={
+    @live_action == :view &&
+      @content
+  }
+  class="flex flex-col"
+>
+  <div class="flex flex-row justify-between items-center gap-x-4 break-words">
+    <.link patch={~p"/student/messages?search=#{@search}"} class="self-start">
+      <Heroicons.arrow_left class="w-10" />
+    </.link>
+    <h2 class="font-semibold text-sm px-1"><%= @content.title %></h2>
+  </div>
+  <span class="text-gray-400 text-sm text-end"><%= @content.author %></span>
+  <article
+    id="message-wrapper"
+    phx-hook="new_page_link"
+    class="mt-1 child:whitespace-break-spaces announcement_link"
+  >
+    <%= @content.content
+    |> as_html!()
+    |> HtmlSanitizeEx.html5()
+    |> Phoenix.HTML.raw() %>
+  </article>
+  <span class="text-gray-400 text-sm self-end"><%= @content.date %></span>
+</div>
