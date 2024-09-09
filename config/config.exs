@@ -39,7 +39,7 @@ config :venomous, :snake_manager, %{
 # Configure esbuild (the version is required)
 config :bun,
   path: System.get_env("MIX_BUN_PATH"),
-  version: "1.0.14",
+  version: "1.1.2",
   default: [
     args:
       ~w(build js/app.js --outdir=../priv/static/assets --external /fonts/* --external /images/*),

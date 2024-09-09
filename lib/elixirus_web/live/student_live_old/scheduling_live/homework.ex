@@ -13,7 +13,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   @asyncs [:load_details, :load_homework]
 
   def fetch_homework_details(token, id) do
-    SnakeArgs.from_params(:fetchers, :fetch_homework_details, [token, id])|>python!(python_timeout: :infinity)
+    SnakeArgs.from_params(:fetchers, :fetch_homework_details, [token, id])
+    |> python!(python_timeout: :infinity)
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
@@ -114,8 +115,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
       |> assign(:loadings, [])
       |> assign(:details, %{})
       |> assign(:page_title, "Homework")
-      |> create_fetcher(homework, :homework, fn ->
-        SnakeArgs.from_params(:fetchers, :fetch_homework, [api_token, monday, next_monday])|>python!(python_timeout: :infinity)
+      |> create_fetcher(user_id, homework, :homework, fn ->
+        SnakeArgs.from_params(:fetchers, :fetch_homework, [api_token, monday, next_monday])
+        |> python!(python_timeout: :infinity)
       end)
 
     {:ok, socket}

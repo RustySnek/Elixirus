@@ -23,15 +23,15 @@ defmodule Elixirus.Types.Client do
     end
   end
 
-  defp proxy, do: proxy(System.get_env("ELIXIRUS_PROXY")) |> dbg
+  defp proxy, do: proxy(System.get_env("ELIXIRUS_PROXY"))
 
-  @spec get_client(String.t(), String.t()) :: %__MODULE__{}
+  @spec get_client(String.t(), String.t()) :: %__MODULE__{} | any()
   def get_client(username, password) do
     SnakeArgs.from_params(:client, :get_client_from_credentials, [username, password, proxy()])
     |> Venomous.python!()
   end
 
-  @spec get_client(String.t()) :: %__MODULE__{}
+  @spec get_client(String.t()) :: %__MODULE__{} | any()
   def get_client(token) do
     SnakeArgs.from_params(:client, :get_client, [token, proxy()]) |> python!()
   end

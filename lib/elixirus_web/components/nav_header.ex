@@ -53,7 +53,7 @@ defmodule ElixirusWeb.Components.NavHeader do
         Services:
         <div
           :for={{service, status} <- status()}
-          class={"#{status == :up && '!text-green-400'} text-red-600"}
+          class={"#{status == :up && "!text-green-400"} text-red-600"}
         >
           <%= service %> <span class="font-semibold"><%= status %></span>
         </div>

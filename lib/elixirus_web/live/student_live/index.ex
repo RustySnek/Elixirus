@@ -1,7 +1,5 @@
 defmodule ElixirusWeb.StudentLive.Index do
   require Logger
-  alias Elixirus.Types.Announcement
-  alias Elixirus.Types.Grade
   alias Elixirus.Types.Message
   alias Elixirus.Types.Event
   alias Venomous.SnakeArgs
@@ -39,10 +37,6 @@ defmodule ElixirusWeb.StudentLive.Index do
         |> Enum.reduce(0, fn avg, acc -> acc + avg end)
         |> Kernel./(len)
     end
-  end
-
-  def handle_info({:EXIT, _pid, reason}, socket) do
-    {:noreply, socket}
   end
 
   def handle_event("retrieve_local_storage", %{"discards" => discards}, socket)
@@ -134,7 +128,10 @@ defmodule ElixirusWeb.StudentLive.Index do
   def handle_async(:load_averages, {:ok, averages}, socket) do
     socket =
       case match_basic_errors(socket, averages, @asyncs) do
-        {:ok, averages} ->
+        {:ok, _averages} ->
+          socket
+
+        {:error, _err} ->
           socket
 
         {_err, _msg, socket} ->
@@ -314,7 +311,7 @@ defmodule ElixirusWeb.StudentLive.Index do
 
     semester =
       case semester |> Integer.parse() do
-        {:error, _} -> 0
+        :error -> 0
         {semester, _} -> semester
       end
 

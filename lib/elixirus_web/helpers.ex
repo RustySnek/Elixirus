@@ -206,8 +206,6 @@ defmodule ElixirusWeb.Helpers do
     "#{percentage * 3.6}deg"
   end
 
-  def create_fetcher(x, y, z, l), do: nil
-
   def create_fetcher(socket, user_id, cache_data, name, load_func) do
     case cache_data do
       :load ->

@@ -86,8 +86,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       socket
       |> assign(:semester, semester)
       |> assign(:attendance, [])
-      |> create_fetcher(attendance, :attendance, fn ->
-        {SnakeArgs.from_params(:fetchers, :fetch_all_attendance, [token, semester, true]) |> python!(python_timeout: :infinity), semester}
+      |> create_fetcher(user_id, attendance, :attendance, fn ->
+        {SnakeArgs.from_params(:fetchers, :fetch_all_attendance, [token, semester, true])
+         |> python!(python_timeout: :infinity), semester}
       end)
 
     {:noreply, socket}
@@ -120,8 +121,9 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Attendance do
       |> assign(:visible, nil)
       |> assign(:login_required, false)
       |> assign(:page_title, "Attendance")
-      |> create_fetcher(frequency, :frequency, fn ->
-        SnakeArgs.from_params(:fetchers, :fetch_attendance_frequency, [token]) |> python!(python_timeout: :infinity)
+      |> create_fetcher(user_id, frequency, :frequency, fn ->
+        SnakeArgs.from_params(:fetchers, :fetch_attendance_frequency, [token])
+        |> python!(python_timeout: :infinity)
       end)
 
     {:ok, socket}

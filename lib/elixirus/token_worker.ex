@@ -168,7 +168,7 @@ defmodule Elixirus.TokenWorker do
     notifications =
       if DateTime.compare(
            now,
-           DateTime.shift(last_update, hours: ttl)
+           DateTime.shift(last_update, hour: ttl)
          ) in [:lt, :eq] do
         case SnakeArgs.from_params(:notifications, :fetch_new_notifications, [token, seen_ids])
              |> python!(python_timeout: :infinity) do

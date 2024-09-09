@@ -4,11 +4,11 @@
     %{
       name: "default",
       checks: %{
-        disabled: [
+        enabled: [
           # this means that `TabsOrSpaces` will not run
           {
-            Credo.Check.Refactor.Apply,
-            []
+            Credo.Check.Refactor.Nesting,
+            [max_nesting: 3]
           }
         ]
       }
