@@ -98,7 +98,16 @@
               schedule={@schedule}
             />
 
-            <.weekday_button weekday={first_period} calendar_events={weekday_events} />
+            <.weekday_button
+              :if={weekday_events != []}
+              weekday={first_period}
+              calendar_events={weekday_events}
+            />
+            <.weekday
+              :if={weekday_events == []}
+              weekday={first_period}
+              calendar_events={weekday_events}
+            />
           </div>
           <div :for={period <- weekday} class="w-72 xs:w-60 text-justify">
             <div :if={event_inside_period?(@schedule, period)} class="absolute">

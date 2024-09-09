@@ -426,17 +426,28 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     """
   end
 
+  defp weekday(assigns) do
+    ~H"""
+    <div class="
+      text-center h-12 w-full rounded-2xl border-fuchsia-700 
+      border-2 font-semibold flex flex-col items-center 
+      justify-center text-2xl select-none
+    ">
+      <%= @weekday.weekday %>
+    </div>
+    """
+  end
+
   defp weekday_button(assigns) do
     ~H"""
     <button
       phx-click={ElixirusWeb.Modal.show_modal_js("#{@weekday.weekday}-googlecalendar")}
       phx-target={"##{@weekday.weekday}-googlecalendar"}
-      class={"
+      class="
       text-center h-12 w-full rounded-2xl border-fuchsia-700 
       border-2 font-semibold flex flex-col items-center 
-      justify-center text-2xl
-      #{@calendar_events != [] && "!bg-orange-500/10"}
-    "}
+      justify-center text-2xl bg-orange-500/10
+    "
     >
       <%= @weekday.weekday %>
     </button>
