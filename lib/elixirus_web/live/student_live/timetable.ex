@@ -1,6 +1,5 @@
-defmodule ElixirusWeb.StudentLive.SchedulingLive.Timetable do
+defmodule ElixirusWeb.StudentLive.Timetable do
   require Logger
-  alias Elixirus.Types.Event
   alias Elixirus.Types.Period
   alias Elixirus.Types.Client
   use ElixirusWeb, :live_view

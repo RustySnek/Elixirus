@@ -6,8 +6,10 @@ defmodule ElixirusWeb.Layouts do
 
   def links do
     [
+      {"Timetable", ~p"/student/timetable", [], []},
       {"Messages", ~p"/student/messages", [], []},
       {"Announcements", ~p"/student/announcements", [], []}
+
       #    {
       #      "Academics",
       #      ~p"/student/academics",
@@ -20,7 +22,6 @@ defmodule ElixirusWeb.Layouts do
       #    },
       #    {"Scheduling", ~p"/student/scheduling",
       #     [
-      #       {"Timetable", ~p"/student/scheduling/timetable"},
       #       {"Schedule", ~p"/student/scheduling/schedule"}
       #     ], []},
       #    {"Communication", ~p"/student/communication/announcements",
