@@ -6,6 +6,12 @@
   >
   </div>
   <div
+    :if={@announcements == [] && !(:announcements in @loadings)}
+    class="flex flex-col justify-center text-center"
+  >
+    <h2 class="font-bold text-gray-400/50 text-2xl">Nothing to see here</h2>
+  </div>
+  <div
     :for={{announcement, idx} <- @announcements |> Enum.with_index()}
     class="border-fuchsia-600 border rounded py-1 px-4 mx-4 lg:mx-0"
   >
