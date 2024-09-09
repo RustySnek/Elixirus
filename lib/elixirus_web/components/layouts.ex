@@ -8,13 +8,14 @@ defmodule ElixirusWeb.Layouts do
     [
       {"Timetable", ~p"/student/timetable", [], []},
       {"Messages", ~p"/student/messages", [], []},
-      {"Announcements", ~p"/student/announcements", [], []}
-
+      {"Announcements", ~p"/student/announcements", [], []},
+      {"Schedule", ~p"/student/schedule", [], []},
+      {"Subjects", ~p"/student/subjects", [], []}
       #    {
       #      "Academics",
       #      ~p"/student/academics",
       #      [
-      #        {"Subjects", ~p"/student/academics/subjects"},
+      #        
       #        {"Attendance", ~p"/student/academics/attendance"},
       #        {"Homework", ~p"/student/academics/homework"}
       #      ],
@@ -22,7 +23,6 @@ defmodule ElixirusWeb.Layouts do
       #    },
       #    {"Scheduling", ~p"/student/scheduling",
       #     [
-      #       {"Schedule", ~p"/student/scheduling/schedule"}
       #     ], []},
       #    {"Communication", ~p"/student/communication/announcements",
       #     [

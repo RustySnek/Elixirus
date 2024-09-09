@@ -1,5 +1,6 @@
-defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
+defmodule ElixirusWeb.StudentLive.Subjects do
   require Logger
+  alias Elixirus.Types.Client
   use ElixirusWeb, :live_view
   import Venomous
   alias Venomous.SnakeArgs
@@ -157,36 +158,8 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
   def handle_event("view_grade", %{"grade_id" => id, "subject" => subject}, socket) do
     {:noreply,
      push_navigate(socket,
-       to:
-         ~p"/student/academics/subjects/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}",
-       replace: false
+       to: ~p"/student/subjects/#{subject}?grade_id=#{id}&semester=#{socket.assigns.semester}"
      )}
-  end
-
-  def handle_event("retrieve_local_storage", %{"semester" => semester} = _params, socket) do
-    user_id = socket.assigns.user_id
-    data = handle_cache_data(user_id, "#{semester}-grades")
-
-    token = socket.assigns.token
-
-    socket =
-      socket
-      |> assign(:semester, semester)
-      |> assign(:shown_grades, %{})
-      |> assign(:grades, %{})
-
-    socket =
-      case data do
-        :load ->
-          socket
-          |> start_async(:load_grades, fn -> fetch_all_grades(token, semester) end)
-
-        data ->
-          socket |> assign(:grades, data) |> assign(:shown_grades, data) |> assign_averages(data)
-      end
-
-    {:noreply,
-     push_patch(socket, to: ~p"/student/academics/subjects?#{socket.assigns.query_params}")}
   end
 
   def handle_event(
@@ -220,13 +193,14 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
       socket
       |> assign(:shown_grades, shown)
       |> assign(:query_params, query_params)
-      |> push_patch(to: ~p"/student/academics/subjects?#{query_params}")
+      |> push_patch(to: ~p"/student/subjects?#{query_params}")
 
     {:noreply, socket}
   end
 
-  def fetch_all_grades(token, semester) do
-    {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester]) |> python!(python_timeout: :infinity), semester}
+  def fetch_all_grades(client, semester) do
+    {SnakeArgs.from_params(:elixirus, :grades, [client, semester])
+     |> python!(), semester}
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
@@ -270,22 +244,37 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Subjects do
 
   def mount(
         _params,
-        %{"semester" => semester, "token" => api_token, "user_id" => user_id},
+        %{"semester" => semester, "token" => token, "user_id" => user_id},
         socket
       ) do
-    api_token = handle_api_token(socket, api_token)
+    %Client{} =
+      client =
+      socket
+      |> handle_api_token(token)
+      |> Client.get_client()
+
+    data = handle_cache_data(user_id, "#{semester}-grades")
 
     socket =
       socket
-      |> assign(:token, api_token)
+      |> assign(:client, client)
       |> assign(:user_id, user_id)
-      |> assign(:login_required, false)
-      |> assign(:grades, %{})
+      |> assign(:grades, nil)
       |> assign(:semester_grades, %{})
       |> assign(:semester_average, 0.0)
       |> assign(:shown_grades, %{})
       |> assign(:query_params, @default_params)
       |> assign(:page_title, "Subjects")
+
+    socket =
+      case data do
+        :load ->
+          socket
+          |> start_async(:load_grades, fn -> fetch_all_grades(client, semester) end)
+
+        data ->
+          socket |> assign(:grades, data) |> assign(:shown_grades, data) |> assign_averages(data)
+      end
 
     {:ok, assign(socket, :semester, semester)}
   end

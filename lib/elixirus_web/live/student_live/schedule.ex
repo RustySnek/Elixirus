@@ -1,5 +1,6 @@
-defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
+defmodule ElixirusWeb.StudentLive.Schedule do
   require Logger
+  alias Elixirus.Types.Client
   use ElixirusWeb, :live_view
 
   use ElixirusWeb.SetSemesterLive
@@ -10,10 +11,6 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   alias ElixirusWeb.Modal
 
   @asyncs [:load_schedule]
-
-  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
-    {:noreply, socket}
-  end
 
   def handle_async(:load_schedule, {:ok, {schedule, year, month}}, socket) do
     user_id = socket.assigns.user_id
@@ -35,7 +32,11 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
   end
 
   def mount(_params, %{"token" => token, "user_id" => user_id, "semester" => semester}, socket) do
-    token = handle_api_token(socket, token)
+    %Client{} =
+      client =
+      socket
+      |> handle_api_token(token)
+      |> Client.get_client()
 
     {{year, month, _day}, _time} = :calendar.local_time()
 
@@ -43,17 +44,17 @@ defmodule ElixirusWeb.StudentLive.SchedulingLive.Schedule do
 
     socket =
       socket
-      |> assign(:token, token)
+      |> assign(:client, client)
       |> assign(:user_id, user_id)
       |> assign(:semester, semester)
       |> assign(:schedule, %{})
       |> assign(:loadings, [])
-      |> assign(:login_required, false)
       |> assign(:year, year)
       |> assign(:month, month)
       |> assign(:page_title, "Schedule #{year}-#{month}")
-      |> create_fetcher(schedule, :schedule, fn ->
-        {SnakeArgs.from_params(:fetchers, :fetch_schedule, [token, year, month]) |> python!(python_timeout: :infinity), year, month}
+      |> create_fetcher(user_id, schedule, :schedule, fn ->
+        {SnakeArgs.from_params(:elixirus, :schedule, [client, year, month, true])
+         |> python!(), year, month}
       end)
 
     {:ok, socket}

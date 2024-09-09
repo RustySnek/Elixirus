@@ -71,7 +71,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       case match_basic_errors(socket, schedule, @asyncs) do
         {:ok, schedule} ->
           user_id = socket.assigns.user_id
-          cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule)
+          cache_and_ttl_data(user_id, "#{year}-#{month}-schedule-nonempty", schedule)
 
           socket
           |> assign(:schedule, schedule)
@@ -289,8 +289,12 @@ defmodule ElixirusWeb.StudentLive.Index do
         %{"token" => token, "user_id" => user_id, "semester" => semester} = session,
         socket
       ) do
-    token = handle_api_token(socket, token)
-    %Client{} = client = Client.get_client(token)
+    %Client{} =
+      client =
+      socket
+      |> handle_api_token(token)
+      |> Client.get_client()
+
     {{year, month, day}, _} = :calendar.local_time()
     announcements = handle_cache_data(user_id, "announcements")
     frequency = handle_cache_data(user_id, "frequency")
@@ -305,7 +309,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     schedule =
       handle_cache_data(
         user_id,
-        "#{year}-#{month}-schedule"
+        "#{year}-#{month}-schedule-nonempty"
       )
 
     semester =

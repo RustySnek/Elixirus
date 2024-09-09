@@ -70,7 +70,7 @@ defmodule ElixirusWeb.Helpers do
 
   def sort_gpas(gpas) do
     Enum.sort_by(gpas, fn {_, [_, _, gpa]} ->
-      if gpa == "-", do: 99.0, else: gpa |> String.to_float()
+      if gpa == "-", do: 99.0, else: gpa
     end)
   end
 

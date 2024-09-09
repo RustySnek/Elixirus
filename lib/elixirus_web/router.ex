@@ -32,6 +32,7 @@ defmodule ElixirusWeb.Router do
       live "/", StudentLive.Index
       live "/announcements", StudentLive.Announcements
       live "/timetable", StudentLive.Timetable
+      live "/schedule", StudentLive.Schedule
 
       scope "/messages" do
         live "/", StudentLive.Messages
@@ -39,10 +40,13 @@ defmodule ElixirusWeb.Router do
         live "/:message_id", StudentLive.Messages, :view
       end
 
+      scope "/subjects" do
+        live "/", StudentLive.Subjects
+        live "/:subject", StudentLive.GradesLive.Subject
+      end
+
       # scope "/scheduling" do
-      #   live "/", StudentLive.SchedulingLive.Timetable
       #   
-      #   live "/schedule", StudentLive.SchedulingLive.Schedule
       # end
 
       #  scope "/academics" do
@@ -50,11 +54,6 @@ defmodule ElixirusWeb.Router do
       #    live "/attendance", StudentLive.AcademicsLive.Attendance
       #    live "/homework", StudentLive.AcademicsLive.Homework
       #    
-
-      #    scope "/subjects" do
-      #      live "/", StudentLive.AcademicsLive.Subjects
-      #      live "/:subject", StudentLive.AcademicsLive.GradesLive.Subject
-      #    end
     end
   end
 

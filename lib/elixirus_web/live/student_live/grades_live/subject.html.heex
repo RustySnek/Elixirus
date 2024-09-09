@@ -1,4 +1,4 @@
-<div :if={@grades == %{} && @login_required == false} class="flex items-center justify-center">
+<div :if={@grades == %{} && :grades in @loadings} class="flex items-center justify-center">
   <.spinner />
 </div>
 <div :if={@grades != %{}} class="flex gap-y-5 flex-col mx-10">
