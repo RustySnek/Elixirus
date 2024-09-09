@@ -71,7 +71,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       case match_basic_errors(socket, schedule, @asyncs) do
         {:ok, schedule} ->
           user_id = socket.assigns.user_id
-          cache_and_ttl_data(user_id, "schedule", schedule)
+          cache_and_ttl_data(user_id, "#{year}-#{month}-schedule", schedule)
 
           socket
           |> assign(:schedule, schedule)
@@ -313,7 +313,6 @@ defmodule ElixirusWeb.StudentLive.Index do
         {:error, _} -> 0
         {semester, _} -> semester
       end
-    
 
     socket =
       case calendar_data do
@@ -383,12 +382,15 @@ defmodule ElixirusWeb.StudentLive.Index do
         ])
         |> Venomous.python!()
       end)
-    socket = case frequency do
-        [_, _, final] -> assign(socket, :final_frequency, final)
+
+    socket =
+      case frequency do
+        [_, _, final] ->
+          assign(socket, :final_frequency, final)
 
         _ ->
-        socket
-    end
+          socket
+      end
 
     {:ok, socket}
   end
@@ -477,7 +479,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         class="flex flex-col w-32 max-w-32 w-full rounded-md px-2 text-sm"
       >
         <span class="break-all">
-          <%= event.title %> | <%= event.subject %>
+          <strong><%= event.subject %></strong> | <%= event.title %>
         </span>
         <div :if={event.hour != "unknown"} class="flex flex-row justify-between flex-wrap break-all">
           <span>Time</span><span><%= event.hour %></span>
