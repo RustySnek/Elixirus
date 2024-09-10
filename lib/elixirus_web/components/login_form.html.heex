@@ -1,15 +1,17 @@
-<div class="flex flex-col gap-y-10 bg-[#121212] p-10 rounded-2xl xs:max-w-xs mb-32">
-  <div class="flex flex-row gap-x-2 justify-center">
-    <h1 class="font-quicksand text-6xl md:text-7xl xl:text-8xl font-extrabold text-fuchsia-700">
-      Elixir<span class="text-fuchsia-900">us</span>
-    </h1>
-    <.beaker mini class="h-14 text-fuchsia-700 self-end" />
-  </div>
+<div class="flex flex-col gap-y-10 bg-[#121212] p-10 rounded-md xs:max-w-xs">
   <div
     phx-target={@myself}
     phx-hook="retrieve_local_storage"
     id="retrieve-token-ttl"
     name="ttl"
+    hidden
+  >
+  </div>
+  <div
+    phx-target={@myself}
+    phx-hook="retrieve_local_storage"
+    id="retrieve-username"
+    name="username"
     hidden
   >
   </div>
@@ -30,15 +32,16 @@
     class="flex text-xl flex-col gap-y-6 items-center"
   >
     <input
-      class="bg-[#2a2a2a] w-4/5 text-xl rounded border-none"
+      class="bg-transparent w-4/5 text-xl input-underline transition focus:ring-0"
       placeholder="username"
+      value={@username}
       type="text"
       id="form-username"
       name="username"
       autocomplete="username"
     />
     <input
-      class="bg-[#2a2a2a] w-4/5 text-xl rounded border-none"
+      class="bg-transparent w-4/5 text-xl input-underline transition focus:ring-0"
       id="form-password"
       autocomplete="current-password"
       placeholder="password"
@@ -47,17 +50,38 @@
     />
     <div class="flex flex-col md:flex-row lg:flex-col gap-y-4">
       <div class="flex flex-row items-center justify-evenly">
-        <span class="text-lg lg:text-xl mr-2">Keep token alive?</span>
-
-        <div
-          phx-click={JS.push("save_token", target: @myself)}
-          class="w-20 scale-75 lg:scale-100 p-0.5 px-1 rounded-3xl bg-[#1f1f1f]"
-        >
-          <Heroicons.bolt
-            solid
-            class={"w-8 transition duration-250 #{@keep_alive && '!text-yellow-200 translate-x-10'} text-white"}
-          />
+        <div class="flex flex-row justify-between items-center gap-x-4">
+          <span class="text-sm">Save session</span>
+          <div class="flex items-center justify-center">
+            <input
+              phx-change="save_token"
+              phx-target={@myself}
+              checked={@keep_alive}
+              type="checkbox"
+              id="toggle-session"
+              class="hidden toggle-checkbox"
+            />
+            <label
+              for="toggle-session"
+              class="flex items-center cursor-pointer border-b-2 border-fuchsia-600 w-12 h-6 relative transition-colors duration-300"
+            >
+              <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded transition-transform duration-300 toggle-square">
+              </div>
+            </label>
+            <select
+              :if={@keep_alive}
+              phx-hook="set_local_storage"
+              phx-change="change_ttl"
+              value={@ttl}
+              id="ttl-select"
+              name="ttl"
+              class="bg-fg border-none text-xs w-min h-min ml-2"
+            >
+              <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
+            </select>
+          </div>
         </div>
+
         <input
           hidden
           phx-hook="set_local_storage"
@@ -66,46 +90,38 @@
           id="save-token-checkbox"
         />
       </div>
-      <div :if={@keep_alive} class="flex flex-row gap-x-4 scale-75 lg:scale-100">
-        <div class="flex flex-row gap-2 items-center justify-center">
-          <label for="ttl">TTL:</label>
-          <select
-            phx-hook="set_local_storage"
-            phx-change="change_ttl"
-            value={@ttl}
-            id="ttl-select"
-            name="ttl"
-            class="bg-[#1E1E1E] border-none"
-          >
-            <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
-          </select>
-        </div>
-        <div
-          class="flex bg-[#1e1e1e] w-fit mx-auto rounded-3xl py-2 px-4 flex-row gap-2 items-center justify-center"
-          phx-click={JS.push("generate_notification_uuid", target: @myself)}
-        >
-          <span class="text-lg mr-2">ntfy.sh</span>
-          <Heroicons.chat_bubble_bottom_center
-            :if={!@notification_token}
-            solid
-            class="w-8 text-red-600/60 animate-bounce hover:cursor-pointer"
-          />
-          <Heroicons.chat_bubble_bottom_center
-            :if={@notification_token}
-            solid
-            class="w-8 text-green-600/60 transition hover:cursor-pointer"
-          />
+
+      <div :if={@keep_alive} class="flex flex-row items-center justify-evenly">
+        <div class="flex flex-row justify-between items-center gap-x-4">
+          <span class="text-sm">ntfy.sh</span>
+          <div class="flex items-center justify-center">
+            <input
+              phx-change={JS.push("generate_notification_uuid", target: @myself)}
+              phx-target={@myself}
+              checked={@notification_token}
+              type="checkbox"
+              id="toggle-notifications"
+              class="hidden toggle-checkbox"
+            />
+            <label
+              for="toggle-notifications"
+              class="flex items-center cursor-pointer border-b-2 border-fuchsia-600 w-12 h-6 relative transition-colors duration-300"
+            >
+              <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded transition-transform duration-300 toggle-square">
+              </div>
+            </label>
+            <a
+              :if={@notification_token && @keep_alive}
+              href={"ntfy://ntfy.sh/#{@notification_token}"}
+              class="lg:hidden block border-fuchsia-600 border-b-2 text-sm ml-4 px-1 pt-1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in ntfy.sh
+            </a>
+          </div>
         </div>
       </div>
-      <a
-        :if={@notification_token && @keep_alive}
-        href={"ntfy://ntfy.sh/#{@notification_token}"}
-        class="lg:hidden block mx-auto bg-[#1e1e1e] rounded-3xl px-4 py-2"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Open in ntfy.sh
-      </a>
 
       <div
         :if={@notification_token && @keep_alive}

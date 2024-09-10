@@ -24,18 +24,12 @@ AuthHooks.store_token = {
 
 
 AuthHooks.login_form = {
-  updated() {
-    let username = localStorage.getItem("username") || "";
-    let username_input = this.el.querySelector('#form-username');
-    username_input.value = username
-  },
+
   mounted() {
     let renderer = document.getElementById("login-modal-renderer")
-    let username = localStorage.getItem("username") || "";
     let password_input = this.el.querySelector('#form-password');
     let username_input = this.el.querySelector('#form-username');
-    if (username !== "") {
-      username_input.value = username
+    if (username_input.value !== "") {
       password_input.focus()
     } else {
       username_input.focus()
@@ -45,7 +39,7 @@ AuthHooks.login_form = {
     const observer = new MutationObserver((mutations, observer) => {
 
       username_input.addEventListener('input', () => {
-        localStorage.setItem("username", username_input.value);
+        localStorage.setItem("username", JSON.stringify(username_input.value));
       });
     })
     let config = { attributes: true, attributeFilter: ['class'] };

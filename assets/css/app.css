@@ -10,6 +10,21 @@ html {
   color-scheme: dark;
 }
 
+.toggle-checkbox:checked+label .toggle-square {
+  transform: translateX(160%);
+  background-color: rgb(210, 38, 220);
+}
+
+.input-underline {
+  border: none;
+  border-bottom: 2px solid rgb(134 25 143);
+  outline: none;
+}
+
+.input-underline:focus {
+  border-bottom-color: rgb(192 38 211);
+}
+
 .announcement_link a {
   color: fuchsia;
   overflow-wrap: break-word;

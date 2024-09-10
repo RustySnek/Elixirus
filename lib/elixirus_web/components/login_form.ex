@@ -3,7 +3,6 @@ defmodule ElixirusWeb.LoginForm do
   alias Elixirus.Types.Token
   alias Elixirus.Types.Client
   use ElixirusWeb, :live_component
-  import Heroicons
   require Logger
   alias GenServer
   alias Elixirus.TokenWorker
@@ -37,10 +36,16 @@ defmodule ElixirusWeb.LoginForm do
     {:noreply, assign(socket, :keep_alive, !socket.assigns.keep_alive)}
   end
 
+  def handle_event("retrieve_local_storage", %{"username" => uname}, socket),
+    do: {:noreply, assign(socket, :username, uname)}
+
   def handle_event("retrieve_local_storage", %{"save_token" => keep_alive}, socket) do
+    dbg(keep_alive)
+
     keep_alive =
       case keep_alive do
         "true" -> true
+        true -> true
         _ -> false
       end
 
