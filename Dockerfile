@@ -1,8 +1,8 @@
-ARG ELIXIR_VERSION=1.16.1
+ARG ELIXIR_VERSION=1.17.2
 ARG OTP_VERSION=24.3.4.16
 ARG DEBIAN_VERSION=bullseye-20240130-slim
 
-ARG BUILDER_IMAGE="hexpm/elixir:1.16.1-erlang-24.3.4.16-debian-bullseye-20240130-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:1.17.2-erlang-24.3.4.16-debian-bullseye-20240130-slim"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 ARG BUN_IMAGE="oven/bun:latest"
 
