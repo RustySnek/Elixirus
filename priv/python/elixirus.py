@@ -21,6 +21,11 @@ from librus_apix.messages import (
     recipient_groups,
     send_message,
 )
+from librus_apix.notifications import (
+    NotificationIds,
+    get_initial_notification_data,
+    get_new_notification_data,
+)
 from librus_apix.schedule import get_schedule
 from librus_apix.student_information import get_student_information
 from librus_apix.timetable import get_timetable
@@ -136,3 +141,13 @@ def timetable(client: Client, monday: str):
     date = datetime.strptime(monday, "%Y-%m-%d")
     status, timetable = sanitize_fetch(get_timetable, client, date)
     return status.value, timetable
+
+
+def notifications(client: Client, ids: NotificationIds):
+    status, notifications = sanitize_fetch(get_new_notification_data, client, ids)
+    return status.value, notifications
+
+
+def initial_notifications(client: Client):
+    status, notifications = sanitize_fetch(get_initial_notification_data, client)
+    return status.value, notifications

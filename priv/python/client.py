@@ -1,8 +1,8 @@
-from dataclasses import Field, dataclass, field
-from typing import Any, Dict, List, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, Tuple
 
 from erlport.erlang import set_decoder, set_encoder
-from erlport.erlterms import Atom, Map
+from erlport.erlterms import Atom, List, Map
 from librus_apix.announcements import Announcement
 from librus_apix.attendance import Attendance
 from librus_apix.client import Client, Token, new_client
@@ -11,7 +11,8 @@ from librus_apix.exceptions import AuthorizationError
 from librus_apix.grades import Gpa, Grade
 from librus_apix.homework import Homework
 from librus_apix.messages import Message, MessageData
-from librus_apix.schedule import Event, schedule_detail
+from librus_apix.notifications import NotificationData, NotificationIds
+from librus_apix.schedule import Event, RecentEvent
 from librus_apix.student_information import StudentInformation
 from librus_apix.timetable import Period
 from venomous import (
@@ -47,6 +48,11 @@ class MessageStruct(VenomousTrait, Message):
 
 
 @dataclass
+class RecentEventStruct(VenomousTrait, RecentEvent):
+    __struct__: Atom = Atom(b"Elixir.Elixirus.Types.RecentEvent")
+
+
+@dataclass
 class MessageDataStruct(VenomousTrait, MessageData):
     __struct__: Atom = Atom(b"Elixir.Elixirus.Types.MessageData")
 
@@ -54,6 +60,22 @@ class MessageDataStruct(VenomousTrait, MessageData):
 @dataclass
 class PeriodStruct(VenomousTrait, Period):
     __struct__: Atom = Atom(b"Elixir.Elixirus.Types.Period")
+
+
+@dataclass
+class NotificationDataStruct(VenomousTrait, NotificationData):
+    __struct__: Atom = Atom(b"Elixir.Elixirus.Types.NotificationData")
+
+    def into_erl(self) -> Dict:
+        return {
+            Atom(key.encode("utf-8")): encoder(value)
+            for key, value in self.__dict__.items()
+        }
+
+
+@dataclass
+class NotificationIdsStruct(VenomousTrait, NotificationIds):
+    __struct__: Atom = Atom(b"Elixir.Elixirus.Types.NotificationIds")
 
 
 @dataclass
@@ -124,6 +146,9 @@ venomous_structs = {
     Atom(b"Elixir.Elixirus.Types.MessageData"): MessageDataStruct,
     Atom(b"Elixir.Elixirus.Types.Period"): PeriodStruct,
     Atom(b"Elixir.Elixirus.Types.StudentInformation"): StudentInformationStruct,
+    Atom(b"Elixir.Elixirus.Types.NotificationData"): NotificationDataStruct,
+    Atom(b"Elixir.Elixirus.Types.NotificationIds"): NotificationIdsStruct,
+    Atom(b"Elixir.Elixirus.Types.RecentEvent"): RecentEventStruct,
 }
 
 
@@ -156,6 +181,13 @@ def encoder(value: Any) -> Any:
         return ClientStruct.from_dict(
             {"token": encoder(value.token), "proxy": value.proxy}
         ).into_erl()
+    if isinstance(value, NotificationData):
+        return NotificationDataStruct.from_dict(value.__dict__).into_erl()
+    if isinstance(value, NotificationIds):
+        return NotificationIdsStruct.from_dict(value.__dict__).into_erl()
+    if isinstance(value, RecentEvent):
+        return RecentEventStruct.from_dict(value.__dict__).into_erl()
+
     if isinstance(value, Grade):
         return GradeStruct.from_dict(value.__dict__).into_erl()
     if isinstance(value, Gpa):
@@ -180,17 +212,16 @@ def encoder(value: Any) -> Any:
     return encode_basic_type_strings(value)
 
 
-def test():
-    return Atom(b"error"), "test"
-
-
 def decoder(value: Any) -> Any:
     if isinstance(value, (Map, dict)):
         if struct := value.get(Atom(b"__struct__")):
             if struct in venomous_structs:
                 return venomous_structs[struct].from_dict(value, venomous_structs)
         return {decoder(key): decoder(val) for key, val in value.items()}
-    elif isinstance(value, (set, list, tuple)):
+
+    elif isinstance(value, List):
+        return [decoder(_val) for _val in value]
+    elif isinstance(value, (set, tuple)):
         return type(value)(decoder(_val) for _val in value)
 
     return decode_basic_types_strings(value)
