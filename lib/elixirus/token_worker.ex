@@ -3,7 +3,10 @@ defmodule Elixirus.TokenWorker do
   GenServer for refreshing token lifespan and retrieving notifications
   """
   use GenServer
+  alias Elixirus.Types.Client
+  alias Elixirus.Types.NotificationIds
   require Logger
+  alias Elixirus.Types.NotificationData
   alias Elixirus.Notifications.NotificationsSupervisor
   import Venomous
   alias Venomous.SnakeArgs
@@ -21,7 +24,7 @@ defmodule Elixirus.TokenWorker do
 
   defp load_initial_notifications(_token, nil) do
     {nil,
-     %{
+     %NotificationIds{
        grades: [],
        attendance: [],
        messages: [],
@@ -32,9 +35,10 @@ defmodule Elixirus.TokenWorker do
   end
 
   defp load_initial_notifications(token, notification_token) do
-    case SnakeArgs.from_params(:notifications, :fetch_initial_notifications, [token])
-         |> python!(python_timeout: :infinity) do
-      {:ok, [notifications, seen_ids]} ->
+    %Client{} = client = Client.get_client(token)
+
+    case SnakeArgs.from_params(:elixirus, :initial_notifications, [client]) |> python!() |> dbg do
+      {:ok, {%NotificationData{} = notifications, %NotificationIds{} = seen_ids}} ->
         notifications
         |> Map.to_list()
         |> Enum.filter(&match?({_, [_ | _]}, &1))
@@ -46,7 +50,7 @@ defmodule Elixirus.TokenWorker do
         Logger.error("Error in initial notification #{notification_token}\n#{error |> inspect()}")
 
         {nil,
-         %{
+         %NotificationIds{
            grades: [],
            attendance: [],
            messages: [],
@@ -165,14 +169,17 @@ defmodule Elixirus.TokenWorker do
   defp refresh_token(table, {username, token, ttl, notification_token, seen_ids, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
+    %Client{} = client = Client.get_client(token)
+
     notifications =
       if DateTime.compare(
            now,
            DateTime.shift(last_update, hour: ttl)
          ) in [:lt, :eq] do
-        case SnakeArgs.from_params(:notifications, :fetch_new_notifications, [token, seen_ids])
-             |> python!(python_timeout: :infinity) do
-          {:ok, [notifications, seen_ids]} ->
+        case SnakeArgs.from_params(:elixirus, :notifications, [client, seen_ids])
+             |> python!()
+             |> dbg do
+          {:ok, {%NotificationData{} = notifications, %NotificationIds{} = seen_ids}} ->
             :ets.insert(table, {username, token, ttl, notification_token, seen_ids, now})
             notifications
 

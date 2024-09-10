@@ -31,6 +31,12 @@ defmodule ElixirusWeb.StudentLive.Schedule do
     {:noreply, socket}
   end
 
+  def handle_params(%{"href" => href}, _uri, socket) do
+    {:noreply, assign(socket, :event_href, href)}
+  end
+
+  def handle_params(_params, _uri, socket), do: {:noreply, socket}
+
   def mount(_params, %{"token" => token, "user_id" => user_id, "semester" => semester}, socket) do
     %Client{} =
       client =
@@ -45,6 +51,7 @@ defmodule ElixirusWeb.StudentLive.Schedule do
     socket =
       socket
       |> assign(:client, client)
+      |> assign(:event_href, nil)
       |> assign(:user_id, user_id)
       |> assign(:semester, semester)
       |> assign(:schedule, %{})

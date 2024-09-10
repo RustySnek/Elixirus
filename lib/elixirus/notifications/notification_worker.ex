@@ -1,5 +1,10 @@
 defmodule Elixirus.Notifications.NotificationWorker do
   @moduledoc false
+  alias Elixirus.Types.Announcement
+  alias Elixirus.Types.Message
+  alias Elixirus.Types.Attendance
+  alias Elixirus.Types.Homework
+  alias Elixirus.Types.Event
   alias Elixirus.Notifications.NotificationsSupervisor
   use HTTPoison.Base
 
@@ -28,7 +33,7 @@ defmodule Elixirus.Notifications.NotificationWorker do
 
     headers = [
       {"Click",
-       "https://elixirus.rustysnek.xyz/student/academics/subjects/#{grade.title}?grade_id=#{grade.href}&semester=#{grade.semester}"},
+       "https://elixirus.rustysnek.xyz/student/subjects/#{grade.title}?grade_id=#{grade.href}&semester=#{grade.semester}"},
       {"Icon",
        "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=#{grade.grade |> grade_sign_encode}"},
       {"Title", "#{grade.grade} #{grade.title}"},
@@ -39,12 +44,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {body, headers}
   end
 
-  defp parse_notification(:attendance, attendance) do
+  defp parse_notification(:attendance, %Attendance{} = attendance) do
     body =
       "#{attendance.subject}: #{attendance.type}\nTopic: #{attendance.topic}\nTeacher: #{attendance.teacher}"
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/academics/attendance"},
+      {"Click", "https://elixirus.rustysnek.xyz/student/attendance?href=" <> attendance.href},
       {"Icon",
        "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=#{attendance.symbol}"},
       {"Title", "#{attendance.symbol} - #{attendance.subject}"},
@@ -55,12 +60,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {body, headers}
   end
 
-  defp parse_notification(:messages, message) do
+  defp parse_notification(:messages, %Message{} = message) do
     body = "#{message.title}\n - #{message.author}"
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/communication/messages"},
-      {"Title", "Received a message from #{message.author}!"},
+      {"Click", "https://elixirus.rustysnek.xyz/student/messages/#{message.href}"},
+      {"Title", "Click to view message from #{message.author}!"},
       {"Icon", "https://elixirus.rustysnek.xyz/images/snake_envelope.jpg"},
       {"Tags", "envelope"},
       {"Markdown", "yes"}
@@ -69,11 +74,11 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {body, headers}
   end
 
-  defp parse_notification(:announcements, announcement) do
+  defp parse_notification(:announcements, %Announcement{} = announcement) do
     body = "#{announcement.description}"
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/communication/announcements"},
+      {"Click", "https://elixirus.rustysnek.xyz/student/announcements"},
       {"Title", "#{announcement.title}"},
       {"Icon", "https://elixirus.rustysnek.xyz/images/horn.png"},
       {"Tags", "postal_horn"},
@@ -83,12 +88,13 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {body, headers}
   end
 
-  defp parse_notification(:schedule, event) do
-    body = "#{event.data}"
+  defp parse_notification(:schedule, %Event{} = event) do
+    time = if event.number != "undefined", do: event.hour, else: event.number
+    body = event.day <> " - " <> time <> " | " <> event.subject
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/scheduling/schedule"},
-      {"Title", "#{event.type}"},
+      {"Click", "https://elixirus.rustysnek.xyz/student/schedule?href=#{event.href}"},
+      {"Title", event.title},
       {"Icon", "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=!"},
       {"Tags", "calendar"},
       {"Markdown", "yes"}
@@ -97,12 +103,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {body, headers}
   end
 
-  defp parse_notification(:homework, homework) do
+  defp parse_notification(:homework, %Homework{} = homework) do
     body =
       "#{homework.category}\n#{homework.subject}\nDue to: #{homework.completion_date}\nTeacher: #{homework.teacher}"
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/academics/homework"},
+      {"Click", "https://elixirus.rustysnek.xyz/student/homework?href=" <> homework.href},
       {"Title", "#{homework.lesson}: #{homework.subject}"},
       {"Tags", "pencil"},
       {"Markdown", "yes"}

@@ -540,6 +540,9 @@ defmodule ElixirusWeb.StudentLive.Index do
         <span class="xs:text-sm line-clamp-2 break-all">
           <%= @period.subject %>
         </span>
+        <span class="xs:text-sm line-clamp-2 break-all">
+          <%= @period.teacher_and_classroom %>
+        </span>
         <span class="xs:text-sm truncate">
           <%= @period.number %>. <%= @period.date_from %> - <%= @period.date_to %>
         </span>

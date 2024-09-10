@@ -2,7 +2,7 @@ let StorageHooks = {};
 StorageHooks.set_local_storage = {
   updated() {
     if (this.el.value !== "") {
-      localStorage.setItem(this.el.name, this.el.value)
+      localStorage.setItem(this.el.name, JSON.stringify(this.el.value))
     }
   }
 }

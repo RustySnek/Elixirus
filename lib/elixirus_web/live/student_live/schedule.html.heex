@@ -8,7 +8,16 @@
   </div>
 </div>
 <div phx-hook="retrieve_local_storage" name="semester" id="retrieve_semester"></div>
-<div class="mx-4 mb-8 grid xl:grid-cols-7 md:grid-cols-3 grid-cols-2 place-items-center gap-y-4">
+<div
+  :if={@schedule}
+  class="mx-4 mb-8 grid xl:grid-cols-7 md:grid-cols-3 grid-cols-2 place-items-center gap-y-4"
+>
+  <div
+    :if={@event_href}
+    class="hidden"
+    phx-mounted={ElixirusWeb.Modal.show_modal_js("event-#{@event_href}")}
+  >
+  </div>
   <div
     :for={{day_num, day} <- @schedule |> Map.to_list()}
     class="p-1 space-y-2 overflow-y-auto border border-fuchsia-600 xs:w-32 xs:h-32 w-40 2xl:w-56 xl:w-40 md:w-60 h-40"
@@ -18,7 +27,10 @@
       :for={{event, event_num} <- day |> Enum.with_index()}
       class="last:border-none h-14 bg-fuchsia-800/10 "
     >
-      <.live_component module={Modal} id={"event-#{event_num}-#{day_num}"}>
+      <.live_component
+        module={Modal}
+        id={"event-#{event.href |> String.split("/") |> List.last()}"}
+      >
         <div class="bg-purple-950/95 p-4 space-y-8 rounded-sm md:w-[800px] xs:w-[260px] w-[360px]">
           <p class="text-center text-2xl mb-6">
             [<%= day_num %> - <%= Date.new!(@year, @month, day_num)
@@ -37,7 +49,11 @@
       </.live_component>
       <button
         class="w-full h-full "
-        phx-click={ElixirusWeb.Modal.show_modal_js("event-#{event_num}-#{day_num}")}
+        phx-click={
+          ElixirusWeb.Modal.show_modal_js(
+            "event-#{event.href |> String.split("/") |> List.last()}"
+          )
+        }
         phx-target={"#event-#{event_num}-#{day_num}"}
       >
         <span class="line-clamp-1"><%= event.title %></span>
