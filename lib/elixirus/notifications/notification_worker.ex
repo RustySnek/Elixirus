@@ -1,10 +1,10 @@
 defmodule Elixirus.Notifications.NotificationWorker do
   @moduledoc false
+  alias Elixirus.Types.RecentEvent
   alias Elixirus.Types.Announcement
   alias Elixirus.Types.Message
   alias Elixirus.Types.Attendance
   alias Elixirus.Types.Homework
-  alias Elixirus.Types.Event
   alias Elixirus.Notifications.NotificationsSupervisor
   use HTTPoison.Base
 
@@ -88,13 +88,12 @@ defmodule Elixirus.Notifications.NotificationWorker do
     {body, headers}
   end
 
-  defp parse_notification(:schedule, %Event{} = event) do
-    time = if event.number != "undefined", do: event.hour, else: event.number
-    body = event.day <> " - " <> time <> " | " <> event.subject
+  defp parse_notification(:schedule, %RecentEvent{} = event) do
+    body = event.data
 
     headers = [
-      {"Click", "https://elixirus.rustysnek.xyz/student/schedule?href=#{event.href}"},
-      {"Title", event.title},
+      {"Click", "https://elixirus.rustysnek.xyz/student/schedule"},
+      {"Title", event.type},
       {"Icon", "https://placehold.co/200x200/35123b/FFFFFF/png/?font=montserrat&text=!"},
       {"Tags", "calendar"},
       {"Markdown", "yes"}

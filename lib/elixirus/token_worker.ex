@@ -37,7 +37,7 @@ defmodule Elixirus.TokenWorker do
   defp load_initial_notifications(token, notification_token) do
     %Client{} = client = Client.get_client(token)
 
-    case SnakeArgs.from_params(:elixirus, :initial_notifications, [client]) |> python!() |> dbg do
+    case SnakeArgs.from_params(:elixirus, :initial_notifications, [client]) |> python!() do
       {:ok, {%NotificationData{} = notifications, %NotificationIds{} = seen_ids}} ->
         notifications
         |> Map.to_list()
@@ -142,6 +142,7 @@ defmodule Elixirus.TokenWorker do
   defp manage_notifications({_, {_username, notifications, notification_token}}) do
     unless notification_token in [nil, ""] do
       notifications
+      |> Map.from_struct()
       |> Map.to_list()
       |> Enum.filter(fn {_, notifications} -> notifications != [] end)
       |> Enum.each(fn notification ->
@@ -177,8 +178,7 @@ defmodule Elixirus.TokenWorker do
            DateTime.shift(last_update, hour: ttl)
          ) in [:lt, :eq] do
         case SnakeArgs.from_params(:elixirus, :notifications, [client, seen_ids])
-             |> python!()
-             |> dbg do
+             |> python!() do
           {:ok, {%NotificationData{} = notifications, %NotificationIds{} = seen_ids}} ->
             :ets.insert(table, {username, token, ttl, notification_token, seen_ids, now})
             notifications

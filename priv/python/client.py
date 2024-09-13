@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, Tuple
 
+from elixirus import initial_notifications, notifications
 from erlport.erlang import set_decoder, set_encoder
 from erlport.erlterms import Atom, List, Map
 from librus_apix.announcements import Announcement
@@ -125,6 +126,11 @@ class ClientStruct(VenomousTrait, Client):
 @dataclass
 class GradeStruct(VenomousTrait, Grade):
     __struct__: Atom = Atom(b"Elixir.Elixirus.Types.Grade")
+
+    def into_erl(self) -> Dict:
+        dic = VenomousTrait.into_erl(self)
+        dic.update({Atom(b"value"): self.value})
+        return dic
 
 
 @dataclass
