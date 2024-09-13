@@ -15,7 +15,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
   defp weekday_scroll_left() do
     case get_current_weekday() do
-      n when n < 5 -> n * 270
+      n when n < 5 -> n * 300
       _ -> 0
     end
   end

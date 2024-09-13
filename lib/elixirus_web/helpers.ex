@@ -2,6 +2,7 @@ defmodule ElixirusWeb.Helpers do
   @moduledoc """
   Miscellanous functions to help parse data
   """
+  alias Elixirus.Types.Grade
   alias Elixirus.Types.Period
   use Phoenix.LiveView
   require Logger
@@ -87,14 +88,15 @@ defmodule ElixirusWeb.Helpers do
 
   defp _average_divisor_of_grades(grades) do
     grades
-    |> Enum.reduce({0, 1}, fn grade, {acc, divisor} ->
-      weight = grade.weight
-
-      if grade.counts == true do
-        {grade
-         |> Map.get(:value)
-         |> Kernel.*(weight)
-         |> Kernel.+(acc), divisor + weight}
+    |> Enum.reduce({0, 1}, fn %Grade{weight: weight, counts: counts, value: value} = gr,
+                              {acc, divisor} ->
+      if counts == true do
+        {
+          value
+          |> Kernel.*(weight)
+          |> Kernel.+(acc),
+          divisor + weight
+        }
       else
         {acc, divisor}
       end

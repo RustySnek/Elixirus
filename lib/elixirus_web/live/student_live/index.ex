@@ -28,7 +28,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       end)
       |> List.flatten()
 
-    case length(avgs) do
+    case length(avgs |> Enum.filter(&Kernel.!=(&1, 0))) do
       0 ->
         0.0
 
@@ -353,8 +353,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         |> Venomous.python!()
       end)
       |> create_fetcher(user_id, final_avg, :final_avg, fn ->
-        SnakeArgs.from_params(:elixirus, :grades, [client])
-        |> Venomous.python!()
+        SnakeArgs.from_params(:elixirus, :grades, [client]) |> Venomous.python!()
       end)
       |> create_fetcher(user_id, frequency, :frequency, fn ->
         SnakeArgs.from_params(:elixirus, :frequency, [client])
@@ -428,7 +427,8 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp unread_message(assigns) do
     ~H"""
-    <div
+    <.link
+      navigate={~p"/student/messages/#{@message.href}"}
       discard-type="message"
       phx-hook="swipe_discard"
       id={@message.href}
@@ -443,7 +443,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         <span class="text-sm xs:text-xs self-end"><%= @message.author %></span>
         <span class="text-sm xs:text-xs self-end"><%= @message.date %></span>
       </div>
-    </div>
+    </.link>
     """
   end
 

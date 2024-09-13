@@ -40,8 +40,6 @@ defmodule ElixirusWeb.LoginForm do
     do: {:noreply, assign(socket, :username, uname)}
 
   def handle_event("retrieve_local_storage", %{"save_token" => keep_alive}, socket) do
-    dbg(keep_alive)
-
     keep_alive =
       case keep_alive do
         "true" -> true

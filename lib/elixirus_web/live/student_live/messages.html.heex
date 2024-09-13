@@ -15,7 +15,7 @@
       phx-hook="recipients_form"
     >
       <div class="flex-col flex md:grid md:grid-cols-2 gap-2">
-        <div :for={group <- @recipient_groups |> dbg} class="flex flex-row items-center">
+        <div :for={group <- @recipient_groups} class="flex flex-row items-center">
           <label class="border items-center border-fuchsia-700 rounded-full py-1 px-2 overflow-x-hidden flex flex-row gap-x-1">
             <input
               class="md:w-5 md:h-5 accent-fuchsia-600 text-fuchsia-600 bg-[#1E1E1E] border-none"

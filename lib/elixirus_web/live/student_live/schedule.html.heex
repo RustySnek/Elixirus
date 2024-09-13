@@ -27,10 +27,7 @@
       :for={{event, event_num} <- day |> Enum.with_index()}
       class="last:border-none h-14 bg-fuchsia-800/10 "
     >
-      <.live_component
-        module={Modal}
-        id={"event-#{event.href |> String.split("/") |> List.last()}"}
-      >
+      <.live_component module={Modal} id={"event-#{event_num}-#{event.day}"}>
         <div class="bg-purple-950/95 p-4 space-y-8 rounded-sm md:w-[800px] xs:w-[260px] w-[360px]">
           <p class="text-center text-2xl mb-6">
             [<%= day_num %> - <%= Date.new!(@year, @month, day_num)
@@ -49,12 +46,8 @@
       </.live_component>
       <button
         class="w-full h-full "
-        phx-click={
-          ElixirusWeb.Modal.show_modal_js(
-            "event-#{event.href |> String.split("/") |> List.last()}"
-          )
-        }
-        phx-target={"#event-#{event_num}-#{day_num}"}
+        phx-click={ElixirusWeb.Modal.show_modal_js("event-#{event_num}-#{event.day}")}
+        phx-target={"#event-#{event_num}-#{event.day}"}
       >
         <span class="line-clamp-1"><%= event.title %></span>
         <span :if={event.subject != :unspecified} class="text-sm line-clamp-1">

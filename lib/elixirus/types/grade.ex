@@ -10,6 +10,7 @@ defmodule Elixirus.Types.Grade do
     :semester,
     :category,
     :teacher,
+    :value,
     :weight
   ]
 
@@ -23,6 +24,7 @@ defmodule Elixirus.Types.Grade do
           semester: non_neg_integer(),
           category: String.t(),
           teacher: String.t(),
-          weight: non_neg_integer()
+          weight: non_neg_integer(),
+          value: float()
         }
 end
