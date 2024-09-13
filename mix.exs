@@ -35,7 +35,7 @@ defmodule Elixirus.MixProject do
       {:html_sanitize_ex, "~> 1.4"},
       {:earmark, "~> 1.4"},
       {:tzdata, "~> 1.1"},
-      {:venomous, "~> 0.6.4"},
+      {:venomous, "~> 0.6.5"},
       {:hammer, "~> 6.1"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
