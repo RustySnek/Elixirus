@@ -1,13 +1,12 @@
-<.live_component module={Modal} id="homework_modal">
+<dialog :if={@details} open id="detail-dialog">
   <div phx-click-away="wipe_details">
     <div class="flex flex-col w-fit bg-[#1E1E1E] text-center rounded-2xl">
       <div :for={detail <- @details |> Map.keys()} class=" py-2 px-6">
         <%= detail %>: <%= @details[detail] %>
       </div>
     </div>
-    <.spinner :if={@details == %{}} />
   </div>
-</.live_component>
+</dialog>
 
 <div class="flex flex-col md:flex-row gap-10 md:max-h-[80vh] mx-4 md:mx-10 items-center overflow-y-auto">
   <div
@@ -37,15 +36,9 @@
         <!-- Still needs to be implemented -->
         <.check solid class="w-8" />
       </button>
-      <button
-        phx-value-homework_id={hw.href}
-        phx-click={
-          JS.push("view_homework")
-          |> ElixirusWeb.Modal.show_modal_js("homework_modal")
-        }
-      >
+      <.link patch={~p"/student/homework?href=#{hw.href}"}>
         <.window solid class="w-8" />
-      </button>
+      </.link>
     </div>
   </div>
 </div>

@@ -10,14 +10,15 @@ defmodule ElixirusWeb.Layouts do
       {"Messages", ~p"/student/messages", [], []},
       {"Announcements", ~p"/student/announcements", [], []},
       {"Schedule", ~p"/student/schedule", [], []},
-      {"Subjects", ~p"/student/subjects", [], []}
+      {"Subjects", ~p"/student/subjects", [], []},
+      {"Homework", ~p"/student/homework", [], []}
       #    {
       #      "Academics",
       #      ~p"/student/academics",
       #      [
       #        
       #        {"Attendance", ~p"/student/academics/attendance"},
-      #        {"Homework", ~p"/student/academics/homework"}
+      #        
       #      ],
       #      []
       #    },

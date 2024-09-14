@@ -33,6 +33,7 @@ defmodule ElixirusWeb.Router do
       live "/announcements", StudentLive.Announcements
       live "/timetable", StudentLive.Timetable
       live "/schedule", StudentLive.Schedule
+      live "/homework", StudentLive.Homework
 
       scope "/messages" do
         live "/", StudentLive.Messages
@@ -52,7 +53,7 @@ defmodule ElixirusWeb.Router do
       #  scope "/academics" do
       #    live "/", StudentLive.AcademicsLive.Index
       #    live "/attendance", StudentLive.AcademicsLive.Attendance
-      #    live "/homework", StudentLive.AcademicsLive.Homework
+      #    
       #    
     end
   end

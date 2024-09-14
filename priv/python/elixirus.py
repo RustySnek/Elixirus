@@ -13,6 +13,7 @@ from librus_apix.exceptions import (
     TokenKeyError,
 )
 from librus_apix.grades import get_grades
+from librus_apix.homework import get_homework, homework_detail
 from librus_apix.messages import (
     get_received,
     get_recipients,
@@ -151,3 +152,13 @@ def notifications(client: Client, ids: NotificationIds):
 def initial_notifications(client: Client):
     status, notifications = sanitize_fetch(get_initial_notification_data, client)
     return status.value, notifications
+
+
+def homework(client: Client, start: str, end: str):
+    status, homework = sanitize_fetch(get_homework, client, start, end)
+    return status.value, homework
+
+
+def homework_details(client: Client, hw_id: str):
+    status, homework = sanitize_fetch(homework_detail, client, hw_id)
+    return status.value, homework

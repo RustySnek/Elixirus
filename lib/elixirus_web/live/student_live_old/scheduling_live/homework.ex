@@ -1,4 +1,4 @@
-defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
+defmodule ElixirusWeb.StudentLive.Homework do
   require Logger
   use ElixirusWeb, :live_view
   use ElixirusWeb.SetSemesterLive
@@ -6,19 +6,16 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   alias Venomous.SnakeArgs
   import ElixirusWeb.Helpers
 
-  import Heroicons
+  alias Elixirus.Types.Client
+  import Heroicons, only: [window: 1, check: 1]
   alias ElixirusWeb.Modal
 
   import ElixirusWeb.Components.Loadings
   @asyncs [:load_details, :load_homework]
 
-  def fetch_homework_details(token, id) do
-    SnakeArgs.from_params(:fetchers, :fetch_homework_details, [token, id])
-    |> python!(python_timeout: :infinity)
-  end
-
-  def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
-    {:noreply, socket}
+  def fetch_homework_details(client, id) do
+    SnakeArgs.from_params(:elixirus, :homework_details, [client, id])
+    |> python!()
   end
 
   def handle_async(:load_details, {:ok, details}, socket) do
@@ -57,17 +54,7 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
   end
 
   def handle_event("wipe_details", _params, socket) do
-    {:noreply, assign(socket, :details, %{})}
-  end
-
-  def handle_event("view_homework", %{"homework_id" => hw_id}, socket) do
-    token = socket.assigns.token
-
-    socket =
-      socket
-      |> start_async(:load_details, fn -> fetch_homework_details(token, hw_id) end)
-
-    {:noreply, socket}
+    {:noreply, push_patch(socket, to: ~p"/student/homework") |> assign(:details, nil)}
   end
 
   defp days_to_color(days) do
@@ -92,32 +79,50 @@ defmodule ElixirusWeb.StudentLive.AcademicsLive.Homework do
     Date.diff(date, today)
   end
 
+  def handle_params(%{"href" => id}, _uri, socket) do
+    client = socket.assigns.client
+
+    socket =
+      socket
+      |> start_async(:load_details, fn -> fetch_homework_details(client, id) end)
+
+    {:noreply, socket}
+  end
+
+  def handle_params(_params, _uri, socket) do
+    {:noreply, socket}
+  end
+
   def mount(
         _params,
-        %{"user_id" => user_id, "token" => api_token, "semester" => semester},
+        %{"user_id" => user_id, "token" => token, "semester" => semester},
         socket
       ) do
-    api_token = handle_api_token(socket, api_token)
+    %Client{} =
+      client =
+      socket
+      |> handle_api_token(token)
+      |> Client.get_client()
 
-    monday = this_weeks_monday() |> Date.add(-14)
-    next_monday = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
-    monday = monday |> Calendar.strftime("%Y-%m-%d")
+    monday = this_weeks_monday()
+    start_date = monday |> Date.add(-14) |> Calendar.strftime("%Y-%m-%d")
+    end_date = monday |> Date.add(14) |> Calendar.strftime("%Y-%m-%d")
 
     homework = handle_cache_data(user_id, "homework")
 
     socket =
       socket
-      |> assign(:token, api_token)
+      |> assign(:client, client)
       |> assign(:semester, semester)
       |> assign(:user_id, user_id)
-      |> assign(:login_required, false)
       |> assign(:homework, [])
       |> assign(:loadings, [])
-      |> assign(:details, %{})
+      |> assign(:details, nil)
       |> assign(:page_title, "Homework")
       |> create_fetcher(user_id, homework, :homework, fn ->
-        SnakeArgs.from_params(:fetchers, :fetch_homework, [api_token, monday, next_monday])
-        |> python!(python_timeout: :infinity)
+        SnakeArgs.from_params(:elixirus, :homework, [client, start_date, end_date])
+        |> python!()
+        |> dbg
       end)
 
     {:ok, socket}
