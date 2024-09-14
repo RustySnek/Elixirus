@@ -199,8 +199,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   end
 
   def fetch_all_grades(client, semester) do
-    {SnakeArgs.from_params(:elixirus, :grades, [client, semester])
-     |> python!(), semester}
+    {SnakeArgs.from_params(:elixirus, :grades, [client]) |> python!(), semester}
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
@@ -214,20 +213,28 @@ defmodule ElixirusWeb.StudentLive.Subjects do
 
     socket =
       case match_basic_errors(socket, grades, @asyncs) do
-        {:ok, [grades, semester_grades]} ->
-          keys = grades |> Map.keys()
+        {:ok, {[first, second] = grades, semester_grades, _descriptive}} ->
+          semester =
+            case semester |> Integer.parse() do
+              :error -> 0
+              {semester, _} -> semester
+            end
+
+          current = grades |> Enum.at(semester)
+          keys = current |> Map.keys()
           semester_grades = sort_gpas(semester_grades)
 
           keys =
             keys |> search_subjects(query)
 
-          shown = grades |> Map.take(keys)
+          shown = current |> Map.take(keys)
 
           cache_and_ttl_data(user_id, "semester_grades", semester_grades, 15)
-          cache_and_ttl_data(user_id, "#{semester}-grades", grades, 15)
+          cache_and_ttl_data(user_id, "0-grades", first, 15)
+          cache_and_ttl_data(user_id, "1-grades", second, 15)
 
           socket
-          |> assign(:grades, grades)
+          |> assign(:grades, current)
           |> assign(:shown_grades, shown)
           |> assign(:semester_grades, semester_grades)
           |> assign_averages(grades)
@@ -259,7 +266,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       socket
       |> assign(:client, client)
       |> assign(:user_id, user_id)
-      |> assign(:grades, nil)
+      |> assign(:grades, %{})
       |> assign(:semester_grades, %{})
       |> assign(:semester_average, 0.0)
       |> assign(:shown_grades, %{})

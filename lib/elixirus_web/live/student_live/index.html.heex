@@ -10,9 +10,13 @@
     <div :if={@final_frequency} class="col-span-2 text-center bg-fg rounded-md w-full">
       <%= @final_frequency %>%
     </div>
-    <div :if={@final_avg} class="font-semibold col-span-3 text-center bg-fg rounded-md w-full">
+    <.link
+      :if={@final_avg}
+      navigate={~p"/student/subjects"}
+      class="font-semibold col-span-3 text-center bg-fg rounded-md w-full"
+    >
       <%= @final_avg %>
-    </div>
+    </.link>
   </div>
 
   <div :if={@timetable}>
