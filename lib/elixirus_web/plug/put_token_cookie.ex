@@ -20,8 +20,23 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
         calendar -> put_session(conn, :calendar_id, calendar)
       end
 
-    user_id =
-      conn.cookies |> Map.get("user_id", UUID.uuid4())
+    conn =
+      case conn.cookies |> Map.get("user_id") do
+        nil ->
+          user_id = UUID.uuid4()
+
+          conn
+          |> put_session(:user_id, user_id)
+          |> put_resp_cookie("user_id", user_id,
+            secure: true,
+            http_only: true,
+            same_site: "strict",
+            path: "/"
+          )
+
+        user_id ->
+          put_session(conn, :user_id, user_id)
+      end
 
     {_, month, _} = Date.to_erl(Date.utc_today())
 
@@ -36,7 +51,6 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
       nil ->
         conn
         |> put_session(:token, %{})
-        |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
 
       token ->
@@ -50,7 +64,6 @@ defmodule ElixirusWeb.Plug.PutTokenCookie do
 
         conn
         |> put_session(:token, token)
-        |> put_session(:user_id, user_id)
         |> put_session(:semester, semester)
     end
   end
