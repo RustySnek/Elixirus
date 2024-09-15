@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, Tuple
 
@@ -15,11 +16,13 @@ from librus_apix.notifications import NotificationData, NotificationIds
 from librus_apix.schedule import Event, RecentEvent
 from librus_apix.student_information import StudentInformation
 from librus_apix.timetable import Period
-from venomous import (
-    VenomousTrait,
-    decode_basic_types_strings,
-    encode_basic_type_strings,
-)
+from venomous import (VenomousTrait, decode_basic_types_strings,
+                      encode_basic_type_strings)
+
+from elixirus import initial_notifications, notifications
+
+if not (MOCK_API_URL := os.getenv("MOCK_API_URL")):
+    raise Exception("Couldn't find MOCK_API_URL env")
 
 from elixirus import initial_notifications, notifications
 
@@ -109,8 +112,31 @@ class ClientStruct(VenomousTrait, Client):
 
     @staticmethod
     def from_dict(dic, structs={}):
+        global MOCK_API_URL
         self = VenomousTrait.from_dict.__func__(ClientStruct, dic, structs)
-        Client.__init__(self, self.token, proxy=self.proxy)
+        Client.__init__(self,
+                        self.token,
+                        proxy=self.proxy,
+                        api_url=MOCK_API_URL + "/login",
+                        base_url=MOCK_API_URL,
+                        grades_url=MOCK_API_URL+"/grades.html",
+                        timetable_url=MOCK_API_URL+"/timetable.html",
+                        announcements_url=MOCK_API_URL+"/announcements.html",
+                        message_url=MOCK_API_URL+"/messages.html",
+                        send_message_url=MOCK_API_URL+"/send_message.html",
+                        attendance_url=MOCK_API_URL+"/attendance.html",
+                        attendance_details_url=MOCK_API_URL+"/attendance_detail.html",
+                        schedule_url=MOCK_API_URL+"/schedule.html",
+                        homework_url=MOCK_API_URL+"/homework.html",
+                        homework_details_url=MOCK_API_URL+"/homework_detail.html",
+                        info_url=MOCK_API_URL+"/student_info.html",
+                        recipients_url=MOCK_API_URL+"/recipients.html",
+                        recipient_groups_url=MOCK_API_URL+"/recipient_groups.html",
+                        completed_lessons_url=MOCK_API_URL+"/completed.html",
+                        gateway_api_attendance=MOCK_API_URL+"/api_attendance.html",
+                        refresh_oauth_url=MOCK_API_URL+"/oauth.html",
+                        index_url=MOCK_API_URL+"/notifications.html",
+                        )
         return self
 
     def into_erl(self) -> Dict:
@@ -162,7 +188,26 @@ venomous_structs = {
 def get_client_from_credentials(
     username: str, password: str, proxy: Dict[str, str]
 ) -> Tuple[Atom, Client | str]:
-    c = new_client(proxy=proxy)
+    global MOCK_API_URL
+    c = new_client(proxy=proxy, api_url=MOCK_API_URL + "/login",
+                        base_url=MOCK_API_URL,
+                        grades_url=MOCK_API_URL+"/grades.html",
+                        timetable_url=MOCK_API_URL+"/timetable.html",
+                        announcements_url=MOCK_API_URL+"/announcements.html",
+                        message_url=MOCK_API_URL+"/messages.html",
+                        send_message_url=MOCK_API_URL+"/send_message.html",
+                        attendance_url=MOCK_API_URL+"/attendance.html",
+                        attendance_details_url=MOCK_API_URL+"/attendance_detail.html",
+                        schedule_url=MOCK_API_URL+"/schedule.html",
+                        homework_url=MOCK_API_URL+"/homework.html",
+                        homework_details_url=MOCK_API_URL+"/homework_detail.html",
+                        info_url=MOCK_API_URL+"/student_info.html",
+                        recipients_url=MOCK_API_URL+"/recipients.html",
+                        recipient_groups_url=MOCK_API_URL+"/recipient_groups.html",
+                        completed_lessons_url=MOCK_API_URL+"/completed.html",
+                        gateway_api_attendance=MOCK_API_URL+"/api_attendance.html",
+                        refresh_oauth_url=MOCK_API_URL+"/oauth.html",
+                        index_url=MOCK_API_URL+"/notifications.html",)
     try:
         c.get_token(username, password)
         return Atom(b"ok"), c
@@ -171,7 +216,28 @@ def get_client_from_credentials(
 
 
 def get_client(token: str, proxy: Dict[str, str]) -> Client:
-    return new_client(token=Token(API_Key=token), proxy=proxy)
+
+
+    return new_client(
+        token=Token(API_Key=token), proxy=proxy,  api_url=MOCK_API_URL + "/login",
+                        base_url=MOCK_API_URL,
+                        grades_url=MOCK_API_URL+"/grades.html",
+                        timetable_url=MOCK_API_URL+"/timetable.html",
+                        announcements_url=MOCK_API_URL+"/announcements.html",
+                        message_url=MOCK_API_URL+"/messages.html",
+                        send_message_url=MOCK_API_URL+"/send_message.html",
+                        attendance_url=MOCK_API_URL+"/attendance.html",
+                        attendance_details_url=MOCK_API_URL+"/attendance_detail.html",
+                        schedule_url=MOCK_API_URL+"/schedule.html",
+                        homework_url=MOCK_API_URL+"/homework.html",
+                        homework_details_url=MOCK_API_URL+"/homework_detail.html",
+                        info_url=MOCK_API_URL+"/student_info.html",
+                        recipients_url=MOCK_API_URL+"/recipients.html",
+                        recipient_groups_url=MOCK_API_URL+"/recipient_groups.html",
+                        completed_lessons_url=MOCK_API_URL+"/completed.html",
+                        gateway_api_attendance=MOCK_API_URL+"/api_attendance.html",
+                        refresh_oauth_url=MOCK_API_URL+"/oauth.html",
+                        index_url=MOCK_API_URL+"/notifications.html",)
 
 
 def encoder(value: Any) -> Any:
