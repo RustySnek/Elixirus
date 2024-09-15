@@ -217,9 +217,9 @@ defmodule ElixirusWeb.StudentLive.Index do
     {:noreply, socket}
   end
 
-  def handle_async(:load_frequency, {:ok, [status, freq]}, socket) do
+  def handle_async(:load_frequency, {:ok, freq}, socket) do
     socket =
-      case match_basic_errors(socket, {status, freq}, @asyncs) do
+      case match_basic_errors(socket, freq, @asyncs) do
         {:ok, frequency} ->
           user_id = socket.assigns.user_id
 
