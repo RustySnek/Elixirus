@@ -1,8 +1,8 @@
 ARG ELIXIR_VERSION=1.17.2
-ARG OTP_VERSION=24.3.4.16
+ARG OTP_VERSION=25.1.2.1
 ARG DEBIAN_VERSION=bullseye-20240130-slim
 
-ARG BUILDER_IMAGE="hexpm/elixir:1.17.2-erlang-24.3.4.16-debian-bullseye-20240130-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:1.17.2-erlang-25.1.2.1-debian-bullseye-20240904"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 ARG BUN_IMAGE="oven/bun:latest"
 
@@ -49,7 +49,6 @@ RUN mix release
 
 FROM ${RUNNER_IMAGE}
 
-COPY priv priv
 RUN apt-get update -y && \
   apt-get install -y \
       build-essential zlib1g-dev procps libncurses5-dev \
@@ -58,26 +57,29 @@ RUN apt-get update -y && \
       openssl locales ca-certificates && \
   apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-RUN wget https://www.python.org/ftp/python/3.11.0/Python-3.11.0.tar.xz && \
-  tar -xf Python-3.11.0.tar.xz && \
-  ./Python-3.11.0/configure && \
-  make install && \
-  rm -r Python-3.11.0.tar.xz Python-3.11.0/
+RUN mkdir -p /opt/python_build && \
+    cd /opt/python_build && \
+    wget https://www.python.org/ftp/python/3.11.0/Python-3.11.0.tar.xz && \
+    tar -xf Python-3.11.0.tar.xz && \
+    cd Python-3.11.0 && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -r Python-3.11.0.tar.xz Python-3.11.0/
+
 
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
-ENV PYTHONPATH="/app/librus-apix"
 ENV MIX_ENV="prod"
 
 WORKDIR "/app"
 RUN chown nobody /app
-
-COPY priv/librus-apix librus-apix
-RUN pip3 install -r librus-apix/requirements.txt && \
-    rm -r /usr/bin/python3 && ln -s /usr/local/bin/python3 /usr/bin/python 
+RUN pip3 install librus-apix --target=lib/elixirus-0.2.0/priv/python/librus-apix \
+    && rm -r /usr/bin/python3 && ln -s /usr/local/bin/python3 /usr/bin/python
 
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/elixirus ./
 
