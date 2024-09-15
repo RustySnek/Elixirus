@@ -74,8 +74,7 @@ def average_grades(client: Client):
 
 def frequency(client: Client):
     status, freq = sanitize_fetch(get_attendance_frequency, client)
-    # Some absolute wizardry prevents from returning a tuple here.
-    return [status.value, freq]
+    return {status.value, freq}
 
 
 def student_info(client: Client):

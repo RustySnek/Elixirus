@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, Tuple
 
-from elixirus import initial_notifications, notifications
 from erlport.erlang import set_decoder, set_encoder
 from erlport.erlterms import Atom, List, Map
 from librus_apix.announcements import Announcement
@@ -21,6 +20,8 @@ from venomous import (
     decode_basic_types_strings,
     encode_basic_type_strings,
 )
+
+from elixirus import initial_notifications, notifications
 
 
 @dataclass
@@ -109,14 +110,14 @@ class ClientStruct(VenomousTrait, Client):
     @staticmethod
     def from_dict(dic, structs={}):
         self = VenomousTrait.from_dict.__func__(ClientStruct, dic, structs)
-        Client.__init__(self, self.token)
+        Client.__init__(self, self.token, proxy=self.proxy)
         return self
 
     def into_erl(self) -> Dict:
         return {
             Atom(b"__struct__"): self.__struct__,
             Atom(b"token"): self.token,
-            Atom(b"proxy"): self.proxy,
+            Atom(b"proxy"): encode_basic_type_strings(self.proxy),
         }
 
     def __post_init__(self) -> None:
