@@ -16,6 +16,23 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
+config :venomous, :snake_manager, %{
+  erlport_encoder: %{
+    module: :client,
+    func: :setup_data_types,
+    args: []
+  },
+  snake_ttl_minutes: 15,
+  perpetual_workers: 10,
+  cleaner_interval: 60_000,
+  python_opts: [
+    module_paths: [
+      Path.join(:code.priv_dir(:elixirus), "python/"),
+      Path.join(:code.priv_dir(:elixirus), "python/librus-apix")
+    ]
+  ]
+}
+
 if System.get_env("PHX_SERVER") do
   config :elixirus, ElixirusWeb.Endpoint, server: true
 end

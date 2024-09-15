@@ -9,8 +9,8 @@ defmodule Elixirus.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
-    ]
+      deps: deps(),
+          ]
   end
 
   # Type `mix help compile.app` for more information.
@@ -35,7 +35,7 @@ defmodule Elixirus.MixProject do
       {:html_sanitize_ex, "~> 1.4"},
       {:earmark, "~> 1.4"},
       {:tzdata, "~> 1.1"},
-      {:venomous, "~> 0.6.5"},
+      {:venomous, "~> 0.7.1"},
       {:hammer, "~> 6.1"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
