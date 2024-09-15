@@ -15,7 +15,7 @@
       navigate={~p"/student/subjects"}
       class="font-semibold col-span-3 text-center bg-fg rounded-md w-full"
     >
-      <%= @final_avg %>
+      <%= @final_avg |> to_string() |> String.slice(0..5) %>
     </.link>
   </div>
 
