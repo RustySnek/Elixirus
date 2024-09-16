@@ -1,11 +1,10 @@
 ARG ELIXIR_VERSION=1.17.2
 ARG OTP_VERSION=25.1.2.1
-ARG DEBIAN_VERSION=bullseye-20240130-slim
+ARG DEBIAN_VERSION=bullseye-20240904-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:1.17.2-erlang-25.1.2.1-debian-bullseye-20240904-slim"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 ARG BUN_IMAGE="oven/bun:latest"
-
 FROM ${BUILDER_IMAGE} as initial_builder
 
 RUN apt-get update -y && apt-get install -y build-essential git \
@@ -13,6 +12,7 @@ RUN apt-get update -y && apt-get install -y build-essential git \
 
 WORKDIR /app
 ENV MIX_ENV="prod"
+ENV ERL_FLAGS="+JPperf true"
 
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
@@ -31,6 +31,7 @@ RUN bun install && bun install --production
 FROM ${BUILDER_IMAGE} as builder
 
 ENV MIX_ENV="prod"
+ENV ERL_FLAGS="+JPperf true"
 WORKDIR /app
 COPY --from=bunny app/ .
 RUN mix local.hex --force && \
