@@ -127,7 +127,7 @@ def get_attendance_stats(attendance):
 
 def attendance(client: Client, stats: bool = False, opt: str = "all"):
     status, attendance = sanitize_fetch(get_attendance, client, opt)
-    if not stats:
+    if not stats or status.value != RETURN_ATOM.ok.value:
         return status.value, attendance
     return status.value, attendance, get_attendance_stats(attendance)
 
