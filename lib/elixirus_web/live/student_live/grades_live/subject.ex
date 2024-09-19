@@ -10,11 +10,6 @@ defmodule ElixirusWeb.StudentLive.GradesLive.Subject do
 
   @asyncs [:load_grades]
 
-  def fetch_all_grades(token, semester) do
-    {SnakeArgs.from_params(:fetchers, :fetch_all_grades, [token, semester])
-     |> python!(python_timeout: :infinity), semester}
-  end
-
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
     {:noreply, socket}
   end

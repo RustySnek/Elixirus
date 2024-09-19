@@ -59,7 +59,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
     start_async(socket, :load_schedule, fn ->
       {SnakeArgs.from_params(:elixirus, :schedule, [client, year, month])
-       |> python!(python_timeout: 20_000), year, month}
+       |> python!(), year, month}
     end)
   end
 
@@ -139,20 +139,27 @@ defmodule ElixirusWeb.StudentLive.Timetable do
         date_to
       ]
     )
-    |> python!(python_timeout: 20_000)
+    |> python!()
   end
 
   defp load_timetable(socket, :load) do
     monday = socket.assigns.current_monday
     client = socket.assigns.client
+    user_id = socket.assigns.user_id
 
-    socket
+    case Hammer.check_rate("timetable:#{user_id}", 60_000, 5) do
+      {:allow, _count} ->
+  socket
     |> assign(:loadings, [:timetable | socket.assigns.loadings])
     |> start_async(:load_timetable, fn ->
       SnakeArgs.from_params(:elixirus, :timetable, [client, monday |> to_string()])
       |> python!(python_timeout: 20_000)
     end)
-  end
+{:deny, _limit} -> 
+            socket |> put_flash(:error, "Rate limit exceeded!")
+
+end
+    end
 
   defp load_timetable(socket, timetable) do
     socket

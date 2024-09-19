@@ -9,7 +9,8 @@ defmodule ElixirusWeb.Components.NavHeader do
 
   defp toggle_dropdown(id, js \\ %JS{}) do
     js
-    |> JS.toggle(to: id)
+    |> JS.toggle(to: id,  in: {"transition-all opacity-0", "opacity-50", "opacity-100 translate-y-none"},
+      out: "transition-all opacity-0")
   end
 
   defp status() do
@@ -50,12 +51,13 @@ defmodule ElixirusWeb.Components.NavHeader do
     ~H"""
     <nav class=" border-gray-200 px-2 xs:px-0 sm:px-4 py-2.5 rounded w-full">
       <div class="flex flex-row text-xs gap-x-4">
-        Services:
         <div
           :for={{service, status} <- status()}
           class={"#{status == :up && "!text-green-400"} text-red-600"}
         >
-          <%= service %> <span class="font-semibold"><%= status %></span>
+          <Heroicons.check_circle :if={service == :librus} class="w-6 h-6"/>
+          <Heroicons.signal :if={service == :proxy && status == :up} class="w-6 h-6"/>
+          <Heroicons.signal_slash :if={service == :proxy && status == :down} class="w-6 h-6"/>
         </div>
       </div>
       <div class="container flex flex-wrap items-center justify-between mx-auto">
@@ -72,7 +74,7 @@ defmodule ElixirusWeb.Components.NavHeader do
         </button>
 
         <div
-          class="hidden w-full mt-4 md:mt-0 md:flex md:w-auto flex-row border rounded-lg border-gray-100 md:border-0"
+          class="hidden w-full mt-4 md:mt-0 md:flex md:w-auto flex-row border rounded-lg border-gray-100 md:border-0 transition-all"
           id="navbar-default"
         >
           <ul class="flex flex-col p-4 md:flex-row md:space-x-4 lg:space-x-8 md:mt-0 md:text-sm md:font-medium">

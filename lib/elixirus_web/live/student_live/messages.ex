@@ -443,6 +443,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
       |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:visibility, "all")
+      |> assign(:page_title, "Messages")
       |> assign(:search, "")
       |> create_fetcher(user_id, sent, :sent_messages, fn ->
         SnakeArgs.from_params(:elixirus, :sent, [client])
