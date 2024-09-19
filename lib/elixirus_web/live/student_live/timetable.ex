@@ -9,7 +9,6 @@ defmodule ElixirusWeb.StudentLive.Timetable do
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
 
-  use ElixirusWeb.SetSemesterLive
   import Heroicons, only: [information_circle: 1]
   @asyncs [:load_schedule, :load_timetable]
 

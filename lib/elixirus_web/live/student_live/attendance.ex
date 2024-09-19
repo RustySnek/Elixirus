@@ -8,9 +8,6 @@ defmodule ElixirusWeb.StudentLive.Attendance do
   import Venomous
   alias Venomous.SnakeArgs
 
-  import Phoenix.UI.Components.Tooltip
-  import Phoenix.UI.Components.Typography
-
   @asyncs [
     :load_frequency,
     :load_attendance

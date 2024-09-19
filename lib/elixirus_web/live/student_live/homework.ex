@@ -1,7 +1,6 @@
 defmodule ElixirusWeb.StudentLive.Homework do
   require Logger
   use ElixirusWeb, :live_view
-  use ElixirusWeb.SetSemesterLive
   import Venomous
   alias Venomous.SnakeArgs
   import ElixirusWeb.Helpers

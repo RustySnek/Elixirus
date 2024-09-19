@@ -3,7 +3,6 @@ defmodule ElixirusWeb.StudentLive.Schedule do
   alias Elixirus.Types.Client
   use ElixirusWeb, :live_view
 
-  use ElixirusWeb.SetSemesterLive
   import Venomous
   alias Venomous.SnakeArgs
 

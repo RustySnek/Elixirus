@@ -9,7 +9,6 @@ defmodule ElixirusWeb.StudentLive.Messages do
   import ElixirusWeb.Helpers
   alias Heroicons
 
-  use ElixirusWeb.SetSemesterLive
   import Earmark, only: [as_html!: 1]
   alias HtmlSanitizeEx
   @asyncs [:load_messages, :load_sent_messages, :load_group_recipients, :load_recipient_groups]
