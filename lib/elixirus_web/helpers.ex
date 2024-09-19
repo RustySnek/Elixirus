@@ -7,6 +7,23 @@ defmodule ElixirusWeb.Helpers do
   use Phoenix.LiveView
   require Logger
 
+  def iso_date_to_dayname(date_str) do
+    {:ok, date} = Date.from_iso8601(date_str)
+
+    day_of_week = Date.day_of_week(date)
+
+    case day_of_week do
+      1 -> "Monday"
+      2 -> "Tuesday"
+      3 -> "Wednesday"
+      4 -> "Thursday"
+      5 -> "Friday"
+      6 -> "Saturday"
+      7 -> "Sunday"
+      _ -> nil
+    end
+  end
+
   def get_current_weekday(date \\ Date.utc_today()) do
     date
     |> Date.day_of_week()
@@ -79,7 +96,7 @@ defmodule ElixirusWeb.Helpers do
   def attendance_color(symbol) do
     case symbol do
       "nb" -> "red-500"
-      "u" -> "fuchsia-600"
+      "u" -> "lime-600"
       "sp" -> "amber-600"
       "zw" -> "zinc-700"
       "ob" -> "cyan-500"
@@ -89,7 +106,7 @@ defmodule ElixirusWeb.Helpers do
 
   defp _average_divisor_of_grades(grades) do
     grades
-    |> Enum.reduce({0, 1}, fn %Grade{weight: weight, counts: counts, value: value} = gr,
+    |> Enum.reduce({0, 1}, fn %Grade{weight: weight, counts: counts, value: value},
                               {acc, divisor} ->
       if counts == true do
         {
