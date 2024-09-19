@@ -11,13 +11,14 @@ defmodule ElixirusWeb.Layouts do
       {"Announcements", ~p"/student/announcements", [], []},
       {"Schedule", ~p"/student/schedule", [], []},
       {"Subjects", ~p"/student/subjects", [], []},
+      {"Attendance", ~p"/student/attendance", [], []},
       {"Homework", ~p"/student/homework", [], []}
       #    {
       #      "Academics",
       #      ~p"/student/academics",
       #      [
       #        
-      #        {"Attendance", ~p"/student/academics/attendance"},
+      #        
       #        
       #      ],
       #      []

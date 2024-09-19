@@ -10,6 +10,20 @@ html {
   color-scheme: dark;
 }
 
+@keyframes fill {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: var(--percentage);
+  }
+}
+
+.animate-fill {
+  animation: fill 1.2s forwards;
+}
+
 .toggle-checkbox:checked+label .toggle-square {
   transform: translateX(160%);
   background-color: rgb(210, 38, 220);

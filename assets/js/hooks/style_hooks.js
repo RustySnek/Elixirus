@@ -47,7 +47,7 @@ StyleHooks.swipe_discard = {
     }
   },
   animateSwipe(result) {
-    const event = this.el.getAttribute("discard-type")
+    const event = this.el.getAttribute("phx-discard-type")
     const item_id = this.el.getAttribute("id")
     const direction = result === 'right' ? 1000 : -1000; // Move right for kept, left for discarded
     this.el.style.transition = 'transform 0.5s ease-out';

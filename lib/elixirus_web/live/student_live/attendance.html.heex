@@ -1,0 +1,56 @@
+<div :if={@attendance != []} class="flex flex-col gap-y-8">
+  <div
+    :if={@frequency != []}
+    class="flex flex-col md:flex-row gap-10 justify-center md:items-start items-center"
+  >
+    <div :for={{freq, idx} <- @frequency |> Enum.with_index()} class="select-none w-full">
+      <span class="flex flex-row items-center">
+        <div class="mr-2 flex flex-row items-center flex-1">
+          <div
+            :for={_ <- 0..idx}
+            :if={idx < 2}
+            class="mr-0.5 w-2.5 h-2.5 rounded-full bg-pink-600"
+          >
+          </div>
+          <div :if={idx == 2} class="mr-0.5 w-6 h-2.5 rounded-full bg-pink-600"></div>
+        </div>
+        <%= freq %>%
+      </span>
+      <div class="w-full bg-fg rounded-full h-2.5">
+        <div
+          class="bg-fuchsia-600 h-2.5 rounded-full animate-fill"
+          style={"--percentage: #{freq}%;"}
+        >
+        </div>
+      </div>
+      <div class="flex flex-row gap-x-4 flex-wrap">
+        <div
+          :for={{key, val} <- @stats |> elem(idx) |> Map.to_list()}
+          class={"rounded-full mt-4 w-24 flex flex-row bg-#{attendance_color(key)}"}
+        >
+          <span class="bg-inherit text-center h-full rounded-l-full brightness-75 w-1/3">
+            <%= key %>
+          </span><span class="rounded-full w-2/3 text-center"><%= val %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    :for={day <- @attendance |> Enum.chunk_by(&Map.get(&1, :date))}
+    class="grid grid-cols-4 md:grid-cols-12 p-4 rounded-md gap-4 bg-lighterbg"
+  >
+    <div
+      :if={(%Attendance{date: date} = Enum.at(day, 0)) != nil}
+      class="col-span-4 md:col-span-12 flex flex-row justify-between"
+    >
+      <span><%= date %></span>
+      <span><%= iso_date_to_dayname(date) %></span>
+    </div>
+    <.absence
+      :for={%Attendance{} = absence <- day}
+      absence={absence}
+      selected={absence.href == @selected}
+    />
+  </div>
+</div>

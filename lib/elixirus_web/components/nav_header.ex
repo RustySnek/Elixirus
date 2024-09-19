@@ -77,7 +77,7 @@ defmodule ElixirusWeb.Components.NavHeader do
         >
           <ul class="flex flex-col p-4 md:flex-row md:space-x-4 lg:space-x-8 md:mt-0 md:text-sm md:font-medium">
             <%= for {title, href, nested_links, _text_classes} <- @links do %>
-              <div phx-hook="expand_links" class="flex relative flex-col w-full" id={title}>
+              <div class="flex relative flex-col w-full" id={title}>
                 <.link
                   id={"link-#{title}"}
                   navigate={href}
