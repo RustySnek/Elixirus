@@ -8,9 +8,6 @@ defmodule ElixirusWeb.StudentLive.Homework do
 
   alias Elixirus.Types.Client
   import Heroicons, only: [window: 1, check: 1]
-  alias ElixirusWeb.Modal
-
-  import ElixirusWeb.Components.Loadings
   @asyncs [:load_details, :load_homework]
 
   def fetch_homework_details(client, id) do
@@ -122,7 +119,6 @@ defmodule ElixirusWeb.StudentLive.Homework do
       |> create_fetcher(user_id, homework, :homework, fn ->
         SnakeArgs.from_params(:elixirus, :homework, [client, start_date, end_date])
         |> python!()
-        |> dbg
       end)
 
     {:ok, socket}

@@ -91,7 +91,9 @@
        "
       >
         <div class="flex h-full gap-y-4 flex-col ">
-          <div :if={(weekday_events = events_inside_timeframe(@calendar_events, first_period.date)) != nil}>
+          <div :if={
+            (weekday_events = events_inside_timeframe(@calendar_events, first_period.date)) != nil
+          }>
             <.weekday_modal
               weekday={first_period}
               calendar_events={weekday_events}

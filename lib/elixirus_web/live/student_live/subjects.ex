@@ -237,7 +237,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           |> assign(:grades, current)
           |> assign(:shown_grades, shown)
           |> assign(:semester_grades, semester_grades)
-          |> assign_averages(grades)
+          |> assign_averages(current)
 
         {:token_error, _message, socket} ->
           socket

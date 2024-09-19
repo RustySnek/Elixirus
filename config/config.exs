@@ -22,7 +22,6 @@ config :elixirus, ElixirusWeb.Endpoint,
   pubsub_server: Elixirus.PubSub,
   live_view: [signing_salt: "UkfzIumN"]
 
-
 # Configure esbuild (the version is required)
 config :bun,
   path: System.get_env("MIX_BUN_PATH"),

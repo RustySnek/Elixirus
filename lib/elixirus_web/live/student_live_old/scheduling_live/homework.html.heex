@@ -1,6 +1,6 @@
 <dialog :if={@details} open id="detail-dialog">
   <div phx-click-away="wipe_details">
-    <div class="flex flex-col w-fit bg-[#1E1E1E] text-center rounded-2xl">
+    <div class="flex flex-col w-fit text-center rounded-2xl">
       <div :for={detail <- @details |> Map.keys()} class=" py-2 px-6">
         <%= detail %>: <%= @details[detail] %>
       </div>

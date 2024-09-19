@@ -398,7 +398,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   defp announcement(assigns) do
     ~H"""
     <div
-      discard-type="announcement"
+      phx-discard-type="announcement"
       phx-hook="swipe_discard"
       id={@announcement.title <> @announcement.date}
       class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative"
@@ -429,7 +429,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     ~H"""
     <.link
       navigate={~p"/student/messages/#{@message.href}"}
-      discard-type="message"
+      phx-discard-type="message"
       phx-hook="swipe_discard"
       id={@message.href}
       class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative"
@@ -449,8 +449,9 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp attendance(assigns) do
     ~H"""
-    <div
-      discard-type="attendance"
+    <.link
+      navigate={~p"/student/attendance?href=#{@attendance.href}"}
+      phx-discard-type="attendance"
       phx-hook="swipe_discard"
       id={@attendance.href}
       class="flex-row flex justify-between bg-fg rounded-md px-2 py-1"
@@ -465,7 +466,7 @@ defmodule ElixirusWeb.StudentLive.Index do
         <span class="text-sm xs:text-xs self-end"><%= @attendance.teacher %></span>
         <span class="text-sm xs:text-xs self-end"><%= @attendance.date %></span>
       </div>
-    </div>
+    </.link>
     """
   end
 
@@ -499,7 +500,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   defp grade(assigns) do
     ~H"""
     <div
-      discard-type="grade"
+      phx-discard-type="grade"
       phx-hook="swipe_discard"
       id={@grade.href}
       class="flex-row flex justify-between bg-fg rounded-md px-2 py-1 relative"

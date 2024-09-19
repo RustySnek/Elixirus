@@ -1,7 +1,7 @@
 defmodule ElixirusWeb.StudentLive.SchedulingLive.Index do
   use ElixirusWeb, :live_view
-  #import Venomous
-  #alias Venomous.SnakeArgs
+  # import Venomous
+  # alias Venomous.SnakeArgs
   import ElixirusWeb.Helpers
   use ElixirusWeb.SetSemesterLive
 
