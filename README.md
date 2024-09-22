@@ -1,6 +1,14 @@
-![Elixirus](https://github.com/RustySnek/Elixirus/blob/master/images/elixirus_logo.png)
+<img src="https://github.com/RustySnek/Elixirus/raw/master/images/elixirus_logo.png" width="45%" alt="elixirus" />
 
 [![Updated Badge](https://badges.pufler.dev/updated/rustysnek/elixirus)](https://github.com/RustySnek/Elixirus/commits/master/) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/rustysnek/elixirus?style=flat-square) ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/rustysnek/elixirus?style=flat-square)
+
+<div>
+  <img src="https://github.com/RustySnek/Elixirus/raw/master/images/attendance.webp" height="350px" />
+  <img src="https://github.com/RustySnek/Elixirus/raw/master/images/main.webp" height="350px" />
+  <img src="https://github.com/RustySnek/Elixirus/raw/master/images/subjects.webp" height="350px" />
+  <img src="https://github.com/RustySnek/Elixirus/raw/master/images/messages.webp" height="350px" />
+  <img src="https://github.com/RustySnek/Elixirus/raw/master/images/timetable.webp" height="350px" />
+</div>
 
 ### 📒 A better replacement for Synergia Learning Managment System web interface
 **Elixirus** is a web application written in Elixir Phoenix for the librus_apix web scraper, providing a superior replacement for the native Librus web interface.
