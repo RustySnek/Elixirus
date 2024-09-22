@@ -2,7 +2,7 @@ name: Create and publish a Docker image
 
 on:
   push:
-    branches: ["v2_mock"]
+    branches: ["master"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -39,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v2
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-mock
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             latest
 
