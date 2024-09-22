@@ -7,9 +7,13 @@
       </div>
       <div class="text-center bg-fg rounded-md w-full"><%= @student_info.lucky_number %></div>
     </div>
-    <div :if={@final_frequency} class="col-span-2 text-center bg-fg rounded-md w-full">
+    <.link
+      :if={@final_frequency}
+      navigate={~p"/student/attendance"}
+      class="col-span-2 text-center bg-fg rounded-md w-full"
+    >
       <%= @final_frequency %>%
-    </div>
+    </.link>
     <.link
       :if={@final_avg}
       navigate={~p"/student/subjects"}

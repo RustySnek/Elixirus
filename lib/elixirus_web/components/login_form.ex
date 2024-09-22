@@ -39,6 +39,14 @@ defmodule ElixirusWeb.LoginForm do
   def handle_event("retrieve_local_storage", %{"username" => uname}, socket),
     do: {:noreply, assign(socket, :username, uname)}
 
+  def handle_event("retrieve_local_storage", %{"ntfy" => ntfy}, socket) do
+    case ntfy do
+      "true" -> handle_event("generate_notification_uuid", %{}, socket)
+      true -> handle_event("generate_notification_uuid", %{}, socket)
+      _ -> {:noreply, socket}
+    end
+  end
+
   def handle_event("retrieve_local_storage", %{"save_token" => keep_alive}, socket) do
     keep_alive =
       case keep_alive do

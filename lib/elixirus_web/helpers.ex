@@ -136,14 +136,6 @@ defmodule ElixirusWeb.Helpers do
     end
   end
 
-  def switch_integer(val) do
-    case val do
-      0 -> 1
-      1 -> 0
-      _ -> 0
-    end
-  end
-
   defp inside_timeframe?(date, event_timeframe) do
     [event_from, event_to] =
       String.split(event_timeframe |> to_string(), "|")
@@ -229,7 +221,7 @@ defmodule ElixirusWeb.Helpers do
   def create_fetcher(socket, user_id, cache_data, name, load_func) do
     case cache_data do
       :load ->
-        case Hammer.check_rate("#{name}:#{user_id}", 60_000, 5) do
+        case Hammer.check_rate("#{name}:#{user_id}", 60_000, 10) do
           {:allow, _count} ->
             socket
             |> assign(:loadings, [name | socket.assigns.loadings])

@@ -18,6 +18,15 @@
   <div
     phx-target={@myself}
     phx-hook="retrieve_local_storage"
+    id="retrieve-notification"
+    name="ntfy"
+    hidden
+  >
+  </div>
+
+  <div
+    phx-target={@myself}
+    phx-hook="retrieve_local_storage"
     id="retrieve-save-token"
     name="save_token"
     hidden
@@ -81,6 +90,13 @@
             </select>
           </div>
         </div>
+        <input
+          hidden
+          phx-hook="set_local_storage"
+          value={@notification_token |> Kernel.!=(nil) |> to_string()}
+          name="ntfy"
+          id="save-ntfy-checkbox"
+        />
 
         <input
           hidden

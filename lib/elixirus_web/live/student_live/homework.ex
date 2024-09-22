@@ -80,14 +80,14 @@ defmodule ElixirusWeb.StudentLive.Homework do
     user_id = socket.assigns.user_id
 
     socket =
-case Hammer.check_rate("hw_detail:#{user_id}", 60_000, 5) do
-      {:allow, _count} ->
-      socket
-      |> start_async(:load_details, fn -> fetch_homework_details(client, id) end)
-{:deny, _limit} -> 
-            socket |> put_flash(:error, "Rate limit exceeded!")
+      case Hammer.check_rate("hw_detail:#{user_id}", 60_000, 5) do
+        {:allow, _count} ->
+          socket
+          |> start_async(:load_details, fn -> fetch_homework_details(client, id) end)
 
-end
+        {:deny, _limit} ->
+          socket |> put_flash(:error, "Rate limit exceeded!")
+      end
 
     {:noreply, socket}
   end

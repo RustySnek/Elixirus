@@ -276,15 +276,14 @@ defmodule ElixirusWeb.StudentLive.Subjects do
     socket =
       case data do
         :load ->
-case Hammer.check_rate("grades:#{user_id}", 60_000, 5) do
-      {:allow, _count} ->
-          socket
-          |> start_async(:load_grades, fn -> fetch_all_grades(client, semester) end)
-{:deny, _limit} -> 
-            socket |> put_flash(:error, "Rate limit exceeded!")
+          case Hammer.check_rate("grades:#{user_id}", 60_000, 5) do
+            {:allow, _count} ->
+              socket
+              |> start_async(:load_grades, fn -> fetch_all_grades(client, semester) end)
 
-end
-
+            {:deny, _limit} ->
+              socket |> put_flash(:error, "Rate limit exceeded!")
+          end
 
         data ->
           socket |> assign(:grades, data) |> assign(:shown_grades, data) |> assign_averages(data)

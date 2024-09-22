@@ -149,17 +149,17 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
     case Hammer.check_rate("timetable:#{user_id}", 60_000, 5) do
       {:allow, _count} ->
-  socket
-    |> assign(:loadings, [:timetable | socket.assigns.loadings])
-    |> start_async(:load_timetable, fn ->
-      SnakeArgs.from_params(:elixirus, :timetable, [client, monday |> to_string()])
-      |> python!(python_timeout: 20_000)
-    end)
-{:deny, _limit} -> 
-            socket |> put_flash(:error, "Rate limit exceeded!")
+        socket
+        |> assign(:loadings, [:timetable | socket.assigns.loadings])
+        |> start_async(:load_timetable, fn ->
+          SnakeArgs.from_params(:elixirus, :timetable, [client, monday |> to_string()])
+          |> python!(python_timeout: 20_000)
+        end)
 
-end
+      {:deny, _limit} ->
+        socket |> put_flash(:error, "Rate limit exceeded!")
     end
+  end
 
   defp load_timetable(socket, timetable) do
     socket

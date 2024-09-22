@@ -9,8 +9,11 @@ defmodule ElixirusWeb.Components.NavHeader do
 
   defp toggle_dropdown(id, js \\ %JS{}) do
     js
-    |> JS.toggle(to: id,  in: {"transition-all opacity-0", "opacity-50", "opacity-100 translate-y-none"},
-      out: "transition-all opacity-0")
+    |> JS.toggle(
+      to: id,
+      in: {"transition-all opacity-0", "opacity-50", "opacity-100 translate-y-none"},
+      out: "transition-all opacity-0"
+    )
   end
 
   defp status() do
@@ -55,9 +58,9 @@ defmodule ElixirusWeb.Components.NavHeader do
           :for={{service, status} <- status()}
           class={"#{status == :up && "!text-green-400"} text-red-600"}
         >
-          <Heroicons.check_circle :if={service == :librus} class="w-6 h-6"/>
-          <Heroicons.signal :if={service == :proxy && status == :up} class="w-6 h-6"/>
-          <Heroicons.signal_slash :if={service == :proxy && status == :down} class="w-6 h-6"/>
+          <Heroicons.check_circle :if={service == :librus} class="w-6 h-6" />
+          <Heroicons.signal :if={service == :proxy && status == :up} class="w-6 h-6" />
+          <Heroicons.signal_slash :if={service == :proxy && status == :down} class="w-6 h-6" />
         </div>
       </div>
       <div class="container flex flex-wrap items-center justify-between mx-auto">
