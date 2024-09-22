@@ -10,8 +10,14 @@
   <img src="https://github.com/RustySnek/Elixirus/raw/master/images/timetable.webp" height="350px" />
 </div>
 
+
+
 ### 📒 A better replacement for Synergia Learning Managment System web interface
 **Elixirus** is a web application written in Elixir Phoenix for the librus_apix web scraper, providing a superior replacement for the native Librus web interface.
+
+Check out the app [here](https://elixirus.rustysnek.xyz) 
+
+Check out the mock-api test deployment [here](https://elixirus-test.rustysnek.xyz)
 
 ### Core Features 🚀
 - **Data Caching**: Efficient data caching for faster load times. ⚡
