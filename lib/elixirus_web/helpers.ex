@@ -71,9 +71,7 @@ defmodule ElixirusWeb.Helpers do
 
   def match_basic_errors(socket, {:error, message}, _asyncs) do
     Logger.error(message)
-    put_flash(socket, :error, message)
-
-    {:error, message, socket}
+    {:error, message, put_flash(socket, :error, message)}
   end
 
   def match_basic_errors(socket, %Venomous.SnakeError{} = err, _asyncs) do
