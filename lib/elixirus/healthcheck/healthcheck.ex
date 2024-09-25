@@ -9,6 +9,7 @@ defmodule Elixirus.Healthcheck.Healthcheck do
     status = GenServer.call(service, {:get_status})
     Cachex.put(:elixirus_cache, "services-#{service}", status)
     Cachex.expire(:elixirus_cache, "services-#{service}", :timer.minutes(1))
+    status
   end
 
   def get_service_status(_service, {:ok, status}), do: status
