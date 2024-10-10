@@ -167,6 +167,34 @@ defmodule Elixirus.TokenWorker do
     {:noreply, table}
   end
 
+  defp refresh_token(table, {username, token, ttl, nil, seen_ids, last_update}) do
+    now = DateTime.now!("Europe/Warsaw")
+
+    if DateTime.compare(
+         now,
+         DateTime.shift(last_update, hour: ttl)
+       ) in [:lt, :eq] do
+      %Client{} = client = Client.get_client(token)
+
+      case SnakeArgs.from_params(:elixirus, :announcements, [client])
+           |> python!(timeout: 10_000) do
+        {:error, :timeout} ->
+          Logger.info("Timed out refreshing")
+
+        {:ok, _} ->
+          :ets.insert(table, {username, token, ttl, nil, seen_ids, now})
+
+        err ->
+          Logger.info(inspect(err))
+      end
+    else
+      Logger.info("Removing expired token")
+      :ets.delete(table, username)
+    end
+
+    {username, nil, nil}
+  end
+
   defp refresh_token(table, {username, token, ttl, notification_token, seen_ids, last_update}) do
     now = DateTime.now!("Europe/Warsaw")
 
