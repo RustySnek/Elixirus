@@ -4,6 +4,8 @@ defmodule ElixirusWeb.Helpers do
   """
   alias Elixirus.Types.Grade
   alias Elixirus.Types.Period
+  alias Elixirus.Healthcheck.Healthcheck
+
   use Phoenix.LiveView
   require Logger
 
@@ -67,6 +69,15 @@ defmodule ElixirusWeb.Helpers do
       |> push_event("require-login", %{})
 
     {:token_error, message, socket}
+  end
+
+  def match_basic_errors(socket, {:error, :timeout}, _asyncs) do
+    status = Healthcheck.get_service_status(Elixirus.Healthcheck.LibrusConnection)
+    proxy = System.get_env("USE_PROXY", "no")
+    Logger.error("Librus connection on timing out: #{status} | proxy after refresh: #{proxy}")
+
+    {:error, message,
+     put_flash(socket, :error, "Timed out. Librus status: #{status}. Try refreshing...")}
   end
 
   def match_basic_errors(socket, {:error, message}, _asyncs) do

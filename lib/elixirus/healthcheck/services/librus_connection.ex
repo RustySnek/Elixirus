@@ -30,7 +30,6 @@ defmodule Elixirus.Healthcheck.Services.LibrusConnection do
          ) do
       {:ok, _} ->
         set_proxy(:down)
-
         :up
 
       _ ->

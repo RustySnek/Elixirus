@@ -13,8 +13,14 @@ defmodule Elixirus.Healthcheck.HealthSupervisor do
 
   def init(_args) do
     children = [
-      Supervisor.child_spec({HealthWorker, [LibrusConnection, 10_000]}, id: LibrusConnection),
-      Supervisor.child_spec({HealthWorker, [ProxyAlive, 10_000]}, id: ProxyAlive)
+      Supervisor.child_spec({HealthWorker, [LibrusConnection, 10_000]},
+        id: LibrusConnection,
+        restart: :permanent
+      ),
+      Supervisor.child_spec({HealthWorker, [ProxyAlive, 10_000]},
+        id: ProxyAlive,
+        restart: :permanent
+      )
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
