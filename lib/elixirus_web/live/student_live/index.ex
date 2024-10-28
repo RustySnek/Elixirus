@@ -401,7 +401,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       phx-discard-type="announcement"
       phx-hook="swipe_discard"
       id={@announcement.title <> @announcement.date}
-      class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative"
+      class="flex-col flex justify-between bg-card rounded-md px-2 py-1 relative"
     >
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Announcement
@@ -432,7 +432,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       phx-discard-type="message"
       phx-hook="swipe_discard"
       id={@message.href}
-      class="flex-col flex justify-between bg-fg rounded-md px-2 py-1 relative"
+      class="flex-col flex justify-between bg-card rounded-md px-2 py-1 relative"
     >
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Message
@@ -454,7 +454,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       phx-discard-type="attendance"
       phx-hook="swipe_discard"
       id={@attendance.href}
-      class="flex-row flex justify-between bg-fg rounded-md px-2 py-1"
+      class="flex-row flex justify-between bg-card rounded-md px-2 py-1"
     >
       <div>
         <h3 class="w-8"><%= @attendance.symbol %></h3>
@@ -472,7 +472,7 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   defp today_schedule(%{schedule: _schedule} = assigns) do
     ~H"""
-    <div class="p-1 rounded-md flex flex-col gap-x-2 bg-fg gap-y-2 relative">
+    <div class="p-1 rounded-md flex flex-col gap-x-2 bg-card gap-y-2 relative">
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Event
       </span>
@@ -503,7 +503,7 @@ defmodule ElixirusWeb.StudentLive.Index do
       phx-discard-type="grade"
       phx-hook="swipe_discard"
       id={@grade.href}
-      class="flex-row flex justify-between bg-fg rounded-md px-2 py-1 relative"
+      class="flex-row flex justify-between bg-card rounded-md px-2 py-1 relative"
     >
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-center font-bold text-xl">
         Grade
@@ -532,7 +532,7 @@ defmodule ElixirusWeb.StudentLive.Index do
     assigns = assign(assigns, :info, period.info)
 
     ~H"""
-    <div class="bg-fg h-20 rounded-md flex flex-row gap-x-2 relative">
+    <div class="bg-card h-20 rounded-md flex flex-row gap-x-2 relative">
       <span class="select-none absolute opacity-10 inset-0 flex items-center justify-end mr-2 font-bold text-xl">
         Up next
       </span>

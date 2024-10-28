@@ -1,11 +1,11 @@
 <div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
 <div class="flex flex-col md:flex-row gap-x-4 mb-6 justify-center">
-  <div class="flex flex-row items-center justify-between xs:-mt-4 sm:-mt-8">
+  <div class="flex flex-row items-center md:gap-x-4 justify-between xs:-mt-4 sm:-mt-8">
     <form phx-change="connect_calendar" class="flex flex-row xs:flex-col gap-4 self-center">
       <input
         placeholder="google calendar id/email"
         phx-debounce={500}
-        class="bg-[#1f1f1f] rounded-lg border-fuchsia-800 border-2 xs:text-sm"
+        class={"bg-card #{@calendar_events != %{} && "!border-none"} shadow rounded-lg border xs:text-sm"}
         type="text"
         name="calendar_id"
         value={@calendar_id}
@@ -18,22 +18,22 @@
       phx-click="change_week"
       phx-value-days={@this_monday |> Date.diff(@current_monday)}
     >
-      <span class="sm:font-semibold  border-red-800 border-2 rounded-lg flex h-10 items-center px-2">
+      <span class="sm:font-semibold bg-card border-red-800 border-2 rounded-lg flex h-10 items-center px-2">
         <%= @current_monday |> Date.to_iso8601() %>
       </span>
     </button>
     <span
       :if={:timetable in @loadings || @current_monday == @this_monday}
-      class="border-fuchsia-800 border-2 rounded-lg flex h-10 items-center px-2"
+      class="shadow bg-card rounded-lg flex h-10 items-center px-2"
     >
       <%= @current_monday |> Date.to_iso8601() %>
     </span>
   </div>
-  <div class="flex flex-row justify-between mx-4 mt-2 items-center">
+  <div class="flex flex-row justify-between mx-4 mt-2 md:-mt-8 md:gap-x-4 items-center">
     <button
       :if={(:timetable in @loadings) |> Kernel.!()}
       phx-click="change_week"
-      class="bg-fuchsia-800 px-2 py-1 rounded-lg w-24"
+      class="bg-card px-2 shadow py-1 h-8 md:h-10 rounded-lg w-24"
       phx-value-days="-7"
     >
       <span>previous</span>
@@ -46,7 +46,7 @@
     <button
       :if={(:timetable in @loadings) |> Kernel.!()}
       phx-click="change_week"
-      class="bg-fuchsia-800 px-2 py-1 rounded-lg w-24"
+      class="bg-card shadow px-2 py-1 h-8 md:h-10 rounded-lg w-24"
       phx-value-days="7"
     >
       <span>next</span>
@@ -61,14 +61,14 @@
     top={current_next_period_number(@timetable) * 125}
     class="relative w-full  flex flex-col"
   >
-    <div class="flex -z-40 flex-col w-full  gap-y-4">
+    <div class="flex flex-col w-full  gap-y-4">
       <div class="opacity-0 h-12">Weekday</div>
       <div :for={period <- hd(@timetable)} class="w-full">
-        <div class="h-[90px] text-gray-500 xs:tracking-tight xs:text-xs  flex flex-col justify-between">
-          <p class="w-full">
+        <div class="h-[90px] text-gray-400 xs:tracking-tight xs:text-xs  flex flex-col justify-between">
+          <p class="z-30 pointer-events-none w-full">
             <%= period.date_from %>
           </p>
-          <p class="w-full">
+          <p class="z-30 pointer-events-none w-full">
             <%= period.date_to %>
           </p>
         </div>

@@ -242,15 +242,12 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     socket =
       case match_basic_errors(socket, timetable, @asyncs) do
         {:ok, timetable} ->
-          if socket.assigns.current_monday == socket.assigns.this_monday do
-            cache_and_ttl_data(user_id, "timetable", timetable, 30)
-          else
-            cache_and_ttl_data(
-              user_id,
-              Date.to_iso8601(socket.assigns.current_monday) <> "-timetable",
-              timetable
-            )
-          end
+          cache_and_ttl_data(
+            user_id,
+            Date.to_iso8601(socket.assigns.current_monday) <> "-timetable",
+            timetable,
+            30
+          )
 
           socket
           |> assign(:timetable, exclude_empty_days(timetable))
@@ -275,14 +272,10 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     calendar_id = socket.assigns.calendar_id
 
     timetable =
-      if current_monday == socket.assigns.this_monday do
-        handle_cache_data(user_id, "timetable")
-      else
-        handle_cache_data(
-          user_id,
-          Date.to_iso8601(current_monday) <> "-timetable"
-        )
-      end
+      handle_cache_data(
+        user_id,
+        Date.to_iso8601(current_monday) <> "-timetable"
+      )
 
     calendar_data =
       handle_cache_data(
@@ -342,7 +335,8 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       |> handle_api_token(token)
       |> Client.get_client()
 
-    monday =
+    # if its weekend, skip to next week
+    beggining_of_the_week =
       case get_current_weekday() do
         n when n < 5 ->
           this_weeks_monday()
@@ -351,20 +345,20 @@ defmodule ElixirusWeb.StudentLive.Timetable do
           warsaw_now() |> DateTime.add(4, :day) |> this_weeks_monday()
       end
 
-    timetable = handle_cache_data(user_id, "timetable")
+    timetable = handle_cache_data(user_id, "#{beggining_of_the_week}-timetable")
 
     calendar_data =
       handle_cache_data(
         user_id,
-        "#{monday |> Date.to_iso8601()}-timetable_calendar"
+        "#{beggining_of_the_week |> Date.to_iso8601()}-timetable_calendar"
       )
 
     socket =
       socket
       |> assign(:user_id, user_id)
       |> assign(:semester, semester)
-      |> assign(:this_monday, monday)
-      |> assign(:current_monday, monday)
+      |> assign(:this_monday, beggining_of_the_week)
+      |> assign(:current_monday, beggining_of_the_week)
       |> assign(:client, client)
       |> assign(:timetable, [])
       |> assign(:loadings, [])
@@ -372,7 +366,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       |> assign(:calendar_events, %{})
       |> assign(:calendar_id, "")
       |> assign(:page_title, "Timetable")
-      |> fetch_schedule(monday)
+      |> fetch_schedule(beggining_of_the_week)
       |> load_calendar(calendar_data)
       |> load_timetable(timetable)
 
@@ -435,11 +429,11 @@ defmodule ElixirusWeb.StudentLive.Timetable do
   defp weekday(assigns) do
     ~H"""
     <div class="
-      text-center h-12 w-full rounded-2xl border-fuchsia-700 
-      border-2 font-semibold flex flex-col items-center 
-      justify-center text-2xl select-none
+      text-center h-12 shadow rounded-lg w-full 
+      font-semibold flex items-center justify-center 
+      md:text-lg bg-card
     ">
-      <%= @weekday.weekday %>
+      <%= @weekday.weekday %>, <%= date_to_shorthand(@weekday.date) %>
     </div>
     """
   end
@@ -450,12 +444,16 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       phx-click={ElixirusWeb.Modal.show_modal_js("#{@weekday.weekday}-googlecalendar")}
       phx-target={"##{@weekday.weekday}-googlecalendar"}
       class="
-      text-center h-12 w-full rounded-2xl border-fuchsia-700 
-      border-2 font-semibold flex flex-col items-center 
-      justify-center text-2xl bg-orange-500/10
+      text-center h-12 shadow rounded-lg w-full 
+      font-semibold items-center justify-center
+      md:text-lg bg-card relative flex
     "
     >
-      <%= @weekday.weekday %>
+      <%= @weekday.weekday %>, <%= date_to_shorthand(@weekday.date) %>
+      <.information_circle
+        outline
+        class="absolute right-2 top-1/2 -translate-y-1/2 text-red-800 w-6 md:w-7"
+      />
     </button>
     """
   end
@@ -467,16 +465,16 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       module={Modal}
       id={"#{@period.weekday}-#{@period.number}"}
     >
-      <div class="bg-[#1E1E1E] mx-5 md:max-w-3xl max-w-xs xs:max-w-[250px] overflow-y-auto rounded-2xl absolute z-40">
+      <div class="bg-card mx-5 max-w-md min-w-[300px] md:min-w-[450px] xs:max-w-[250px] overflow-y-auto rounded-lg absolute z-40">
         <div
           :for={
             event <-
               get_events_inside_period(@schedule, @period)
           }
-          class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
+          class="bg-card rounded-2xl px-4 py-2"
         >
-          <div class="flex flex-col text-center space-y-2 mb-3">
-            <span class="text-lg text-center text-fuchsia-700 font-bold">
+          <div class="flex flex-col space-y-2 mb-3">
+            <span class="text-lg text-fuchsia-700 font-bold">
               <%= event.title %>
             </span>
             <span
@@ -489,7 +487,7 @@ defmodule ElixirusWeb.StudentLive.Timetable do
               <%= event.subject %>
             </span>
           </div>
-          <div class="flex flex-col text-center">
+          <div class="flex flex-col">
             <span
               :for={
                 item <-
@@ -505,46 +503,55 @@ defmodule ElixirusWeb.StudentLive.Timetable do
           </div>
         </div>
 
-        <div class="p-4 flex flex-col text-center items-center justify-center gap-y-1 lg:gap-y-4">
-          <span class="text-base lg:text-lg font-bold">
+        <div class="p-4 flex flex-col justify-center gap-y-1">
+          <div
+            :for={
+              {title, info} <-
+                @period.info
+                |> Map.to_list()
+            }
+            class={"flex flex-col text-#{lesson_info_color(%{title => ""})} font-bold pb-2"}
+          >
+            <span>
+              <%= title %>
+            </span>
+            <div :if={is_map(info)} class="text-gray-500 font-normal flex flex-col">
+              <span :for={{_, val} <- info}><%= val %></span>
+            </div>
+          </div>
+
+          <span class="break-words max-w-xl lg:text-lg font-bold mb-1">
+            <%= @period.subject %>
+          </span>
+          <span class="text-base lg:text-lg">
             <%= @period.weekday %>
           </span>
 
-          <span class="break-words lg:text-lg font-bold w-full">
-            <%= @period.subject %>
-          </span>
-          <div
-            :for={
-              info <-
-                @period.info
-                |> Map.values()
-            }
-            :if={info != ""}
-            class="flex flex-col border-red-700 border rounded-2xl p-2"
-          >
-            <span :for={
-              val <-
-                info
-                |> Map.values()
-            }>
-              <%= val %>
-            </span>
-          </div>
-
-          <span>
+          <span class="text-gray-400">
             Lesson: <%= @period.number %>
           </span>
-          <span>
+          <span class="text-gray-400">
             <%= @period.teacher_and_classroom %>
           </span>
-          <span>
+          <span class="text-gray-400">
             <%= @period.date %>
           </span>
         </div>
+        <button
+          class="bg-gray-600 h-8 hover:brightness-125 transition rounded-b-lg rounded-x-lg w-full"
+          phx-click={Modal.hide_modal("#{@period.weekday}-#{@period.number}")}
+        >
+          Close
+        </button>
       </div>
     </.live_component>
     """
   end
+
+  defp lesson_info_color(%{"odwołane" => _val}), do: "red-700"
+  defp lesson_info_color(%{"dzień wolny szkoły" => _val}), do: "lime-400"
+  defp lesson_info_color(%{"przesunięcie" => _val}), do: "blue-400"
+  defp lesson_info_color(%{}), do: "fuchsia-600"
 
   defp period(assigns) do
     ~H"""
@@ -553,16 +560,15 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       phx-click={ElixirusWeb.Modal.show_modal_js("#{@period.weekday}-#{@period.number}")}
       phx-target={"##{@period.weekday}-#{@period.number}"}
       class={"
-                hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
-                duration-100 border-2 border-fuchsia-600 rounded-2xl
-                #{ @period.subject == "" &&"!border-none !bg-inherit"}
-                #{ @period.info |> Map.keys() |> length() > 0 && "!border-red-700"}
-                "}
+        hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
+        duration-100 rounded-lg shadow bg-card relative
+        #{ @period.subject == "" &&"!shadow-none !bg-inherit"}
+        "}
     >
-      <span class="flex-shrink text-center font-bold text-red-600">
+      <span class={"flex-shrink absolute opacity-50 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-center font-bold text-#{lesson_info_color(@period.info)}"}>
         <%= @period.info |> Map.keys() |> Enum.join(", ") %>
       </span>
-      <div class="flex-grow">
+      <div class="flex-grow z-10">
         <span class="line-clamp-1">
           <%= @period.subject %>
         </span>

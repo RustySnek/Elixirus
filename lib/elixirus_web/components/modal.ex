@@ -11,11 +11,7 @@ defmodule ElixirusWeb.Modal do
   def render(assigns) do
     ~H"""
     <div class="absolute z-40 " id={@id} hidden={@hidden}>
-      <div
-        id={"#{@id}-bg"}
-        class=" fixed bg-blue-500/10  inset-0 transition-opacity"
-        aria-hidden="true"
-      />
+      <div id={"#{@id}-bg"} class=" fixed bg-black/50 inset-0 transition-opacity" aria-hidden="true" />
       <div class="fixed inset-0 overflow-y-auto" role="dialog" aria-modal="true" tabindex="0">
         <div class="flex min-h-full items-center justify-center">
           <div

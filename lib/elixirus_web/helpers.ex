@@ -244,4 +244,27 @@ defmodule ElixirusWeb.Helpers do
         assign(socket, name, data)
     end
   end
+
+  def date_to_shorthand(date) do
+    [_year, month, day] = String.split(date, "-")
+
+    "#{day} #{month_to_shorthand(String.to_integer(month))}"
+  end
+
+  def month_to_shorthand(month) do
+    case month do
+      1 -> "Jan"
+      2 -> "Feb"
+      3 -> "Mar"
+      4 -> "Apr"
+      5 -> "May"
+      6 -> "Jun"
+      7 -> "Jul"
+      8 -> "Aug"
+      9 -> "Sep"
+      10 -> "Oct"
+      11 -> "Nov"
+      12 -> "Dec"
+    end
+  end
 end
