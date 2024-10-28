@@ -12,6 +12,11 @@ module.exports = {
     "../lib/elixirus_web/**/*.*ex",
     "../deps/phoenix_ui/**/*.*ex",
   ],
+  safelist: [
+    "text-lime-400",
+    "text-red-700",
+    "text-blue-400",
+  ],
   theme: {
     extend: {
       animation: {
@@ -26,6 +31,7 @@ module.exports = {
       colors: {
         brand: "#FD4F00",
         fg: "#282B2F",
+        card: "#1E2023",
         lighterbg: "#202226"
       }
     },

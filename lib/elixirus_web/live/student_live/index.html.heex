@@ -2,22 +2,22 @@
   <div hidden phx-hook="retrieve_local_storage" name="discards" id="discard-handler"></div>
   <div class="grid grid-cols-7 gap-x-4 text-lg">
     <div :if={@student_info} class="col-span-2 flex flex-row gap-x-4">
-      <div class={"text-center bg-fg #{@student_info.number == @student_info.lucky_number && "!bg-fuchsia-600"} rounded-md w-full"}>
+      <div class={"text-center bg-card #{@student_info.number == @student_info.lucky_number && "!bg-fuchsia-600"} rounded-md w-full"}>
         <%= @student_info.number %>
       </div>
-      <div class="text-center bg-fg rounded-md w-full"><%= @student_info.lucky_number %></div>
+      <div class="text-center bg-card rounded-md w-full"><%= @student_info.lucky_number %></div>
     </div>
     <.link
       :if={@final_frequency}
       navigate={~p"/student/attendance"}
-      class="col-span-2 text-center bg-fg rounded-md w-full"
+      class="col-span-2 text-center bg-card rounded-md w-full"
     >
       <%= @final_frequency %>%
     </.link>
     <.link
       :if={@final_avg}
       navigate={~p"/student/subjects"}
-      class="font-semibold col-span-3 text-center bg-fg rounded-md w-full"
+      class="font-semibold col-span-3 text-center bg-card rounded-md w-full"
     >
       <%= @final_avg |> to_string() |> String.slice(0..5) %>
     </.link>
