@@ -72,7 +72,7 @@ defmodule ElixirusWeb.Helpers do
   end
 
   def match_basic_errors(socket, {:error, :timeout}, _asyncs) do
-    status = Healthcheck.get_service_status(Elixirus.Healthcheck.LibrusConnection)
+    status = Healthcheck.get_service_status(Services.Healthcheck.LibrusConnection)
     proxy = System.get_env("USE_PROXY", "no")
     Logger.error("Librus connection on timing out: #{status} | proxy after refresh: #{proxy}")
 
