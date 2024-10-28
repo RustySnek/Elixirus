@@ -278,7 +278,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def mount(_params, %{"token" => token}, socket) when map_size(token) == 0 do
-    {:ok, setup(socket) |> push_event("require-login", %{})}
+    {:ok, setup(socket) |> assign(:page_title, "Login") |> push_event("require-login", %{})}
   end
 
   def mount(
