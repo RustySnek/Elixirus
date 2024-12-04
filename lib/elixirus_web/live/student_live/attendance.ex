@@ -10,8 +10,33 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
   @asyncs [
     :load_frequency,
+    :load_subject_frequency,
     :load_attendance
   ]
+
+  def handle_async(:load_subject_frequency, {:ok, freq}, socket) do
+    socket =
+      case match_basic_errors(socket, freq, @asyncs) do
+        {:ok, frequency} ->
+          user_id = socket.assigns.user_id
+
+          frequency =
+            frequency
+            |> Enum.to_list()
+            |> Enum.sort_by(fn {_key, value} -> value end)
+
+          cache_and_ttl_data(user_id, "subject_frequency", frequency, 15)
+
+          socket
+          |> assign(:subject_frequency, frequency)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :subject_frequency))
+
+        {_err, _msg, socket} ->
+          socket
+      end
+
+    {:noreply, socket}
+  end
 
   def handle_async(:load_frequency, {:ok, frequency}, socket) do
     user_id = socket.assigns.user_id
@@ -95,6 +120,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> Client.get_client()
 
     frequency = handle_cache_data(user_id, "frequency")
+    subject_frequency = handle_cache_data(user_id, "subject_frequency")
 
     attendance = handle_cache_data(user_id, "#{semester}-attendance")
 
@@ -109,6 +135,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> assign(:attendance, [])
       |> assign(:stats, stats)
       |> assign(:frequency, [])
+      |> assign(:subject_frequency, [])
       |> assign(:loadings, [])
       |> assign(:client, client)
       |> assign(:semester, semester)
@@ -118,6 +145,10 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> create_fetcher(user_id, frequency, :frequency, fn ->
         SnakeArgs.from_params(:elixirus, :frequency, [client])
         |> python!()
+      end)
+      |> create_fetcher(user_id, subject_frequency, :subject_frequency, fn ->
+        SnakeArgs.from_params(:elixirus, :subject_frequency, [client])
+        |> Venomous.python!()
       end)
       |> create_fetcher(user_id, attendance, :attendance, fn ->
         {SnakeArgs.from_params(:elixirus, :attendance, [client, true])
@@ -193,5 +224,14 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       "><%= @absence.subject %></span>
     </.link>
     """
+  end
+
+  defp colors(freq) do
+    cond do
+      freq == 100 -> "bg-fuchsia-600"
+      freq > 70 -> "bg-green-600"
+      freq <= 50 -> "bg-red-600"
+      freq <= 70 -> "bg-amber-600"
+    end
   end
 end

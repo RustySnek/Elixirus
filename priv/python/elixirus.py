@@ -4,7 +4,11 @@ from enum import Enum
 
 from erlport.erlterms import Atom
 from librus_apix.announcements import get_announcements
-from librus_apix.attendance import get_attendance, get_attendance_frequency
+from librus_apix.attendance import (
+    get_attendance,
+    get_attendance_frequency,
+    get_subject_frequency,
+)
 from librus_apix.client import Client
 from librus_apix.exceptions import (
     AuthorizationError,
@@ -74,6 +78,11 @@ def average_grades(client: Client):
 
 def frequency(client: Client):
     status, freq = sanitize_fetch(get_attendance_frequency, client)
+    return status.value, freq
+
+
+def subject_frequency(client: Client):
+    status, freq = sanitize_fetch(get_subject_frequency, client)
     return status.value, freq
 
 
