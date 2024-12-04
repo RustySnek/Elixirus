@@ -38,20 +38,40 @@
   </div>
 
   <div
-    :for={day <- @attendance |> Enum.chunk_by(&Map.get(&1, :date))}
-    class="grid grid-cols-4 md:grid-cols-12 p-4 rounded-md gap-4 bg-lighterbg"
+    :if={@subject_frequency != []}
+    class="flex flex-col gap-y-4 xl:max-h-[400px] md:flex-wrap items-center "
   >
-    <div
-      :if={(%Attendance{date: date} = Enum.at(day, 0)) != nil}
-      class="col-span-4 md:col-span-12 flex flex-row justify-between"
-    >
-      <span><%= date %></span>
-      <span><%= iso_date_to_dayname(date) %></span>
+    <div :for={{subj, freq} <- @subject_frequency} class="select-none w-full xl:w-1/4">
+      <span class="flex flex-row items-center justify-between">
+        <span class="line-clamp-1 font-quicksand font-bold"><%= subj %></span>
+        <span><%= freq %>%</span>
+      </span>
+      <div class="w-full bg-fg rounded-full h-2.5">
+        <div
+          class={"#{colors(freq)} h-2.5 rounded-full animate-fill"}
+          style={"--percentage: #{freq}%;"}
+        >
+        </div>
+      </div>
     </div>
-    <.absence
-      :for={%Attendance{} = absence <- day}
-      absence={absence}
-      selected={absence.href == @selected}
-    />
+  </div>
+  <div class="xl:grid flex flex-col md:grid-cols-2 gap-2">
+    <div
+      :for={day <- @attendance |> Enum.chunk_by(&Map.get(&1, :date))}
+      class="grid grid-cols-4 md:grid-cols-12 p-4 rounded-md gap-4 bg-lighterbg"
+    >
+      <div
+        :if={(%Attendance{date: date} = Enum.at(day, 0)) != nil}
+        class="col-span-4 md:col-span-12 flex flex-row justify-between"
+      >
+        <span><%= date %></span>
+        <span><%= iso_date_to_dayname(date) %></span>
+      </div>
+      <.absence
+        :for={%Attendance{} = absence <- day}
+        absence={absence}
+        selected={absence.href == @selected}
+      />
+    </div>
   </div>
 </div>
