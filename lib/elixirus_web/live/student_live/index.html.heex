@@ -17,10 +17,13 @@
     <.link
       :if={@final_avg}
       navigate={~p"/student/subjects"}
-      class="font-semibold col-span-3 text-center bg-card rounded-md w-full"
+      class="font-semibold col-span-2 text-center bg-card rounded-md w-full"
     >
-      <%= @final_avg |> to_string() |> String.slice(0..5) %>
+      <%= @final_avg |> to_string() |> String.slice(0..4) %>
     </.link>
+    <button phx-click="discard_all">
+      <Heroicons.trash class="w-5 h-5" />
+    </button>
   </div>
 
   <div :if={@timetable}>

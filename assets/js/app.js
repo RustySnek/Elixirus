@@ -1,6 +1,7 @@
 import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
+import { discard } from './hooks/storage_hooks';
 import topbar from "../vendor/topbar"
 import Hooks from './hooks';
 
@@ -25,6 +26,9 @@ window.addEventListener('beforeunload', (event) => {
     event.returnValue = ''; // This prompts the user with a confirmation dialog
   }
 });
+window.addEventListener('phx:discard-all', e => {
+  discard(e.detail)
+})
 
 liveSocket.connect()
 window.liveSocket = liveSocket
