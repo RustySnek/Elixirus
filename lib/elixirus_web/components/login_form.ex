@@ -21,6 +21,14 @@ defmodule ElixirusWeb.LoginForm do
     {:ok, socket}
   end
 
+  def require_login(socket) do
+    if Application.get_env(:elixirus, :elixirus_test, false) == "true" do
+      socket
+    else
+      push_event(socket, "require-login", %{})
+    end
+  end
+
   def handle_event("generate_notification_uuid", _params, socket) do
     socket =
       if socket.assigns.notification_token == nil do

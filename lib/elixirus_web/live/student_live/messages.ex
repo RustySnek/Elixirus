@@ -3,6 +3,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
   use ElixirusWeb, :live_view
   alias Elixirus.Types.Message
   alias Elixirus.Types.MessageData
+  alias ElixirusWeb.LoginForm
   alias Venomous.SnakeArgs
   import Venomous
   alias Elixirus.Types.Client
@@ -111,7 +112,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
 
         {:token_error, _msg} ->
           socket
-          |> push_event("require-login", %{})
+          |> LoginForm.require_login() 
 
         {:error, msg} ->
           Logger.error(msg)
