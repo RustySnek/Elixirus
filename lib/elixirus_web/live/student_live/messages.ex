@@ -112,7 +112,7 @@ defmodule ElixirusWeb.StudentLive.Messages do
 
         {:token_error, _msg} ->
           socket
-          |> LoginForm.require_login() 
+          |> LoginForm.require_login()
 
         {:error, msg} ->
           Logger.error(msg)

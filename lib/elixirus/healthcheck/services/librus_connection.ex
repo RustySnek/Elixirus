@@ -34,7 +34,6 @@ defmodule Elixirus.Healthcheck.Services.LibrusConnection do
 
       _ ->
         get_librus_status()
-
         :down
     end
   end
