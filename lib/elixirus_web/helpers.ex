@@ -3,6 +3,7 @@ defmodule ElixirusWeb.Helpers do
   Miscellanous functions to help parse data
   """
   alias Elixirus.Types.Grade
+  alias ElixirusWeb.LoginForm
   alias Elixirus.Types.Period
   alias Elixirus.Healthcheck.Healthcheck
   alias Elixirus.Healthcheck.Services
@@ -66,8 +67,7 @@ defmodule ElixirusWeb.Helpers do
       Enum.reduce(asyncs, socket, fn loading, socket_acc ->
         cancel_async(socket_acc, loading, :error)
       end)
-      |> assign(:login_required, true)
-      |> push_event("require-login", %{})
+      |> LoginForm.require_login() 
 
     {:token_error, message, socket}
   end
@@ -172,12 +172,6 @@ defmodule ElixirusWeb.Helpers do
     end)
     |> Map.values()
     |> List.flatten()
-  end
-
-  def inside_event_timeframe?(events, date) do
-    events
-    |> events_inside_timeframe(date)
-    |> Kernel.!=([])
   end
 
   def warsaw_now() do

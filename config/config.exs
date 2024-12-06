@@ -20,7 +20,8 @@ config :elixirus, ElixirusWeb.Endpoint,
     layout: false
   ],
   pubsub_server: Elixirus.PubSub,
-  live_view: [signing_salt: "UkfzIumN"]
+  live_view: [signing_salt: "UkfzIumN"],
+  elixirus_test: System.get_env("ELIXIRUS_TEXT", "false")
 
 # Configure esbuild (the version is required)
 config :bun,
