@@ -1,4 +1,5 @@
 defmodule ElixirusWeb.StudentLive.Index do
+  alias ElixirusWeb.LoginForm
   require Logger
   alias Elixirus.Types.Message
   alias Elixirus.Types.Event
@@ -46,6 +47,41 @@ defmodule ElixirusWeb.StudentLive.Index do
 
   def handle_event("retrieve_local_storage", %{"discards" => _discards}, socket) do
     {:noreply, assign(socket, :discards, %{})}
+  end
+
+  def handle_event("discard_all", _params, socket) do
+    discards = socket.assigns.discards
+
+    message_discards =
+      socket.assigns.messages
+      |> Enum.map(&Map.get(&1, :href))
+      |> Enum.reject(fn msg -> msg in Map.get(discards, "message", []) end)
+
+    attendance_discards =
+      socket.assigns.attendance
+      |> Enum.map(&Map.get(&1, :href))
+      |> Enum.reject(fn a -> a in Map.get(discards, "attendance", []) end)
+
+    grade_discards =
+      socket.assigns.grades
+      |> Enum.map(&Map.get(&1, :href))
+      |> Enum.reject(fn g -> g in Map.get(discards, "grade", []) end)
+
+    announcement_discards =
+      socket.assigns.announcements
+      |> Enum.map(&(Map.get(&1, :title) <> Map.get(&1, :date)))
+      |> Enum.reject(fn a -> a in Map.get(discards, "announcement", []) end)
+
+    discards =
+      %{
+        :grade => grade_discards,
+        :message => message_discards,
+        :attendance => attendance_discards,
+        :announcement => announcement_discards
+      }
+      |> dbg
+
+    {:noreply, push_event(socket, "discard-all", discards)}
   end
 
   def handle_async(task, {:ok, {:killed, _reason}}, socket) when task in @asyncs do
@@ -278,7 +314,7 @@ defmodule ElixirusWeb.StudentLive.Index do
   end
 
   def mount(_params, %{"token" => token}, socket) when map_size(token) == 0 do
-    {:ok, setup(socket) |> assign(:page_title, "Login") |> push_event("require-login", %{})}
+    {:ok, setup(socket) |> assign(:page_title, "Login") |> LoginForm.require_login()}
   end
 
   def mount(
@@ -551,20 +587,22 @@ defmodule ElixirusWeb.StudentLive.Index do
       <div :if={@info != %{}} class="flex overflow-x-auto z-10">
         <div
           :for={
-            info <-
+            {key, val} <-
               @info
-              |> Map.values()
-              |> Enum.filter(&Kernel.!=(&1, ""))
+              |> Map.to_list()
+              |> dbg
           }
-          class="flex flex-row gap-x-1 h-full"
+          phx-hook="expand_click"
+          id="info"
+          class="line-clamp-3 flex-wrap break-all flex bg-lighterbg w-24 max-w-24 p-1 rounded-md my-1"
         >
-          <div
-            :for={{value, idx} <- Map.values(info) |> Enum.with_index()}
-            phx-hook="expand_click"
-            id={"info-#{idx}"}
-            class="line-clamp-3 flex-wrap break-all flex bg-lighterbg w-24 max-w-24 p-1 rounded-md my-1"
-          >
-            <%= value %>
+          <div class="flex flex-col">
+            <span><%= key %></span>
+            <div class="flex flex-row gap-x-1">
+              <p :for={val <- Map.values(val)} :if={val != ""}>
+                <%= val %>
+              </p>
+            </div>
           </div>
         </div>
       </div>

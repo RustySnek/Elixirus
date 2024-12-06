@@ -1,3 +1,5 @@
+import { discard } from './storage_hooks';
+
 let StyleHooks = {};
 
 StyleHooks.scroll_top = {
@@ -56,35 +58,7 @@ StyleHooks.swipe_discard = {
     setTimeout(_ => {
       this.el.remove()
       if (typeof event === "string") {
-        let discarded_items = localStorage.getItem("discards")
-        if (discarded_items) {
-          try {
-            discarded_items = JSON.parse(discarded_items)
-
-          } catch {
-            discarded_items = {}
-          }
-        }
-        if (!(discarded_items instanceof Object)) {
-          discarded_items = {}
-        }
-        const discards = discarded_items[event]
-        if (Array.isArray(discards) && !discards.includes(item_id)) {
-          localStorage.setItem("discards", JSON.stringify(
-            {
-              ...discarded_items,
-              [event]: [item_id, ...discards]
-            }
-          ))
-        } else {
-          localStorage.setItem("discards", JSON.stringify(
-            {
-              ...discarded_items,
-              [event]: [item_id]
-            }
-
-          ))
-        }
+        discard({ event: [item_id] })
       }
 
     }, 200)
