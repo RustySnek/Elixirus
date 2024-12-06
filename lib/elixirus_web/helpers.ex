@@ -67,7 +67,7 @@ defmodule ElixirusWeb.Helpers do
       Enum.reduce(asyncs, socket, fn loading, socket_acc ->
         cancel_async(socket_acc, loading, :error)
       end)
-      |> LoginForm.require_login() 
+      |> LoginForm.require_login()
 
     {:token_error, message, socket}
   end
