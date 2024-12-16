@@ -30,6 +30,7 @@ defmodule ElixirusWeb.Router do
     scope "/student" do
       pipe_through :api_token
       live "/", StudentLive.Index
+      live "/refresh", StudentLive.Refresh
       live "/announcements", StudentLive.Announcements
       live "/timetable", StudentLive.Timetable
       live "/schedule", StudentLive.Schedule
