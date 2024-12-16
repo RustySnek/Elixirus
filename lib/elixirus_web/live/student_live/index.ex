@@ -590,7 +590,6 @@ defmodule ElixirusWeb.StudentLive.Index do
             {key, val} <-
               @info
               |> Map.to_list()
-              |> dbg
           }
           phx-hook="expand_click"
           id="info"
@@ -598,8 +597,8 @@ defmodule ElixirusWeb.StudentLive.Index do
         >
           <div class="flex flex-col">
             <span><%= key %></span>
-            <div class="flex flex-row gap-x-1">
-              <p :for={val <- Map.values(val)} :if={val != ""}>
+            <div class="flex flex-row gap-x-1" :if={val != ""}>
+              <p  :if={val != ""} :for={val <- Map.values(val)}>
                 <%= val %>
               </p>
             </div>
