@@ -37,8 +37,20 @@
     </div>
   </div>
 
+  <.link
+    :if={@live_action == nil}
+    class="h-20 rounded bg-fg shadow-md flex items-center justify-center"
+    navigate={~p"/student/attendance/subjects"}
+    replace={false}
+  >
+    View subject frequency
+  </.link>
+  <div :if={@live_action == :subject_frequency && :subject_frequency in @loadings}>
+    Loading...
+  </div>
+
   <div
-    :if={@subject_frequency != []}
+    :if={@live_action == :subject_frequency && :subject_frequency not in @loadings}
     class="flex flex-col gap-y-4 xl:max-h-[400px] md:flex-wrap items-center "
   >
     <div :for={{subj, freq} <- @subject_frequency} class="select-none w-full xl:w-1/4">

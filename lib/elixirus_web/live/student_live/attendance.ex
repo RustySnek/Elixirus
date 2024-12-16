@@ -148,7 +148,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       end)
       |> create_fetcher(user_id, subject_frequency, :subject_frequency, fn ->
         SnakeArgs.from_params(:elixirus, :subject_frequency, [client])
-        |> Venomous.python!(timeout: 30_000)
+        |> Venomous.python!(python_timeout: 20_000)
       end)
       |> create_fetcher(user_id, attendance, :attendance, fn ->
         {SnakeArgs.from_params(:elixirus, :attendance, [client, true])

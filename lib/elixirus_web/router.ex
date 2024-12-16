@@ -38,6 +38,7 @@ defmodule ElixirusWeb.Router do
 
       scope "/attendance" do
         live "/", StudentLive.Attendance
+        live "/subjects", StudentLive.Attendance, :subject_frequency
         live "/:href", StudentLive.Attendance, :view
       end
 

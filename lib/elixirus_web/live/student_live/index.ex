@@ -79,7 +79,6 @@ defmodule ElixirusWeb.StudentLive.Index do
         :attendance => attendance_discards,
         :announcement => announcement_discards
       }
-      |> dbg
 
     {:noreply, push_event(socket, "discard-all", discards)}
   end
@@ -597,8 +596,8 @@ defmodule ElixirusWeb.StudentLive.Index do
         >
           <div class="flex flex-col">
             <span><%= key %></span>
-            <div class="flex flex-row gap-x-1" :if={val != ""}>
-              <p  :if={val != ""} :for={val <- Map.values(val)}>
+            <div :if={val != ""} class="flex flex-row gap-x-1">
+              <p :for={val <- Map.values(val)} :if={val != ""}>
                 <%= val %>
               </p>
             </div>

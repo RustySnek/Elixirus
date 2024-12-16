@@ -177,7 +177,7 @@ defmodule Elixirus.TokenWorker do
       %Client{} = client = Client.get_client(token)
 
       case SnakeArgs.from_params(:elixirus, :announcements, [client])
-           |> python!(timeout: 10_000) do
+           |> python!(python_timeout: 10_000) do
         {:error, :timeout} ->
           Logger.info("Timed out refreshing")
 
