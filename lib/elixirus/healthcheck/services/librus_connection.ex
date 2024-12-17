@@ -28,7 +28,10 @@ defmodule Elixirus.Healthcheck.Services.LibrusConnection do
            timeout: 5_000,
            recv_timeout: 5_000
          ) do
-      {:ok, _} ->
+      {:ok,
+       %HTTPoison.Response{
+         status_code: 302
+       }} ->
         set_proxy(:down)
         :up
 

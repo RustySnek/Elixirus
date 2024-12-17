@@ -195,26 +195,32 @@ defmodule ElixirusWeb.Helpers do
   end
 
   def cache_and_ttl_data(user_id, cache_type, data, expiry_time \\ 5) do
-    Cachex.get_and_update(:elixirus_cache, user_id, fn caches -> 
+    Cachex.get_and_update(:elixirus_cache, user_id, fn caches ->
       if caches != nil do
-        [cache_type | caches] 
-      else 
+        [cache_type | caches]
+      else
         [cache_type]
       end
-
     end)
+
     Cachex.put(:elixirus_cache, user_id <> cache_type, data)
     Cachex.expire(:elixirus_cache, user_id <> cache_type, :timer.minutes(expiry_time))
   end
 
-  def purge_user_cache(user_id) do 
-    case Cachex.get(:elixirus_cache, user_id)  do 
-      {:ok, nil} -> :ok
-      {:ok, user_caches} -> Enum.each(user_caches, fn cache -> 
-        Cachex.del(:elixirus_cache, user_id <> cache)
-      end)
-      _ -> :ok
+  def purge_user_cache(user_id) do
+    case Cachex.get(:elixirus_cache, user_id) do
+      {:ok, nil} ->
+        :ok
+
+      {:ok, user_caches} ->
+        Enum.each(user_caches, fn cache ->
+          Cachex.del(:elixirus_cache, user_id <> cache)
+        end)
+
+      _ ->
+        :ok
     end
+
     Cachex.del(:elixirus_cache, user_id)
     :ok
   end

@@ -21,6 +21,12 @@ defmodule Elixirus.Healthcheck.HealthWorker do
     {:reply, service_status, state}
   end
 
+  def handle_call({:refresh_status}, _from, %{service: service} = state) do
+    new_service_status = apply(service, :check_status, [])
+    new_state = Map.put(state, :status, new_service_status)
+    {:reply, new_service_status, new_state}
+  end
+
   def handle_continue(:init_status, state), do: execute_check_status(state)
 
   def handle_info(:check, state), do: execute_check_status(state)
