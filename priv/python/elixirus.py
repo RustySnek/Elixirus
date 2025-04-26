@@ -1,3 +1,4 @@
+import asyncio
 from collections import Counter
 from datetime import datetime
 from enum import Enum
@@ -5,6 +6,7 @@ from enum import Enum
 from erlport.erlterms import Atom
 from librus_apix.announcements import get_announcements
 from librus_apix.attendance import (
+    _get_subject_attendance,
     get_attendance,
     get_attendance_frequency,
     get_subject_frequency,
@@ -81,8 +83,8 @@ def frequency(client: Client):
     return status.value, freq
 
 
-def subject_frequency(client: Client):
-    status, freq = sanitize_fetch(get_subject_frequency, client)
+def subject_frequency(client: Client, freq):
+    status, freq = sanitize_fetch(get_subject_frequency, client, freq)
     return status.value, freq
 
 
@@ -139,6 +141,11 @@ def attendance(client: Client, stats: bool = False, opt: str = "all"):
     if not stats or status.value != RETURN_ATOM.ok.value:
         return status.value, attendance
     return status.value, attendance, get_attendance_stats(attendance)
+
+
+def subject_attendance(client: Client):
+    status, attendance = sanitize_fetch(asyncio.run, _get_subject_attendance(client))
+    return status.value, attendance
 
 
 def schedule(client: Client, year: str, month: str, empty: bool = False):

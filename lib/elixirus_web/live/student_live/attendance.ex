@@ -10,26 +10,34 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
   @asyncs [
     :load_frequency,
-    :load_subject_frequency,
+    :load_subject_attendance,
     :load_attendance
   ]
 
-  def handle_async(:load_subject_frequency, {:ok, freq}, socket) do
+  def handle_async(:load_subject_attendance, {:ok, attendance}, socket) do
     socket =
-      case match_basic_errors(socket, freq, @asyncs) do
-        {:ok, frequency} ->
+      case match_basic_errors(socket, attendance, @asyncs) do
+        {:ok, subject_attendance} ->
           user_id = socket.assigns.user_id
 
           frequency =
-            frequency
-            |> Enum.to_list()
+            case SnakeArgs.from_params(:elixirus, :subject_frequency, [socket.assigns.client, subject_attendance])
+        |> Venomous.python!(python_timeout: 20_000) do
+              {:ok, frequency} ->
+            frequency |> Enum.to_list()
             |> Enum.sort_by(fn {_key, value} -> value end)
+              anyhow ->  anyhow |> dbg 
+                []
+            end
 
+          subject_attendance = subject_attendance |> dbg |> Enum.into(%{})
           cache_and_ttl_data(user_id, "subject_frequency", frequency, 15)
+          cache_and_ttl_data(user_id, "subject_attendance", subject_attendance, 15)
 
           socket
           |> assign(:subject_frequency, frequency)
-          |> assign(:loadings, List.delete(socket.assigns.loadings, :subject_frequency))
+          |> assign(:subject_attendance, subject_attendance)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :subject_attendance))
 
         {_err, _msg, socket} ->
           socket
@@ -120,8 +128,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> Client.get_client()
 
     frequency = handle_cache_data(user_id, "frequency")
-    subject_frequency = handle_cache_data(user_id, "subject_frequency")
-
+    subject_attendance = handle_cache_data(user_id, "subject_attendance")    
     attendance = handle_cache_data(user_id, "#{semester}-attendance")
 
     stats =
@@ -136,6 +143,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> assign(:stats, stats)
       |> assign(:frequency, [])
       |> assign(:subject_frequency, [])
+      |> assign(:subject_attendance, %{})
       |> assign(:loadings, [])
       |> assign(:client, client)
       |> assign(:semester, semester)
@@ -146,8 +154,8 @@ defmodule ElixirusWeb.StudentLive.Attendance do
         SnakeArgs.from_params(:elixirus, :frequency, [client])
         |> python!()
       end)
-      |> create_fetcher(user_id, subject_frequency, :subject_frequency, fn ->
-        SnakeArgs.from_params(:elixirus, :subject_frequency, [client])
+      |> create_fetcher(user_id, subject_attendance, :subject_attendance, fn ->
+        SnakeArgs.from_params(:elixirus, :subject_attendance, [client])
         |> Venomous.python!(python_timeout: 20_000)
       end)
       |> create_fetcher(user_id, attendance, :attendance, fn ->
@@ -199,6 +207,13 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     """
   end
 
+  defp freq_calculator(assigns) do 
+    dbg(assigns)
+    ~H"""
+    test
+    """
+  end
+
   defp absence(%{selected: false} = assigns) do
     ~H"""
     <.link
@@ -225,6 +240,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     </.link>
     """
   end
+
 
   defp colors(freq) do
     cond do
