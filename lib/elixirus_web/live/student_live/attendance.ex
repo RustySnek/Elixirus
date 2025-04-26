@@ -21,12 +21,18 @@ defmodule ElixirusWeb.StudentLive.Attendance do
           user_id = socket.assigns.user_id
 
           frequency =
-            case SnakeArgs.from_params(:elixirus, :subject_frequency, [socket.assigns.client, subject_attendance])
-        |> Venomous.python!(python_timeout: 20_000) do
+            case SnakeArgs.from_params(:elixirus, :subject_frequency, [
+                   socket.assigns.client,
+                   subject_attendance
+                 ])
+                 |> Venomous.python!(python_timeout: 20_000) do
               {:ok, frequency} ->
-            frequency |> Enum.to_list()
-            |> Enum.sort_by(fn {_key, value} -> value end)
-              anyhow ->  anyhow |> dbg 
+                frequency
+                |> Enum.to_list()
+                |> Enum.sort_by(fn {_key, value} -> value end)
+
+              anyhow ->
+                anyhow |> dbg
                 []
             end
 
@@ -128,7 +134,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> Client.get_client()
 
     frequency = handle_cache_data(user_id, "frequency")
-    subject_attendance = handle_cache_data(user_id, "subject_attendance")    
+    subject_attendance = handle_cache_data(user_id, "subject_attendance")
     attendance = handle_cache_data(user_id, "#{semester}-attendance")
 
     stats =
@@ -207,8 +213,9 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     """
   end
 
-  defp freq_calculator(assigns) do 
+  defp freq_calculator(assigns) do
     dbg(assigns)
+
     ~H"""
     test
     """
@@ -240,7 +247,6 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     </.link>
     """
   end
-
 
   defp colors(freq) do
     cond do
