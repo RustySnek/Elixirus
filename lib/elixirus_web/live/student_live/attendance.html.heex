@@ -45,12 +45,12 @@
   >
     View subject frequency
   </.link>
-  <div :if={@live_action == :subject_frequency && :subject_frequency in @loadings}>
+  <div :if={@live_action == :subject_frequency && :subject_attendance in @loadings}>
     Loading...
   </div>
 
   <div
-    :if={@live_action == :subject_frequency && :subject_frequency not in @loadings}
+    :if={@live_action == :subject_frequency && :subject_attendance not in @loadings}
     class="flex flex-col gap-y-4 xl:max-h-[400px] md:flex-wrap items-center "
   >
     <div :for={{subj, freq} <- @subject_frequency} class="select-none w-full xl:w-1/4">
@@ -64,6 +64,9 @@
           style={"--percentage: #{freq}%;"}
         >
         </div>
+      </div>
+      <div :if={@subject_attendance |> Map.get(subj)}>
+        <.freq_calculator attendance={@subject_attendance |> Map.get(subj)}/>
       </div>
     </div>
   </div>
