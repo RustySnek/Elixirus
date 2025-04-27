@@ -53,7 +53,7 @@
     :if={@live_action == :subject_frequency && :subject_attendance not in @loadings}
     class="flex flex-col gap-y-4 xl:max-h-[400px] md:flex-wrap items-center "
   >
-    <div :for={{subj, freq} <- @subject_frequency} class="select-none w-full xl:w-1/4">
+    <div :for={{subj, freq} <- @subject_frequency |> dbg} class="select-none w-full xl:w-1/4">
       <span class="flex flex-row items-center justify-between">
         <span class="line-clamp-1 font-quicksand font-bold"><%= subj %></span>
         <span><%= freq %>%</span>
@@ -65,8 +65,8 @@
         >
         </div>
       </div>
-      <div :if={@subject_attendance |> Map.get(subj)}>
-        <.freq_calculator attendance={@subject_attendance |> Map.get(subj)} />
+      <div :if={@subject_attendance |> dbg |> Map.get(subj)}>
+        <.freq_calculator subject={subj} attendance={@subject_attendance |> Map.get(subj)} />
       </div>
     </div>
   </div>

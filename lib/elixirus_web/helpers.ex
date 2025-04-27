@@ -108,7 +108,7 @@ defmodule ElixirusWeb.Helpers do
       "nb" -> "red-500"
       "u" -> "lime-600"
       "sp" -> "amber-600"
-      "zw" -> "zinc-700"
+      "zw" -> "zinc-600"
       "ob" -> "cyan-500"
       _ -> "fuchsia-600"
     end

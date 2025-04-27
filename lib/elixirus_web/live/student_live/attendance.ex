@@ -14,35 +14,66 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     :load_attendance
   ]
 
+  def calculate_attendance_frequency(attend_marks, miss_lesson_offset \\ 0) do
+    unattended =
+      Enum.reduce(
+        ["nb", "u"],
+        0,
+        fn state, acc -> Map.get(attend_marks, state, 0) + acc end
+      )
+
+    total = attend_marks |> Map.values() |> Enum.sum()
+
+    {attended, total} =
+      if miss_lesson_offset < 0 do
+        attended = total - unattended + abs(miss_lesson_offset)
+        {attended, total + abs(miss_lesson_offset)}
+      else
+        unattended = unattended + miss_lesson_offset
+        total = total + miss_lesson_offset
+        {total - unattended, total}
+      end
+
+    (attended / max(1, total) * 10_000)
+    |> Float.round()
+    |> Kernel./(100)
+  end
+
+  def handle_event("offset_frequency", %{"name" => name, "offset" => offset}, socket) do
+    frequencies = socket.assigns.subject_frequency
+    attend_marks = socket.assigns.subject_attendance
+
+    offset =
+      case Integer.parse(offset) do
+        :error -> 0
+        {offset, _} -> offset
+      end
+
+    {:noreply,
+     assign(socket, :subject_frequency, %{
+       frequencies
+       | name => calculate_attendance_frequency(attend_marks |> Map.get(name, %{}), offset)
+     })}
+  end
+
   def handle_async(:load_subject_attendance, {:ok, attendance}, socket) do
     socket =
       case match_basic_errors(socket, attendance, @asyncs) do
         {:ok, subject_attendance} ->
           user_id = socket.assigns.user_id
-
-          frequency =
-            case SnakeArgs.from_params(:elixirus, :subject_frequency, [
-                   socket.assigns.client,
-                   subject_attendance
-                 ])
-                 |> Venomous.python!(python_timeout: 20_000) do
-              {:ok, frequency} ->
-                frequency
-                |> Enum.to_list()
-                |> Enum.sort_by(fn {_key, value} -> value end)
-
-              anyhow ->
-                anyhow |> dbg
-                []
-            end
-
-          subject_attendance = subject_attendance |> dbg |> Enum.into(%{})
-          cache_and_ttl_data(user_id, "subject_frequency", frequency, 15)
           cache_and_ttl_data(user_id, "subject_attendance", subject_attendance, 15)
 
+          subject_frequencies =
+            subject_attendance
+            |> Map.to_list()
+            |> Enum.map(fn {subj, marks} ->
+              {subj, calculate_attendance_frequency(marks)}
+            end)
+            |> Enum.into(%{})
+
           socket
-          |> assign(:subject_frequency, frequency)
           |> assign(:subject_attendance, subject_attendance)
+          |> assign(:subject_frequency, subject_frequencies)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :subject_attendance))
 
         {_err, _msg, socket} ->
@@ -135,6 +166,19 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
     frequency = handle_cache_data(user_id, "frequency")
     subject_attendance = handle_cache_data(user_id, "subject_attendance")
+
+    subject_frequency =
+      if subject_attendance != :load do
+        subject_attendance
+        |> Map.to_list()
+        |> Enum.map(fn {subj, marks} ->
+          {subj, calculate_attendance_frequency(marks)}
+        end)
+        |> Enum.into(%{})
+      else
+        %{}
+      end
+
     attendance = handle_cache_data(user_id, "#{semester}-attendance")
 
     stats =
@@ -148,7 +192,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> assign(:attendance, [])
       |> assign(:stats, stats)
       |> assign(:frequency, [])
-      |> assign(:subject_frequency, [])
+      |> assign(:subject_frequency, subject_frequency)
       |> assign(:subject_attendance, %{})
       |> assign(:loadings, [])
       |> assign(:client, client)
@@ -163,6 +207,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> create_fetcher(user_id, subject_attendance, :subject_attendance, fn ->
         SnakeArgs.from_params(:elixirus, :subject_attendance, [client])
         |> Venomous.python!(python_timeout: 20_000)
+        |> dbg
       end)
       |> create_fetcher(user_id, attendance, :attendance, fn ->
         {SnakeArgs.from_params(:elixirus, :attendance, [client, true])
@@ -174,6 +219,32 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
   defp excursion(true), do: "Yes"
   defp excursion(false), do: "No"
+
+  defp freq_calculator(assigns) do
+    ~H"""
+    <div class="flex justify-between mt-1">
+      <div class="flex flex-row gap-1 flex-wrap">
+        <div
+          :for={{name, value} <- @attendance}
+          class={"rounded-full text-sm w-16 h-min flex-wrap flex flex-row bg-#{attendance_color(name)}"}
+        >
+          <span class="bg-inherit text-center h-min rounded-l-full brightness-75 w-1/3">
+            <%= name %>
+          </span>
+          <span class="w-2/3 text-center"><%= value %></span>
+        </div>
+      </div>
+      <form phx-change="offset_frequency" phx-update="ignore" id={"#{@subject}-nb-offset"}>
+        <input hidden value={@subject} name="name" />
+        <input
+          class={"bg-fg rounded-md w-20 h-6 border border-#{attendance_color("nb")}"}
+          type="number"
+          name="offset"
+        />
+      </form>
+    </div>
+    """
+  end
 
   attr :class, :string, default: ""
   attr :absence, Attendance, required: true
@@ -210,14 +281,6 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       "><%= @absence.subject %></span>
     </.link>
     <.absence absence={@absence} selected={false} class="brightness-150" />
-    """
-  end
-
-  defp freq_calculator(assigns) do
-    dbg(assigns)
-
-    ~H"""
-    test
     """
   end
 
