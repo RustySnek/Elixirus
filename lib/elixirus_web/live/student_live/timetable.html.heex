@@ -1,11 +1,14 @@
 <div phx-hook="retrieve_local_storage" name="calendar_id" id="retrieve_calendar_id"></div>
-<div class="flex flex-col md:flex-row gap-x-4 mb-6 justify-center">
-  <div class="flex flex-row items-center md:gap-x-4 justify-between xs:-mt-4 sm:-mt-8">
-    <form phx-change="connect_calendar" class="flex flex-row xs:flex-col gap-4 self-center">
+
+<!-- Timetable Navigation Bar -->
+<div class="timetable-nav-container">
+  <!-- Calendar Input Section -->
+  <div class="timetable-calendar-input">
+    <form phx-change="connect_calendar" class="timetable-calendar-form">
       <input
-        placeholder="google calendar id/email"
+        placeholder="Google Calendar ID / Email"
         phx-debounce={500}
-        class={"bg-card #{@calendar_events != %{} && "!border-none"} shadow rounded-lg border xs:text-sm"}
+        class="timetable-calendar-input-field"
         type="text"
         name="calendar_id"
         value={@calendar_id}
@@ -13,43 +16,60 @@
         phx-hook="set_local_storage"
       />
     </form>
-    <button
-      :if={(:timetable in @loadings) |> Kernel.!() && @current_monday != @this_monday}
-      phx-click="change_week"
-      phx-value-days={@this_monday |> Date.diff(@current_monday)}
-    >
-      <span class="sm:font-semibold bg-card border-red-800 border-2 rounded-lg flex h-10 items-center px-2">
-        <%= @current_monday |> Date.to_iso8601() %>
-      </span>
-    </button>
-    <span
-      :if={:timetable in @loadings || @current_monday == @this_monday}
-      class="shadow bg-card rounded-lg flex h-10 items-center px-2"
-    >
-      <%= @current_monday |> Date.to_iso8601() %>
-    </span>
   </div>
-  <div class="flex flex-row justify-between mx-4 mt-2 md:-mt-8 md:gap-x-4 items-center">
+
+  <!-- Navigation Controls -->
+  <div class="timetable-nav-controls">
     <button
       :if={(:timetable in @loadings) |> Kernel.!()}
       phx-click="change_week"
-      class="bg-card px-2 shadow py-1 h-8 md:h-10 rounded-lg w-24"
+      class="timetable-nav-button timetable-nav-button-prev"
       phx-value-days="-7"
+      title="Previous Week"
     >
-      <span>previous</span>
+      <Heroicons.chevron_left class="w-5 h-5" />
     </button>
-    <div
-      :if={:timetable in @loadings}
-      class="mx-auto w-8 h-8 rounded-full border-l border-t border-fuchsia-600 animate-spin-fast duration-[10]"
-    >
+
+    <!-- Date Display -->
+    <div class="timetable-date-display">
+      <button
+        :if={(:timetable in @loadings) |> Kernel.!() && @current_monday != @this_monday}
+        phx-click="change_week"
+        phx-value-days={@this_monday |> Date.diff(@current_monday)}
+        class="timetable-date-button"
+      >
+        <Heroicons.calendar_days class="w-5 h-5" />
+        <span class="timetable-date-text">
+          <%= @current_monday |> Date.to_iso8601() %>
+        </span>
+        <Heroicons.arrow_path class="w-4 h-4 timetable-date-reset-icon" />
+      </button>
+      <div
+        :if={:timetable in @loadings || @current_monday == @this_monday}
+        class="timetable-date-static"
+      >
+        <Heroicons.calendar_days class="w-5 h-5" />
+        <span class="timetable-date-text">
+          <%= @current_monday |> Date.to_iso8601() %>
+        </span>
+      </div>
+      <div
+        :if={:timetable in @loadings}
+        class="timetable-loading-spinner"
+        title="Loading..."
+      >
+        <div class="timetable-spinner"></div>
+      </div>
     </div>
+
     <button
       :if={(:timetable in @loadings) |> Kernel.!()}
       phx-click="change_week"
-      class="bg-card shadow px-2 py-1 h-8 md:h-10 rounded-lg w-24"
+      class="timetable-nav-button timetable-nav-button-next"
       phx-value-days="7"
+      title="Next Week"
     >
-      <span>next</span>
+      <Heroicons.chevron_right class="w-5 h-5" />
     </button>
   </div>
 </div>
@@ -61,24 +81,66 @@
     top={current_next_period_number(@timetable) * 125}
     class="relative w-full  flex flex-col"
   >
-    <div class="flex flex-col w-full  gap-y-4">
-      <div class="opacity-0 h-12">Weekday</div>
-      <div :for={period <- hd(@timetable)} class="w-full">
-        <div class="h-[90px] text-gray-400 xs:tracking-tight xs:text-xs  flex flex-col justify-between">
-          <p class="z-30 pointer-events-none w-full">
-            <%= period.date_from %>
-          </p>
-          <p class="z-30 pointer-events-none w-full">
-            <%= period.date_to %>
-          </p>
+    <!-- Timeline Column -->
+    <div class="flex flex-col w-20 xs:w-24 md:w-28 flex-shrink-0 relative">
+      <div class="opacity-0 h-12 flex-shrink-0">Weekday</div>
+      <div :for={period <- hd(@timetable)} class="relative">
+        <!-- Time Marker -->
+        <div class="h-[90px] flex flex-col justify-between relative">
+          <!-- Timeline line -->
+          <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-purple-500/20"></div>
+          <!-- Time labels -->
+          <div class="flex flex-col justify-between h-full pl-1">
+            <div class="flex items-start gap-1">
+              <div class="w-2 h-2 rounded-full bg-purple-400/50 mt-1 -ml-1.5"></div>
+              <p class="text-xs text-purple-300/70 font-medium pt-0.5">
+                <%= period.date_from %>
+              </p>
+            </div>
+            <div class="flex items-end gap-1">
+              <div class="w-2 h-2 rounded-full bg-purple-400/50 mb-1 -ml-1.5"></div>
+              <p class="text-xs text-purple-300/70 font-medium pb-0.5">
+                <%= period.date_to %>
+              </p>
+            </div>
+          </div>
         </div>
-        <div style={"height: #{2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}>
+        <!-- Recess spacing with timeline continuation -->
+        <div 
+          :if={2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to) > 0}
+          class="relative"
+          style={"height: #{2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}
+        >
+          <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-purple-500/10"></div>
         </div>
       </div>
     </div>
+    <!-- Horizontal Grid Lines - subtle background guide -->
+    <div class="absolute left-0 right-0 top-12 bottom-0 pointer-events-none z-0" aria-hidden="true">
+      <div class="flex flex-col h-full blur-[0.5px]">
+        <div :for={period <- hd(@timetable)} class="relative">
+          <!-- Line at period start (top) -->
+          <div class="absolute left-0 right-0 top-0 h-[0.5px] bg-purple-500/8"></div>
+          <!-- Period height spacer -->
+          <div class="h-[90px]"></div>
+          <!-- Line at period end (bottom) -->
+          <div class="absolute left-0 right-0 top-[90px] h-[0.5px] bg-purple-500/8"></div>
+          <!-- Recess spacing -->
+          <div 
+            :if={2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to) > 0}
+            style={"height: #{2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}
+            class="relative"
+          >
+            <div class="absolute left-0 right-0 top-0 h-[0.5px] bg-purple-500/5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekdays Columns -->
     <div
       x-init={"$el.scrollLeft = #{weekday_scroll_left()};"}
-      class="overflow-x-auto w-full absolute gap-x-10 justify-between md:snap-none snap-x snap-mandatory  px-20  flex-row flex"
+      class="overflow-x-auto flex-1 absolute left-20 xs:left-24 md:left-28 right-0 gap-x-3 md:gap-x-4 md:snap-none snap-x snap-mandatory px-2 xs:px-4 md:px-6 flex-row flex"
     >
       <div
         :for={weekday <- @timetable}
@@ -86,42 +148,54 @@
           first_period =
             List.first(weekday)
         }
-        class="
-      w-auto snap-center relative
-       "
+        class="w-64 xs:w-72 md:w-80 snap-center relative"
       >
-        <div class="flex h-full gap-y-4 flex-col ">
-          <div :if={
-            (weekday_events = events_inside_timeframe(@calendar_events, first_period.date)) != nil
-          }>
-            <.weekday_modal
-              weekday={first_period}
-              calendar_events={weekday_events}
-              schedule={@schedule}
-            />
-
-            <.weekday_button
-              :if={weekday_events != []}
-              weekday={first_period}
-              calendar_events={weekday_events}
-            />
-            <.weekday
-              :if={weekday_events == []}
-              weekday={first_period}
-              calendar_events={weekday_events}
-            />
-          </div>
-          <div :for={period <- weekday} class="w-72 xs:w-60 text-justify">
-            <div :if={event_inside_period?(@schedule, period)} class="absolute">
-              <.information_circle
-                outline
-                class="w-10 text-red-800 translate-y-11 xs:translate-x-48 translate-x-60"
+        <div class="flex flex-col h-full">
+          <!-- Weekday Header - redesigned -->
+          <div class="weekday-header-container">
+            <div :if={
+              (weekday_events = events_inside_timeframe(@calendar_events, first_period.date)) != nil
+            } class="weekday-header-wrapper">
+              <.weekday_modal
+                weekday={first_period}
+                calendar_events={weekday_events}
+                schedule={@schedule}
+              />
+              <.weekday_button
+                :if={weekday_events != []}
+                weekday={first_period}
+                calendar_events={weekday_events}
+              />
+              <.weekday
+                :if={weekday_events == []}
+                weekday={first_period}
+                calendar_events={weekday_events}
               />
             </div>
-            <div class="w-full overflow-x-hidden">
-              <.period_modal period={period} schedule={@schedule} />
-              <.period period={period} />
-              <div style={"height: #{2* calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}>
+          </div>
+          
+          <!-- Periods -->
+          <div class="flex flex-col relative">
+            <div :for={period <- weekday} class="relative">
+              <!-- Period content -->
+              <div class="relative">
+                <!-- Glow effect indicator for events in period -->
+                <div :if={event_inside_period?(@schedule, period)} class="absolute -top-1 -right-1 pointer-events-none">
+                  <div class="relative w-6 h-6">
+                    <div class="absolute inset-0 rounded-full bg-red-500/30 blur-md animate-pulse"></div>
+                    <div class="absolute inset-0.5 rounded-full bg-red-400 shadow-[0_0_12px_rgba(239,68,68,0.9),0_0_24px_rgba(239,68,68,0.6)]"></div>
+                  </div>
+                </div>
+                <.period_modal period={period} schedule={@schedule} />
+                <.period period={period} />
+              </div>
+              
+              <!-- Recess spacing -->
+              <div 
+                :if={2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to) > 0}
+                style={"height: #{2 * calculate_minute_difference(period.next_recess_from, period.next_recess_to)}px"}
+                class="w-full"
+              >
               </div>
             </div>
           </div>

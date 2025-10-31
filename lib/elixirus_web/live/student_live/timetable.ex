@@ -8,8 +8,8 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
   alias ElixirusWeb.Modal
   import ElixirusWeb.Helpers
-
-  import Heroicons, only: [information_circle: 1]
+  import Heroicons
+  import Phoenix.HTML, only: [raw: 1]
   @asyncs [:load_schedule, :load_timetable]
 
   defp weekday_scroll_left() do
@@ -374,53 +374,141 @@ defmodule ElixirusWeb.StudentLive.Timetable do
   end
 
   defp weekday_modal(assigns) do
+    calendar_events = assigns[:calendar_events] || []
+    weekday = assigns[:weekday]
+    schedule = assigns[:schedule] || %{}
+    
+    schedule_events = 
+      case weekday do
+        %{date: date} when is_binary(date) -> schedule |> get_events_inside_day(date)
+        _ -> []
+      end
+    
+    weekday_name = 
+      case weekday do
+        %{weekday: name} when is_binary(name) -> name
+        %{weekday: name} -> name
+        _ -> "Unknown"
+      end
+    
+    weekday_date = 
+      case weekday do
+        %{date: date} when is_binary(date) -> date
+        %{date: date} -> date
+        _ -> nil
+      end
+    
     ~H"""
-    <.live_component module={Modal} id={"#{@weekday.weekday}-googlecalendar"}>
-      <div class="gap-y-2 flex flex-col items-center md:max-w-3xl max-w-xs xs:max-w-[250px]">
-        <div
-          :for={
-            event <-
-              @schedule
-              |> get_events_inside_day(@weekday.date)
-          }
-          class="bg-[#1E1E1E] rounded-2xl px-4 py-2 md:max-w-3xl max-w-xs xs:max-w-[250px]"
-        >
-          <div class="flex flex-col text-center space-y-2 mb-3">
-            <span class="text-lg text-center text-fuchsia-700 font-bold">
-              <%= event.title %>
-            </span>
-            <span class="text-lg text-fuchsia-400 font-bold font-italic break-words">
-              <%= event.subject %>
-            </span>
+    <.live_component module={Modal} id={"#{weekday_name}-googlecalendar"}>
+      <div class="weekday-events-modal-content">
+        <!-- Header -->
+        <div class="weekday-events-header">
+          <div class="weekday-events-header-title">
+            <Heroicons.calendar class="w-6 h-6" />
+            <h2 class="weekday-events-title">
+              <%= weekday_name %> Events
+            </h2>
           </div>
-          <div class="flex flex-col text-center">
-            <span
-              :for={
-                item <-
-                  event
-                  |> Map.get(:data)
-                  |> Map.values()
-                  |> Enum.reverse()
-              }
-              :if={item != "unknown"}
-            >
-              <%= item %>
-            </span>
-          </div>
-        </div>
-        <div
-          :for={
-            event <-
-              @calendar_events
-          }
-          class="bg-[#1E1E1E] rounded-2xl px-4 py-2"
-        >
-          <span class="mb-2 text-lg font-bold">
-            <%= event["summary"] %>
+          <span class="weekday-events-date">
+            <%= if weekday_date do
+              date_to_shorthand(weekday_date)
+            else
+              ""
+            end %>
           </span>
-          <br />
-          <span><%= event["description"] |> HtmlSanitizeEx.html5() |> raw %></span>
         </div>
+
+        <!-- Schedule Events -->
+        <div
+          :if={schedule_events != []}
+          class="weekday-events-section"
+        >
+          <div class="weekday-events-section-title">
+            <Heroicons.academic_cap class="w-5 h-5" />
+            <span>Schedule Events</span>
+          </div>
+          <div class="weekday-events-list">
+            <div
+              :for={event <- schedule_events}
+              class="weekday-event-card weekday-event-schedule"
+            >
+              <div class="weekday-event-header">
+                <span class="weekday-event-title">
+                  <%= event.title %>
+                </span>
+                <span
+                  :if={event.subject != event.title}
+                  class="weekday-event-subject"
+                >
+                  <%= event.subject %>
+                </span>
+              </div>
+              <div class="weekday-event-details">
+                <div
+                  :for={
+                    {key, value} <-
+                      event
+                      |> Map.get(:data, %{})
+                      |> Map.to_list()
+                      |> Enum.reverse()
+                  }
+                  :if={value != "unknown"}
+                  class="weekday-event-detail-row"
+                >
+                  <span class="weekday-event-detail-label"><%= key %>:</span>
+                  <span class="weekday-event-detail-value"><%= value %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Calendar Events -->
+        <div
+          :if={calendar_events != [] && calendar_events != nil}
+          class="weekday-events-section"
+        >
+          <div class="weekday-events-section-title">
+            <Heroicons.calendar class="w-5 h-5" />
+            <span>Google Calendar</span>
+          </div>
+          <div class="weekday-events-list">
+            <div
+              :for={event <- calendar_events}
+              class="weekday-event-card weekday-event-google"
+            >
+              <div class="weekday-event-header">
+                <span class="weekday-event-title">
+                  <%= event["summary"] || event[:summary] || "Untitled Event" %>
+                </span>
+              </div>
+              <div
+                :if={(event["description"] || event[:description] || "") != ""}
+                class="weekday-event-description"
+              >
+                <%= (event["description"] || event[:description] || "") |> HtmlSanitizeEx.html5() |> raw %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div
+          :if={schedule_events == [] && (calendar_events == [] || calendar_events == nil)}
+          class="weekday-events-empty"
+        >
+          <Heroicons.calendar_days class="w-12 h-12" />
+          <p class="weekday-events-empty-text">No events for this day</p>
+        </div>
+
+        <!-- Close Button -->
+        <button
+          class="weekday-events-close-button"
+          phx-click={Modal.hide_modal("#{weekday_name}-googlecalendar")}
+        >
+          <Heroicons.x_mark class="w-5 h-5" />
+          <span>Close</span>
+        </button>
       </div>
     </.live_component>
     """
@@ -428,12 +516,9 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
   defp weekday(assigns) do
     ~H"""
-    <div class="
-      text-center h-12 shadow rounded-lg w-full 
-      font-semibold flex items-center justify-center 
-      md:text-lg bg-card
-    ">
-      <%= @weekday.weekday %>, <%= date_to_shorthand(@weekday.date) %>
+    <div class="weekday-header weekday-header-static">
+      <span class="weekday-name"><%= @weekday.weekday %></span>
+      <span class="weekday-date"><%= date_to_shorthand(@weekday.date) %></span>
     </div>
     """
   end
@@ -443,17 +528,17 @@ defmodule ElixirusWeb.StudentLive.Timetable do
     <button
       phx-click={ElixirusWeb.Modal.show_modal_js("#{@weekday.weekday}-googlecalendar")}
       phx-target={"##{@weekday.weekday}-googlecalendar"}
-      class="
-      text-center h-12 shadow rounded-lg w-full 
-      font-semibold items-center justify-center
-      md:text-lg bg-card relative flex
-    "
+      class="weekday-header weekday-header-button"
     >
-      <%= @weekday.weekday %>, <%= date_to_shorthand(@weekday.date) %>
-      <.information_circle
-        outline
-        class="absolute right-2 top-1/2 -translate-y-1/2 text-red-800 w-6 md:w-7"
-      />
+      <div class="weekday-header-content">
+        <span class="weekday-name"><%= @weekday.weekday %></span>
+        <span class="weekday-date"><%= date_to_shorthand(@weekday.date) %></span>
+      </div>
+      <!-- Glow effect indicator for events -->
+      <div class="weekday-event-indicator">
+        <div class="weekday-event-glow"></div>
+        <div class="weekday-event-dot"></div>
+      </div>
     </button>
     """
   end
@@ -465,83 +550,125 @@ defmodule ElixirusWeb.StudentLive.Timetable do
       module={Modal}
       id={"#{@period.weekday}-#{@period.number}"}
     >
-      <div class="bg-card mx-5 max-w-md min-w-[300px] md:min-w-[450px] xs:max-w-[250px] overflow-y-auto rounded-lg absolute z-40">
-        <div
-          :for={
-            event <-
-              get_events_inside_period(@schedule, @period)
-          }
-          class="bg-card rounded-2xl px-4 py-2"
-        >
-          <div class="flex flex-col space-y-2 mb-3">
-            <span class="text-lg text-fuchsia-700 font-bold">
-              <%= event.title %>
-            </span>
-            <span
-              :if={
-                event.subject !=
-                  event.title
-              }
-              class="text-fuchsia-400 font-bold font-italic text-lg"
-            >
-              <%= event.subject %>
-            </span>
+      <div class="modal-period-content">
+        <!-- Header Section -->
+        <div class="modal-header-section">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="modal-day-badge">
+              <%= @period.weekday %>
+            </div>
+            <div class="modal-lesson-badge">
+              Lesson <%= @period.number %>
+            </div>
           </div>
-          <div class="flex flex-col">
-            <span
-              :for={
-                item <-
-                  event
-                  |> Map.get(:data)
-                  |> Map.values()
-                  |> Enum.reverse()
-              }
-              :if={item != "unknown"}
-            >
-              <%= item %>
-            </span>
-          </div>
+          <h2 class="modal-subject-title">
+            <%= @period.subject %>
+          </h2>
         </div>
 
-        <div class="p-4 flex flex-col justify-center gap-y-1">
+        <!-- Status Badges (if any) -->
+        <div
+          :if={@period.info != %{}}
+          class="modal-status-section"
+        >
           <div
             :for={
               {title, info} <-
                 @period.info
                 |> Map.to_list()
             }
-            class={"flex flex-col text-#{lesson_info_color(%{title => ""})} font-bold pb-2"}
+            class={"modal-status-badge modal-status-#{lesson_info_color(%{title => ""})}"}
           >
-            <span>
+            <span class="modal-status-icon"></span>
+            <span class="modal-status-text">
               <%= title %>
             </span>
-            <div :if={is_map(info)} class="text-gray-500 font-normal flex flex-col">
-              <span :for={{_, val} <- info}><%= val %></span>
+            <div :if={is_map(info)} class="modal-status-details">
+              <span :for={{_, val} <- info} class="modal-status-detail-item">
+                <%= val %>
+              </span>
             </div>
           </div>
-
-          <span class="break-words max-w-xl lg:text-lg font-bold mb-1">
-            <%= @period.subject %>
-          </span>
-          <span class="text-base lg:text-lg">
-            <%= @period.weekday %>
-          </span>
-
-          <span class="text-gray-400">
-            Lesson: <%= @period.number %>
-          </span>
-          <span class="text-gray-400">
-            <%= @period.teacher_and_classroom %>
-          </span>
-          <span class="text-gray-400">
-            <%= @period.date %>
-          </span>
         </div>
+
+        <!-- Events Section -->
+        <div
+          :if={
+            events =
+              get_events_inside_period(@schedule, @period)
+            events != []
+          }
+          class="modal-events-section"
+        >
+          <div class="modal-section-title">
+            <Heroicons.calendar class="w-5 h-5" />
+            <span>Events</span>
+          </div>
+          <div
+            :for={event <- events}
+            class="modal-event-card"
+          >
+            <div class="modal-event-header">
+              <span class="modal-event-title">
+                <%= event.title %>
+              </span>
+              <span
+                :if={event.subject != event.title}
+                class="modal-event-subject"
+              >
+                <%= event.subject %>
+              </span>
+            </div>
+            <div class="modal-event-details">
+              <span
+                :for={
+                  item <-
+                    event
+                    |> Map.get(:data)
+                    |> Map.values()
+                    |> Enum.reverse()
+                }
+                :if={item != "unknown"}
+                class="modal-event-detail"
+              >
+                <%= item %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details Section -->
+        <div class="modal-details-section">
+          <div class="modal-detail-grid">
+            <div class="modal-detail-item">
+              <div class="modal-detail-label">
+                <Heroicons.user class="w-4 h-4" />
+                <span>Teacher & Room</span>
+              </div>
+              <div class="modal-detail-value">
+                <%= @period.teacher_and_classroom %>
+              </div>
+            </div>
+
+            <div class="modal-detail-item">
+              <div class="modal-detail-label">
+                <Heroicons.calendar_days class="w-4 h-4" />
+                <span>Date</span>
+              </div>
+              <div class="modal-detail-value">
+                <%= @period.date %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Close Button -->
         <button
-          class="bg-gray-600 h-8 hover:brightness-125 transition rounded-b-lg rounded-x-lg w-full"
+          class="modal-close-button"
           phx-click={Modal.hide_modal("#{@period.weekday}-#{@period.number}")}
         >
-          Close
+          <Heroicons.x_mark class="w-5 h-5" />
+          <span>Close</span>
         </button>
       </div>
     </.live_component>
@@ -555,30 +682,50 @@ defmodule ElixirusWeb.StudentLive.Timetable do
 
   defp period(assigns) do
     ~H"""
-    <button
-      disabled={@period.subject == ""}
-      phx-click={ElixirusWeb.Modal.show_modal_js("#{@period.weekday}-#{@period.number}")}
-      phx-target={"##{@period.weekday}-#{@period.number}"}
-      class={"
-        hover:brightness-125 transition h-[90px] w-full flex flex-col text-left justify-between py-1 px-4
-        duration-100 rounded-lg shadow bg-card relative
-        #{ @period.subject == "" &&"!shadow-none !bg-inherit"}
-        "}
-    >
-      <span class={"flex-shrink absolute opacity-50 top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-center font-bold text-#{lesson_info_color(@period.info)}"}>
-        <%= @period.info |> Map.keys() |> Enum.join(", ") %>
-      </span>
-      <div class="flex-grow z-10">
-        <span class="line-clamp-1">
-          <%= @period.subject %>
-        </span>
-      </div>
-      <span class="text-sm text-gray-500 ">
-        <%= @period.teacher_and_classroom
-        |> String.split("s.")
-        |> List.last() %>
-      </span>
-    </button>
+    <div class="h-[90px] w-full">
+      <div :if={@period.subject == ""} class="h-full w-full invisible pointer-events-none"></div>
+      <button
+        :if={@period.subject != ""}
+        phx-click={ElixirusWeb.Modal.show_modal_js("#{@period.weekday}-#{@period.number}")}
+        phx-target={"##{@period.weekday}-#{@period.number}"}
+        class="
+          h-full w-full flex flex-col text-left justify-between py-2 px-3 xs:py-2.5 xs:px-4
+          rounded-lg glass-card backdrop-blur-xl relative border
+          transition-all duration-200 ease-out
+          hover:brightness-110 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/20 period-button-hover
+          border-purple-500/20
+        "
+      >
+        <!-- Status badge overlay (centered) -->
+        <div 
+          :if={@period.info != %{}}
+          class={"period-status-overlay period-status-#{lesson_info_color(@period.info)}"}
+        >
+          <div class="period-status-overlay-content">
+            <span class="period-status-icon"></span>
+            <span class="period-status-text">
+              <%= @period.info |> Map.keys() |> List.first() %>
+            </span>
+          </div>
+        </div>
+        
+        <!-- Subject name -->
+        <div class="flex-grow flex items-start">
+          <span class="line-clamp-2 text-sm xs:text-base font-medium text-purple-100 leading-tight">
+            <%= @period.subject %>
+          </span>
+        </div>
+        
+        <!-- Teacher/Classroom -->
+        <div class="flex-shrink-0 mt-1">
+          <span class="text-[10px] xs:text-xs text-purple-300/60 truncate block">
+            <%= @period.teacher_and_classroom
+            |> String.split("s.")
+            |> List.last() %>
+          </span>
+        </div>
+      </button>
+    </div>
     """
   end
 end

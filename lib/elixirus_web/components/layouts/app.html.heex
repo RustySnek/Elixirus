@@ -1,32 +1,59 @@
 <.flash_group flash={@flash} />
-<header class="px-4 sm:px-6 lg:px-8 border-b border-fuchsia-500 pb-3 lg:mx-8 flex flex-row justify-between items-center">
-  <.header links={links()}>
-    <:logo>
-      <div class="flex flex-row space-x-4">
-        <.link navigate={~p"/student"} class="flex items-center">
-          <div class="flex flex-row mr-0 sm:mr-20 gap-x-2 justify-center">
-            <h1 class="font-quicksand text-6xl xs:text-5xl font-extrabold text-fuchsia-700">
-              Elixir<span class="text-fuchsia-900">us</span>
+<div class="glass-header sticky top-0 z-50 border-b border-purple-500/30 shadow-lg">
+  <div class="modern-header">
+    <div class="header-content">
+      <div class="header-logo-section">
+        <.link navigate={~p"/student"} class="flex items-center group">
+          <div class="flex flex-row gap-x-3 items-center">
+            <Heroicons.beaker class="h-10 w-10 xs:h-8 xs:w-8 text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.8)] group-hover:drop-shadow-[0_0_20px_rgba(232,121,249,0.9)] transition-all duration-300" />
+            <h1 class="font-quicksand text-5xl xs:text-4xl font-extrabold neon-text">
+              Elixir<span class="text-purple-300">us</span>
             </h1>
-            <Heroicons.beaker mini class="h-14 xs:h-10 text-fuchsia-700 self-end" />
           </div>
         </.link>
       </div>
-    </:logo>
-    <:misc>
-      <.link navigate={~p"/"} hidden>
-        <Heroicons.cog_6_tooth class="w-12 hover:cursor-pointer hover:text-fuchsia-500 transition hover:rotate-90 duration-500" />
-      </.link>
-      <button id="logout-button" phx-hook="logout_button">
-        <Heroicons.arrow_right_on_rectangle class="w-12 hover:cursor-pointer hover:text-red-600 hover:translate-x-2 transition duration-500" />
-      </button>
-
-      <.link navigate={~p"/student/refresh"}><Heroicons.arrow_path class="h-12 w-12" /></.link>
-    </:misc>
-  </.header>
-</header>
+      
+      <div class="header-actions">
+        <div class="flex items-center gap-2">
+          <div
+            :for={{service, status} <- ElixirusWeb.Components.NavHeader.status()}
+            class={"status-pill #{status == :up && "status-up" || "status-down"}"}
+            title={"#{service}: #{status}"}
+          >
+            <Heroicons.check_circle :if={service == :librus && status == :up} class="w-4 h-4" />
+            <Heroicons.x_circle :if={service == :librus && status == :down} class="w-4 h-4" />
+            <Heroicons.signal :if={service == :proxy && status == :up} class="w-4 h-4" />
+            <Heroicons.signal_slash :if={service == :proxy && status == :down} class="w-4 h-4" />
+            <span class="hidden sm:inline"><%= String.capitalize(to_string(service)) %></span>
+          </div>
+        </div>
+        
+        <.link navigate={~p"/student/refresh"} class="header-action-btn" title="Refresh">
+          <Heroicons.arrow_path class="w-5 h-5" />
+        </.link>
+        
+        <button id="logout-button" phx-hook="logout_button" class="header-action-btn logout" title="Logout">
+          <Heroicons.arrow_right_on_rectangle class="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+    
+    <nav class="mt-4">
+      <div class="tab-container" phx-hook="ActiveTab" id="tab-container">
+        <.link
+          :for={{title, href, _nested_links, _text_classes} <- links()}
+          navigate={href}
+          class="tab-item"
+          data-href={to_string(href)}
+        >
+          <%= title %>
+        </.link>
+      </div>
+    </nav>
+  </div>
+</div>
 <.live_component module={ElixirusWeb.LoginModal} id="login-modal-component" />
 
-<main class="pt-10 xs:pt-6 xs:px-2 px-4">
+<main class="pt-6 xs:pt-4 xs:px-2 px-6 pb-8">
   <%= @inner_content %>
 </main>

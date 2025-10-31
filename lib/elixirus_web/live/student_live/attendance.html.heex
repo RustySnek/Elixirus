@@ -1,92 +1,240 @@
-<div :if={@attendance != []} class="flex flex-col gap-y-8">
-  <div
-    :if={@frequency != []}
-    class="flex flex-col md:flex-row gap-10 justify-center md:items-start items-center"
-  >
-    <div :for={{freq, idx} <- @frequency |> Enum.with_index()} class="select-none w-full">
-      <span class="flex flex-row items-center">
-        <div class="mr-2 flex flex-row items-center flex-1">
-          <div
-            :for={_ <- 0..idx}
-            :if={idx < 2}
-            class="mr-0.5 w-2.5 h-2.5 rounded-full bg-pink-600"
-          >
-          </div>
-          <div :if={idx == 2} class="mr-0.5 w-6 h-2.5 rounded-full bg-pink-600"></div>
-        </div>
-        <%= freq %>%
-      </span>
-      <div class="w-full bg-fg rounded-full h-2.5">
-        <div
-          class="bg-fuchsia-600 h-2.5 rounded-full animate-fill"
-          style={"--percentage: #{freq}%;"}
-        >
-        </div>
-      </div>
-      <div class="flex flex-row gap-x-4 flex-wrap">
-        <div
-          :for={{key, val} <- @stats |> elem(idx) |> Map.to_list()}
-          class={"rounded-full mt-4 w-24 flex flex-row bg-#{attendance_color(key)}"}
-        >
-          <span class="bg-inherit text-center h-full rounded-l-full brightness-75 w-1/3">
-            <%= key %>
-          </span>
-          <span class="rounded-full w-2/3 text-center"><%= val %></span>
-        </div>
-      </div>
+<div class="flex flex-col gap-6 w-full px-4 lg:px-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-2">
+    <Heroicons.check_badge class="w-8 h-8 text-purple-400" />
+    <h1 class="text-3xl font-bold text-purple-300">Attendance</h1>
+  </div>
+
+  <!-- Loading State -->
+  <div :if={@attendance == [] && (:load_attendance in @loadings || :load_frequency in @loadings)} class="flex flex-col gap-4">
+    <div :for={_ <- 0..3} class="glass-card backdrop-blur-xl rounded-lg p-6 h-32 animate-pulse">
     </div>
   </div>
 
-  <.link
-    :if={@live_action == nil}
-    class="h-20 rounded bg-fg shadow-md flex items-center justify-center"
-    navigate={~p"/student/attendance/subjects"}
-    replace={false}
+  <!-- Empty State -->
+  <div
+    :if={@attendance == [] && !(:load_attendance in @loadings) && !(:load_frequency in @loadings)}
+    class="flex flex-col justify-center items-center text-center py-16"
   >
-    View subject frequency
-  </.link>
-  <div :if={@live_action == :subject_frequency && :subject_attendance in @loadings}>
-    Loading...
+    <Heroicons.check_badge class="w-20 h-20 text-purple-400/50 mb-4" />
+    <h2 class="font-bold text-purple-300/50 text-2xl">No attendance data available</h2>
   </div>
 
-  <div
-    :if={@live_action == :subject_frequency && :subject_attendance not in @loadings}
-    class="flex flex-col gap-y-4 xl:max-h-[400px] md:flex-wrap items-center "
-  >
-    <div :for={{subj, freq} <- @subject_frequency |> dbg} class="select-none w-full xl:w-1/4">
-      <span class="flex flex-row items-center justify-between">
-        <span class="line-clamp-1 font-quicksand font-bold"><%= subj %></span>
-        <span><%= freq %>%</span>
-      </span>
-      <div class="w-full bg-fg rounded-full h-2.5">
-        <div
-          class={"#{colors(freq)} h-2.5 rounded-full animate-fill"}
-          style={"--percentage: #{freq}%;"}
-        >
-        </div>
-      </div>
-      <div :if={@subject_attendance |> dbg |> Map.get(subj)}>
-        <.freq_calculator subject={subj} attendance={@subject_attendance |> Map.get(subj)} />
-      </div>
-    </div>
-  </div>
-  <div class="xl:grid flex flex-col md:grid-cols-2 gap-2">
+  <!-- Content -->
+  <div :if={@attendance != []} class="flex flex-col gap-6">
+    <!-- Overall Frequency Cards -->
     <div
-      :for={day <- @attendance |> Enum.chunk_by(&Map.get(&1, :date))}
-      class="grid grid-cols-4 md:grid-cols-12 p-4 rounded-md gap-4 bg-lighterbg"
+      :if={@frequency != []}
+      class="grid grid-cols-1 md:grid-cols-3 gap-4"
     >
       <div
-        :if={(%Attendance{date: date} = Enum.at(day, 0)) != nil}
-        class="col-span-4 md:col-span-12 flex flex-row justify-between"
+        :for={{freq, idx} <- @frequency |> Enum.with_index()}
+        class="glass-card backdrop-blur-xl rounded-lg p-5"
       >
-        <span><%= date %></span>
-        <span><%= iso_date_to_dayname(date) %></span>
+        <!-- Semester Label -->
+        <div class="flex items-center gap-2 mb-3">
+          <div class="flex items-center gap-1.5">
+            <div
+              :for={_ <- 0..idx}
+              :if={idx < 2}
+              class="w-2.5 h-2.5 rounded-full bg-purple-500"
+            >
+            </div>
+            <div :if={idx == 2} class="w-6 h-2.5 rounded-full bg-purple-500"></div>
+          </div>
+          <span class="text-sm font-medium text-purple-400/70">
+            <%= case idx do
+              0 -> "1st Semester"
+              1 -> "2nd Semester"
+              _ -> "Total"
+            end %>
+          </span>
+        </div>
+
+        <!-- Frequency Percentage -->
+        <div class="mb-4">
+          <div class="text-3xl font-bold text-purple-200 mb-1">
+            <%= freq %>% 
+          </div>
+          <!-- Progress Bar -->
+          <div class="w-full bg-purple-900/30 rounded-full h-2.5 overflow-hidden">
+            <div
+              class={[
+                "h-2.5 rounded-full transition-all duration-500",
+                cond do
+                  freq == 100 -> "bg-fuchsia-600"
+                  freq > 70 -> "bg-green-600"
+                  freq <= 50 -> "bg-red-600"
+                  freq <= 70 -> "bg-amber-600"
+                end
+              ]}
+              style={"width: #{freq}%;"}
+            >
+            </div>
+          </div>
+        </div>
+
+          <!-- Statistics -->
+          <div :if={is_tuple(@stats) && tuple_size(@stats) > idx} class="grid grid-cols-2 gap-2">
+          <div
+            :for={{key, val} <- @stats |> elem(idx) |> Map.to_list()}
+            class={[
+              "flex items-center gap-2 p-2 rounded-lg text-xs",
+              "bg-#{attendance_color(key)}/20 border border-#{attendance_color(key)}/30"
+            ]}
+          >
+            <div class={[
+              "w-2 h-2 rounded-full flex-shrink-0",
+              "bg-#{attendance_color(key)}"
+            ]}>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-purple-200 uppercase"><%= key %></div>
+              <div class="text-purple-300/80"><%= val %></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <.absence
-        :for={%Attendance{} = absence <- day}
-        absence={absence}
-        selected={absence.href == @selected}
-      />
+    </div>
+
+    <!-- Subject Frequency Link -->
+    <.link
+      :if={@live_action == nil}
+      navigate={~p"/student/attendance/subjects"}
+      class="glass-card backdrop-blur-xl rounded-lg p-4 hover:border-purple-400/60 transition-colors flex items-center justify-between group"
+    >
+      <div class="flex items-center gap-3">
+        <Heroicons.academic_cap class="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
+        <div>
+          <div class="font-semibold text-purple-200">View Subject Frequency</div>
+          <div class="text-sm text-purple-400/70">See attendance per subject</div>
+        </div>
+      </div>
+      <Heroicons.chevron_right class="w-5 h-5 text-purple-400/60 group-hover:text-purple-300 transition-colors" />
+    </.link>
+
+    <!-- Subject Frequency Section -->
+    <div :if={@live_action == :subject_frequency} class="flex flex-col gap-4">
+      <!-- Loading State -->
+      <div :if={:subject_attendance in @loadings} class="flex flex-col gap-4">
+        <div :for={_ <- 0..5} class="glass-card backdrop-blur-xl rounded-lg p-4 h-20 animate-pulse">
+        </div>
+      </div>
+
+      <!-- Subject Frequency Cards -->
+      <div
+        :if={:subject_attendance not in @loadings}
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        id="subject-frequency-grid"
+      >
+        <div
+          :for={subj <- @subject_order || (@subject_frequency |> Map.keys() |> Enum.sort())}
+          :if={freq = Map.get(@subject_frequency, subj)}
+          id={"subject-frequency-#{URI.encode(subj)}"}
+          data-subject={subj}
+          class="glass-card backdrop-blur-xl rounded-lg p-4"
+        >
+          <!-- Subject Name and Frequency -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <Heroicons.academic_cap class="w-5 h-5 text-purple-400 flex-shrink-0" />
+              <span class="font-semibold text-purple-200 truncate"><%= subj %></span>
+            </div>
+            <span class="text-xl font-bold text-purple-300 flex-shrink-0 ml-2"><%= freq %>%</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="w-full bg-purple-900/30 rounded-full h-2.5 mb-3 overflow-hidden">
+            <div
+              class={[
+                "h-2.5 rounded-full transition-all duration-500",
+                cond do
+                  freq == 100 -> "bg-fuchsia-600"
+                  freq > 70 -> "bg-green-600"
+                  freq <= 50 -> "bg-red-600"
+                  freq <= 70 -> "bg-amber-600"
+                end
+              ]}
+              style={"width: #{freq}%;"}
+            >
+            </div>
+          </div>
+
+          <!-- Attendance Marks -->
+          <div :if={@subject_attendance |> Map.get(subj)} class="flex flex-col gap-2">
+            <div class="flex flex-row gap-1.5 flex-wrap">
+              <div
+                :for={{name, value} <- @subject_attendance |> Map.get(subj) |> Map.to_list()}
+                class={[
+                  "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
+                  "bg-#{attendance_color(name)}/20 border border-#{attendance_color(name)}/30"
+                ]}
+              >
+                <div class={[
+                  "w-2 h-2 rounded-full flex-shrink-0",
+                  "bg-#{attendance_color(name)}"
+                ]}>
+                </div>
+                <span class="font-medium text-purple-200 uppercase"><%= name %></span>
+                <span class="text-purple-300/80"><%= value %></span>
+              </div>
+            </div>
+
+            <!-- Offset Input -->
+            <form id={"offset-form-#{subj}"} phx-change="offset_frequency" phx-update="ignore" class="flex items-center gap-2 mt-2">
+              <input type="hidden" value={subj} name="name" />
+              <label class="text-xs text-purple-400/70 whitespace-nowrap">Offset:</label>
+              <input
+                id={"offset-input-#{subj}"}
+                type="number"
+                name="offset"
+                value="0"
+                placeholder="0"
+                class="w-20 px-2 py-1 rounded-md glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 text-xs focus:outline-none focus:border-purple-400/60"
+              />
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance by Day -->
+    <div class="flex flex-col gap-4">
+      <div
+        :for={day <- @attendance |> Enum.chunk_by(&Map.get(&1, :date))}
+        class="glass-card backdrop-blur-xl rounded-lg p-5"
+      >
+        <!-- Day Header -->
+        <div
+          :if={(%Attendance{date: date} = Enum.at(day, 0)) != nil}
+          class="flex items-center justify-between mb-4 pb-3 border-b border-purple-500/20"
+        >
+          <div class="flex items-center gap-2">
+            <Heroicons.calendar class="w-5 h-5 text-purple-400" />
+            <span class="text-lg font-bold text-purple-200"><%= date %></span>
+          </div>
+          <span class="text-sm text-purple-400/70 capitalize"><%= iso_date_to_dayname(date) %></span>
+        </div>
+
+        <!-- Absences Grid -->
+        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+          <.absence
+            :for={%Attendance{} = absence <- day}
+            absence={absence}
+            selected={absence.href == @selected}
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty Attendance Message -->
+    <div
+      :if={@attendance == []}
+      class="flex flex-col justify-center items-center text-center py-16 glass-card backdrop-blur-xl rounded-lg"
+    >
+      <Heroicons.check_badge class="w-20 h-20 text-purple-400/50 mb-4" />
+      <h2 class="font-bold text-purple-300/50 text-2xl mb-2">No attendance records</h2>
+      <p class="text-purple-400/50">You have perfect attendance!</p>
     </div>
   </div>
 </div>

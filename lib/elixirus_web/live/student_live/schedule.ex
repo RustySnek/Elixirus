@@ -5,6 +5,7 @@ defmodule ElixirusWeb.StudentLive.Schedule do
 
   import Venomous
   alias Venomous.SnakeArgs
+  import Heroicons
 
   import ElixirusWeb.Helpers
   alias ElixirusWeb.Modal

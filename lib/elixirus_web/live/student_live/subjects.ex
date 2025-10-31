@@ -4,8 +4,8 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   use ElixirusWeb, :live_view
   import Venomous
   alias Venomous.SnakeArgs
-  import ElixirusWeb.Components.Loadings
   import ElixirusWeb.Helpers
+  import Heroicons
 
   @default_params %{
     query: "",

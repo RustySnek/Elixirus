@@ -1,0 +1,78 @@
+<div class="flex flex-col max-w-4xl mx-auto gap-y-6">
+  <div
+    :if={:load_student_info in @loadings}
+    class="flex flex-col gap-4 animate-pulse"
+  >
+    <div class="glass-card backdrop-blur-xl rounded-lg p-6 h-32"></div>
+    <div class="glass-card backdrop-blur-xl rounded-lg p-6 h-64"></div>
+  </div>
+  
+  <div
+    :if={@student_info == nil && !(:load_student_info in @loadings)}
+    class="flex flex-col justify-center text-center py-12"
+  >
+    <h2 class="font-bold text-gray-400/50 text-2xl">No student information available</h2>
+  </div>
+  
+  <div
+    :if={@student_info != nil}
+    class="flex flex-col gap-6"
+  >
+    <!-- Header Card -->
+    <div class="glass-card backdrop-blur-xl rounded-lg p-6">
+      <div class="flex items-center gap-4 mb-4">
+        <Heroicons.user_circle class="w-12 h-12 text-purple-400" />
+        <h1 class="text-3xl font-bold text-purple-300">Student Information</h1>
+      </div>
+    </div>
+    
+    <!-- Student Details Card -->
+    <div class="glass-card backdrop-blur-xl rounded-lg p-6">
+      <h2 class="text-xl font-semibold text-purple-400 mb-6">Personal Details</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col">
+          <span class="text-sm text-purple-300/70 mb-1">Full Name</span>
+          <span class="text-lg font-medium text-purple-200"><%= @student_info.name %></span>
+        </div>
+        
+        <div class="flex flex-col">
+          <span class="text-sm text-purple-300/70 mb-1">Class</span>
+          <span class="text-lg font-medium text-purple-200"><%= @student_info.class_name %></span>
+        </div>
+        
+        <div class="flex flex-col">
+          <span class="text-sm text-purple-300/70 mb-1">Student Number</span>
+          <span class="text-lg font-medium text-purple-200"><%= @student_info.number %></span>
+        </div>
+        
+        <div class="flex flex-col">
+          <span class="text-sm text-purple-300/70 mb-1">Lucky Number</span>
+          <span class={"text-lg font-medium #{@student_info.number == @student_info.lucky_number && "text-green-400" || "text-purple-200"}"}>
+            <%= @student_info.lucky_number %>
+          </span>
+        </div>
+        
+        <div class="flex flex-col md:col-span-2">
+          <span class="text-sm text-purple-300/70 mb-1">Tutor</span>
+          <span class="text-lg font-medium text-purple-200"><%= @student_info.tutor %></span>
+        </div>
+        
+        <div class="flex flex-col md:col-span-2">
+          <span class="text-sm text-purple-300/70 mb-1">School</span>
+          <span class="text-lg font-medium text-purple-200"><%= @student_info.school %></span>
+        </div>
+      </div>
+      
+      <div
+        :if={@student_info.number == @student_info.lucky_number}
+        class="mt-6 p-4 bg-green-500/20 border border-green-400/50 rounded-lg"
+      >
+        <div class="flex items-center gap-2 text-green-400">
+          <Heroicons.check_circle class="w-5 h-5" />
+          <span class="font-medium">Your student number matches your lucky number!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

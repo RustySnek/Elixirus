@@ -45,9 +45,9 @@ defmodule ElixirusWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1",
-        @kind == :info && "bg-emerald-50 text-emerald-800 ring-emerald-500 fill-cyan-900",
-        @kind == :error && "bg-rose-50 text-rose-900 shadow-md ring-rose-500 fill-rose-900"
+        "fixed top-2 right-2 mr-2 w-80 sm:w-96 z-50 rounded-lg p-3 ring-1 glass-card backdrop-blur-xl",
+        @kind == :info && "text-emerald-300 ring-emerald-500/50 border-emerald-500/30",
+        @kind == :error && "text-rose-300 shadow-md ring-rose-500/50 border-rose-500/30"
       ]}
       {@rest}
     >
@@ -131,7 +131,7 @@ defmodule ElixirusWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white">
+        <div class="mt-10 space-y-8 glass-card backdrop-blur-xl rounded-lg p-6">
         <%= render_slot(@inner_block, f) %>
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           <%= render_slot(action, f) %>
@@ -160,7 +160,7 @@ defmodule ElixirusWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
+        "phx-submit-loading:opacity-75 rounded-lg glass-button py-2 px-3",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
         @class
       ]}
@@ -238,7 +238,7 @@ defmodule ElixirusWeb.CoreComponents do
 
     ~H"""
     <div phx-feedback-for={@name}>
-      <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
+      <label class="flex items-center gap-4 text-sm leading-6 text-purple-300">
         <input type="hidden" name={@name} value="false" />
         <input
           type="checkbox"
@@ -246,7 +246,7 @@ defmodule ElixirusWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
+          class="rounded border-purple-500/50 text-purple-400 bg-transparent focus:ring-purple-500/50"
           {@rest}
         />
         <%= @label %>
@@ -263,7 +263,7 @@ defmodule ElixirusWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-2 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-zinc-400 focus:ring-0 sm:text-sm"
+        class="mt-2 block w-full rounded-md border border-purple-500/50 bg-transparent backdrop-blur-sm text-white shadow-sm focus:border-purple-400 focus:ring-0 sm:text-sm"
         multiple={@multiple}
         {@rest}
       >
@@ -283,9 +283,9 @@ defmodule ElixirusWeb.CoreComponents do
         id={@id}
         name={@name}
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
-          "min-h-[6rem] phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
-          @errors == [] && "border-zinc-300 focus:border-zinc-400",
+          "mt-2 block w-full rounded-lg text-white bg-transparent border-purple-500/50 focus:ring-0 sm:text-sm sm:leading-6",
+          "min-h-[6rem] phx-no-feedback:border-purple-500/50 phx-no-feedback:focus:border-purple-400",
+          @errors == [] && "border-purple-500/50 focus:border-purple-400",
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
         {@rest}
@@ -305,12 +305,7 @@ defmodule ElixirusWeb.CoreComponents do
         name={@name}
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-        class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400",
-          @errors == [] && "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
-        ]}
+        class="mt-2 block w-full rounded-lg text-white bg-transparent border-purple-500/50 focus:ring-0 focus:border-purple-400 sm:text-sm sm:leading-6 phx-no-feedback:border-purple-500/50 phx-no-feedback:focus:border-purple-400"
         {@rest}
       />
       <.error :for={msg <- @errors}><%= msg %></.error>
@@ -326,7 +321,7 @@ defmodule ElixirusWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="block text-sm font-semibold leading-6 text-zinc-800">
+      <label for={@for} class="block text-sm font-semibold leading-6 text-purple-300">
       <%= render_slot(@inner_block) %>
     </label>
     """

@@ -1,72 +1,145 @@
-<div :if={@grades == %{} && :grades in @loadings} class="flex items-center justify-center">
-  <.spinner />
-</div>
-<div :if={@grades != %{}} class="flex gap-y-5 flex-col mx-10">
-  <div
-    :for={grade <- @grades |> Map.get(@subject)}
-    class={"rounded-2xl border-fuchsia-400 border #{grade.counts == false && "!border-red-600"}"}
-  >
-    <div
-      :if={
-        grade.href |> String.split("/") |> List.last() ==
-          @shown_grade
-      }
-      id={@shown_grade}
-      phx-hook="highlight_grade"
-      class="flex rounded-2xl p-4 flex-col sm:flex-row gap-x-20 transition duration-1000 bg-white/50"
-    >
-      <p class="text-4xl text-center w-24 font-bold self-center">
-        <span>
-          <%= grade.grade %>
-        </span>
-        <span class="text-sm font-normal bottom-7 right-2 relative">
-          <%= grade.weight %>
-        </span>
-      </p>
+<div class="flex flex-col gap-6 w-full px-4 lg:px-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-2">
+    <Heroicons.academic_cap class="w-8 h-8 text-purple-400" />
+    <h1 class="text-3xl font-bold text-purple-300">
+      <%= URI.decode(@subject) %>
+    </h1>
+  </div>
 
-      <div class="flex flex-col justify-between w-full ">
-        <p class="text-xl ml-2"><%= grade.category %></p>
-        <div class="flex-col flex">
-          <div class={" flex flex-row self-end gap-x-2 #{grade.counts == false && "hidden"}"}>
-            <p>Real value:</p>
-            <p><%= grade.value %></p>
+  <!-- Loading State -->
+  <div :if={@grades == %{} && :grades in @loadings} class="flex flex-col gap-4">
+    <div :for={_ <- 0..5} class="glass-card backdrop-blur-xl rounded-lg p-6 h-32 animate-pulse">
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div
+    :if={@grades == %{} && !(:grades in @loadings)}
+    class="flex flex-col justify-center items-center text-center py-16"
+  >
+    <Heroicons.academic_cap class="w-20 h-20 text-purple-400/50 mb-4" />
+    <h2 class="font-bold text-purple-300/50 text-2xl">No grades available</h2>
+  </div>
+
+  <!-- Grades List -->
+  <div :if={@grades != %{}} class="flex flex-col gap-4">
+    <div
+      :for={grade <- @grades |> Map.get(@subject) |> Enum.reverse()}
+      id={if grade.href |> String.split("/") |> List.last() == @shown_grade, do: @shown_grade, else: nil}
+      phx-hook={if grade.href |> String.split("/") |> List.last() == @shown_grade, do: "highlight_grade", else: nil}
+      class={[
+        "glass-card backdrop-blur-xl rounded-lg p-5 transition-all duration-300 hover:border-purple-400/60",
+        if(grade.href |> String.split("/") |> List.last() == @shown_grade,
+          do: "border-2 border-purple-400/80 bg-purple-500/20 shadow-lg ring-2 ring-purple-400/30",
+          else: "border border-purple-500/30"
+        ),
+        if(grade.counts == false, do: "border-red-500/60 bg-red-500/10", else: "")
+      ]}
+    >
+      <div class="flex flex-col md:flex-row gap-4 md:gap-6">
+        <!-- Grade Display -->
+        <div class="flex-shrink-0 flex flex-col items-center justify-center">
+          <div class={[
+            "relative flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-lg border-2",
+            if(grade.counts == false,
+              do: "border-red-500/60 bg-red-500/20",
+              else: "border-purple-500/60 bg-purple-500/20"
+            )
+          ]}>
+            <span class={[
+              "text-3xl md:text-4xl font-bold",
+              if(grade.counts == false, do: "text-red-300", else: "text-purple-200")
+            ]}>
+              <%= grade.grade %>
+            </span>
+            <!-- Weight Badge -->
+            <div class={[
+              "absolute -bottom-2 -right-2 px-2 py-1 rounded-md text-xs font-bold border",
+              if(grade.counts == false,
+                do: "bg-red-600/60 border-red-500/60 text-red-100",
+                else: "bg-purple-600/60 border-purple-500/60 text-purple-100"
+              )
+            ]}>
+              <%= grade.weight %>
+            </div>
           </div>
-          <div class="flex-row gap-x-2 self-end flex">
-            <p><%= grade.teacher %></p>
-            <p><%= grade.date %></p>
+        </div>
+
+        <!-- Grade Details -->
+        <div class="flex-1 flex flex-col gap-3">
+          <!-- Category and Date Row -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <Heroicons.document_text class="w-5 h-5 text-purple-400" />
+              <h2 class="text-xl font-bold text-purple-200">
+                <%= grade.category %>
+              </h2>
+            </div>
+            <div :if={grade.date} class="flex items-center gap-2 text-sm text-purple-400/70">
+              <Heroicons.calendar class="w-4 h-4" />
+              <span><%= grade.date %></span>
+            </div>
+          </div>
+
+          <!-- Additional Information -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- Teacher -->
+            <div :if={grade.teacher} class="flex items-center gap-2 p-2 rounded-lg bg-purple-500/10">
+              <Heroicons.user class="w-4 h-4 text-purple-400/60 flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="text-xs text-purple-400/70 mb-0.5">Teacher</div>
+                <div class="text-sm text-purple-200 font-medium truncate"><%= grade.teacher %></div>
+              </div>
+            </div>
+
+            <!-- Real Value -->
+            <div :if={grade.counts == true && grade.value} class="flex items-center gap-2 p-2 rounded-lg bg-purple-500/10">
+              <Heroicons.calculator class="w-4 h-4 text-purple-400/60 flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <div class="text-xs text-purple-400/70 mb-0.5">Real Value</div>
+                <div class="text-sm text-purple-200 font-medium"><%= grade.value %></div>
+              </div>
+            </div>
+
+            <!-- Counts Status -->
+            <div class="flex items-center gap-2 p-2 rounded-lg bg-purple-500/10">
+              <Heroicons.check_circle class={[
+                "w-4 h-4 flex-shrink-0",
+                if(grade.counts == true, do: "text-green-400/60", else: "text-red-400/60")
+              ]} />
+              <div class="flex-1 min-w-0">
+                <div class="text-xs text-purple-400/70 mb-0.5">Counts Towards Average</div>
+                <div class={[
+                  "text-sm font-medium",
+                  if(grade.counts == true, do: "text-green-300", else: "text-red-300")
+                ]}>
+                  <%= if grade.counts == true, do: "Yes", else: "No" %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div :if={grade.desc && grade.desc != ""} class="flex items-start gap-2 p-2 rounded-lg bg-purple-500/10 md:col-span-2">
+              <Heroicons.information_circle class="w-4 h-4 text-purple-400/60 flex-shrink-0 mt-0.5" />
+              <div class="flex-1 min-w-0">
+                <div class="text-xs text-purple-400/70 mb-0.5">Description</div>
+                <div class="text-sm text-purple-200 break-words"><%= grade.desc %></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Empty Grades Message -->
     <div
-      :if={
-        grade.href |> String.split("/") |> List.last() !=
-          @shown_grade
-      }
-      id={grade.href}
-      class=" flex flex-col sm:flex-row gap-x-20 rounded-2xl p-4 "
+      :if={(@grades |> Map.get(@subject) |> length()) == 0}
+      class="flex flex-col justify-center items-center text-center py-16 glass-card backdrop-blur-xl rounded-lg"
     >
-      <p class="text-4xl text-center w-24 font-bold self-center">
-        <span>
-          <%= grade.grade %>
-        </span>
-        <span class="text-sm font-normal bottom-7 right-2 relative">
-          <%= grade.weight %>
-        </span>
-      </p>
-      <div class="flex flex-col justify-between w-full ">
-        <p class="text-xl ml-2"><%= grade.category %></p>
-        <div class="flex-col flex">
-          <div class={" flex flex-row self-end gap-x-2 #{grade.counts == false && "hidden"}"}>
-            <p>Real value:</p>
-            <p><%= grade.value %></p>
-          </div>
-          <div class="flex-row gap-x-2 self-end flex">
-            <p><%= grade.teacher %></p>
-            <p><%= grade.date %></p>
-          </div>
-        </div>
-      </div>
+      <Heroicons.academic_cap class="w-20 h-20 text-purple-400/50 mb-4" />
+      <h2 class="font-bold text-purple-300/50 text-2xl mb-2">No grades found</h2>
+      <p class="text-purple-400/50">This subject doesn't have any grades yet</p>
     </div>
   </div>
 </div>

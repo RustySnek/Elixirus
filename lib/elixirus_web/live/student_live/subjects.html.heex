@@ -1,86 +1,219 @@
-<div :if={@grades == nil} class="flex justify-center items-center">
-  <.spinner />
-</div>
+<div class="flex flex-col gap-6 w-full px-4 lg:px-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-2">
+    <Heroicons.academic_cap class="w-8 h-8 text-purple-400" />
+    <h1 class="text-3xl font-bold text-purple-300">Subjects & Grades</h1>
+  </div>
 
-<div class="m-5 flex flex-col gap-y-10">
-  <form
-    phx-change="query_grades"
-    class="select-none  xl:items-center  xl:flex-row flex-col flex gap-5"
-  >
-    <input
-      class="bg-inherit rounded"
-      placeholder="search subjects"
-      type="text"
-      name="query"
-      value={@query}
-    />
-    <input
-      class="bg-inherit rounded"
-      placeholder="search grades"
-      type="text"
-      name="grade_query"
-      value={@grade_query}
-    />
-    <select
-      name="sort_grades"
-      selected={@sort_grades}
-      class="child:bg-stone-900 rounded appearance-none child-hover:bg-fuchsia-600 bg-inherit"
-    >
-      <%= Phoenix.HTML.Form.options_for_select(
-        [
-          Newest: "newest",
-          Oldest: "oldest",
-          Weight: "weight",
-          Value: "value",
-          "Weighed Value": "weighed_value"
-        ],
-        @sort_grades
-      ) %>
-    </select>
-    <span class="ml-2">
-      <label>
-        Hide empty
-        <input
-          class="bg-inherit rounded h-6 w-6 text-pink-600"
-          checked={@hide_empty}
-          type="checkbox"
-          name="hide_empty"
-        />
-      </label>
-    </span>
-  </form>
-  <span>
-    Semester average:
-    <span class="font-bold text-lg">
-      <%= @semester_average |> to_string |> String.slice(0, 5) %>
-    </span>
-  </span>
+  <!-- Loading State -->
+  <div :if={@grades == %{} && :load_grades in @loadings} class="flex flex-col gap-4">
+    <div :for={_ <- 0..5} class="glass-card backdrop-blur-xl rounded-lg p-6 h-32 animate-pulse">
+    </div>
+  </div>
+
+  <!-- Empty State -->
   <div
-    :for={subject <- @shown_grades |> Map.keys()}
-    :if={not ((@hide_empty || @grade_query != "") && Map.get(@shown_grades, subject) == [])}
-    class="bg-[#121212] py-2 px-4 gap-y-4 flex flex-col"
+    :if={@grades == %{} && !(:load_grades in @loadings)}
+    class="flex flex-col justify-center items-center text-center py-16"
   >
-    <div class="flex flex-row justify-between">
-      <span><%= subject %></span>
-      <div :if={avg = @grade_averages |> Map.get(subject)} class="text-lg text-fuchsia-100">
-        <span :if={avg != 0}><%= avg |> to_string |> String.slice(0, 5) %></span>
+    <Heroicons.academic_cap class="w-20 h-20 text-purple-400/50 mb-4" />
+    <h2 class="font-bold text-purple-300/50 text-2xl">No grades available</h2>
+  </div>
+
+  <!-- Content -->
+  <div :if={@grades != %{}} class="flex flex-col gap-6">
+    <!-- Search and Filters -->
+    <div class="glass-card backdrop-blur-xl rounded-lg p-3 md:p-4">
+      <form phx-change="query_grades" class="flex flex-col gap-3 md:gap-4">
+        <!-- Search Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-purple-400/70">Search Subjects</label>
+            <div class="relative">
+              <Heroicons.magnifying_glass class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400/50" />
+              <input
+                type="text"
+                name="query"
+                value={@query}
+                placeholder="Type subject name..."
+                class="w-full pl-10 pr-4 py-2 rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 placeholder-purple-400/50 focus:outline-none focus:border-purple-400/60 transition-colors"
+              />
+            </div>
+          </div>
+          
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-purple-400/70">Search Grades</label>
+            <div class="relative">
+              <Heroicons.magnifying_glass class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400/50" />
+              <input
+                type="text"
+                name="grade_query"
+                value={@grade_query}
+                placeholder="Search by grade details..."
+                class="w-full pl-10 pr-4 py-2 rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 placeholder-purple-400/50 focus:outline-none focus:border-purple-400/60 transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-purple-400/70">Sort By</label>
+            <div class="relative">
+              <select
+                name="sort_grades"
+                class="w-full px-4 py-2 rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 focus:outline-none focus:border-purple-400/60 transition-colors appearance-none cursor-pointer"
+              >
+                <%= Phoenix.HTML.Form.options_for_select(
+                  [
+                    "Newest": "newest",
+                    "Oldest": "oldest",
+                    "Weight": "weight",
+                    "Value": "value",
+                    "Weighed Value": "weighed_value"
+                  ],
+                  @sort_grades
+                ) %>
+              </select>
+              <Heroicons.chevron_down class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400/50 pointer-events-none" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/15 transition-colors cursor-pointer">
+            <input
+              type="checkbox"
+              name="hide_empty"
+              checked={@hide_empty}
+              class="w-5 h-5 rounded border-purple-500/30 bg-purple-500/10 text-purple-400 focus:ring-purple-400/50 focus:ring-2 cursor-pointer"
+              id="hide_empty_checkbox"
+            />
+            <label for="hide_empty_checkbox" class="text-sm font-medium text-purple-300 cursor-pointer">
+              Hide Empty Subjects
+            </label>
+          </div>
+
+          <!-- Semester Average Card -->
+          <div class="glass-card backdrop-blur-xl rounded-lg p-4 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 border border-purple-400/30">
+            <div class="flex items-center gap-2 mb-1">
+              <Heroicons.calculator class="w-5 h-5 text-purple-300" />
+              <span class="text-sm font-medium text-purple-400/70">Semester Average</span>
+            </div>
+            <div class="text-xl md:text-2xl font-bold text-purple-200">
+              <%= @semester_average |> to_string() |> String.slice(0, 4) %>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Subjects List -->
+    <div class="flex flex-col gap-4">
+      <div
+        :for={subject <- @shown_grades |> Map.keys() |> Enum.sort()}
+        :if={not ((@hide_empty || @grade_query != "") && Map.get(@shown_grades, subject) == [])}
+        class="glass-card backdrop-blur-xl rounded-lg p-6 hover:border-purple-400/60 transition-colors"
+      >
+        <!-- Subject Header -->
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-purple-500/20">
+          <div class="flex items-center gap-3">
+            <Heroicons.academic_cap class="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
+            <h2 class="text-lg md:text-xl font-bold text-purple-200"><%= subject %></h2>
+          </div>
+          <div :if={avg = @grade_averages |> Map.get(subject)} class="flex items-center gap-2">
+            <span class="text-xs md:text-sm text-purple-400/70">Average:</span>
+            <span :if={avg != 0} class="text-xl md:text-2xl font-bold text-purple-300">
+              <%= avg |> to_string() |> String.slice(0, 4) %>
+            </span>
+            <span :if={avg == 0} class="text-base md:text-lg text-purple-400/50">-</span>
+          </div>
+        </div>
+
+        <!-- Grades Grid -->
+        <div :if={Map.get(@shown_grades, subject) != []} class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-12 xl:grid-cols-16 gap-2 md:gap-2">
+          <div
+            :for={grade <- @shown_grades |> Map.get(subject) |> sort_grades_by(@sort_grades)}
+            class="group relative w-full aspect-square"
+          >
+            <button
+              phx-click="view_grade"
+              phx-value-subject={subject}
+              phx-value-grade_id={grade.href |> String.split("/") |> List.last()}
+              type="button"
+              class={[
+                "relative w-full h-full rounded-md border transition-all duration-200 hover:scale-105 hover:shadow-lg overflow-hidden",
+                if(grade.counts == false, do: "border-red-500/60 bg-red-500/10 hover:border-red-400/80 hover:bg-red-500/20", else: "border-purple-500/60 bg-purple-500/10 hover:border-purple-400/80 hover:bg-purple-500/20")
+              ]}
+            >
+              <!-- Content Container -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center p-1 md:p-1.5">
+                <!-- Grade Value - Perfectly Centered -->
+                <div class="flex items-center justify-center flex-1">
+                  <span class={[
+                    "text-xl sm:text-2xl md:text-xl lg:text-2xl font-bold transition-colors select-none pointer-events-none leading-none",
+                    if(grade.counts == false, do: "text-red-300 group-hover:text-red-200", else: "text-purple-200 group-hover:text-purple-100")
+                  ]}>
+                    <%= grade.grade %>
+                  </span>
+                </div>
+                
+                <!-- Weight Badge - Bottom with Label -->
+                <div class={[
+                  "flex flex-col items-center justify-center gap-0.5 mt-auto",
+                  if(grade.counts == false, do: "text-red-300/70", else: "text-purple-300/70")
+                ]}>
+                  <span class="text-[8px] sm:text-[9px] md:text-[8px] lg:text-[9px] font-medium uppercase tracking-wide opacity-80">
+                    Weight
+                  </span>
+                  <span class={[
+                    "text-[10px] sm:text-xs md:text-[10px] lg:text-xs font-bold",
+                    if(grade.counts == false, do: "text-red-200", else: "text-purple-200")
+                  ]}>
+                    <%= grade.weight %>
+                  </span>
+                </div>
+              </div>
+            </button>
+            
+            <!-- Hover Tooltip - Triggered by parent group hover -->
+            <div class="absolute -top-20 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+              <div class="glass-card backdrop-blur-xl rounded-lg px-3 py-2.5 border border-purple-500/40 shadow-xl min-w-max">
+                <div class="text-xs font-semibold text-purple-200 mb-1.5">
+                  <%= grade.category %>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div :if={grade.date} class="flex items-center gap-1.5">
+                    <Heroicons.calendar class="w-3.5 h-3.5 text-purple-400/60" />
+                    <span class="text-xs text-purple-400/70"><%= grade.date %></span>
+                  </div>
+                  <div :if={grade.teacher} class="flex items-center gap-1.5">
+                    <Heroicons.user class="w-3.5 h-3.5 text-purple-400/60" />
+                    <span class="text-xs text-purple-400/60"><%= grade.teacher %></span>
+                  </div>
+                </div>
+              </div>
+              <!-- Tooltip Arrow -->
+              <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-purple-500/40"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Subject Message -->
+        <div :if={Map.get(@shown_grades, subject) == []} class="flex flex-col items-center justify-center py-8 text-center">
+          <Heroicons.academic_cap class="w-12 h-12 text-purple-400/30 mb-2" />
+          <span class="text-sm text-purple-400/50">No grades available</span>
+        </div>
       </div>
     </div>
-    <div class="flex flex-row font-semibold text-xl gap-5 flex-wrap">
-      <button
-        :for={grade <- @shown_grades |> Map.get(subject) |> sort_grades_by(@sort_grades)}
-        phx-click="view_grade"
-        phx-value-subject={subject}
-        phx-value-grade_id={grade.href |> String.split("/") |> List.last()}
-        class="w-14 h-14 relative items-center flex flex-row  border rounded border-fuchsia-600"
-      >
-        <p class="w-full text-center">
-          <%= grade.grade %>
-        </p>
-        <p class="text-sm absolute right-1 font-normal items-start justify-end flex h-full">
-          <%= grade.weight %>
-        </p>
-      </button>
+
+    <!-- Empty Results Message -->
+    <div
+      :if={@shown_grades |> Map.keys() |> length() == 0}
+      class="flex flex-col justify-center items-center text-center py-16 glass-card backdrop-blur-xl rounded-lg"
+    >
+      <Heroicons.magnifying_glass class="w-20 h-20 text-purple-400/50 mb-4" />
+      <h2 class="font-bold text-purple-300/50 text-2xl mb-2">No subjects found</h2>
+      <p class="text-purple-400/50">Try adjusting your search filters</p>
     </div>
   </div>
 </div>

@@ -6,7 +6,7 @@ defmodule ElixirusWeb.StudentLive.Homework do
   import ElixirusWeb.Helpers
 
   alias Elixirus.Types.Client
-  import Heroicons, only: [window: 1, check: 1]
+  import Heroicons, except: [link: 1]
   @asyncs [:load_details, :load_homework]
 
   def fetch_homework_details(client, id) do
