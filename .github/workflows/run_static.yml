@@ -24,8 +24,11 @@ jobs:
       - name: Setup
         uses: erlef/setup-beam@v1
         with:
-          otp-version: ">24"
+          otp-version: "28.0"
           elixir-version: "1.17.2"
+      
+      - name: Update Hex
+        run: mix local.hex --force
 
       - name: Retrieve Cached Dependencies
         uses: actions/cache@v3
