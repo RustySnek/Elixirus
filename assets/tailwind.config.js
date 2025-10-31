@@ -31,8 +31,14 @@ module.exports = {
       colors: {
         brand: "#FD4F00",
         fg: "#282B2F",
-        card: "#1E2023",
-        lighterbg: "#202226"
+        card: "rgba(30, 20, 50, 0.3)",
+        lighterbg: "rgba(40, 30, 60, 0.4)",
+        neon: {
+          purple: "#a855f7",
+          "purple-bright": "#c084fc",
+          "purple-dark": "#7c3aed",
+          "purple-glow": "#e879f9"
+        }
       }
     },
   },

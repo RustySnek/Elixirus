@@ -1,28 +1,36 @@
 <div class="flex flex-col gap-y-4">
   <div hidden phx-hook="retrieve_local_storage" name="discards" id="discard-handler"></div>
-  <div class="grid grid-cols-7 gap-x-4 text-lg">
-    <div :if={@student_info} class="col-span-2 flex flex-row gap-x-4">
-      <div class={"text-center bg-card #{@student_info.number == @student_info.lucky_number && "!bg-fuchsia-600"} rounded-md w-full"}>
-        <%= @student_info.number %>
-      </div>
-      <div class="text-center bg-card rounded-md w-full"><%= @student_info.lucky_number %></div>
-    </div>
-    <.link
-      :if={@final_frequency}
-      navigate={~p"/student/attendance"}
-      class="col-span-2 text-center bg-card rounded-md w-full"
+
+  <!-- Statistics -->
+  <div class="flex flex-col gap-y-6">
+    <.stats
+      final_avg={@final_avg}
+      final_frequency={@final_frequency}
+      best_grades={@best_grades}
+      worst_grades={@worst_grades}
+      best_attendance={@best_attendance}
+      worst_attendance={@worst_attendance}
+      upcoming_period={@upcoming_period}
+      timetable={@timetable}
+      student_info={@student_info}
+      active_stat_tab={@active_stat_tab}
+    />
+  </div>
+
+  <!-- Discard All Button -->
+  <div
+    :if={count_discardable_items(@messages, @attendance, @grades, @announcements, @discards) > 0}
+    class="flex items-center justify-center"
+  >
+    <button
+      phx-click="discard_all"
+      class="glass-card backdrop-blur-xl rounded-md px-4 py-2 hover:border-purple-400/60 transition-colors flex items-center gap-2 text-purple-300 hover:text-purple-200"
+      title="Discard all visible items"
     >
-      <%= @final_frequency %>%
-    </.link>
-    <.link
-      :if={@final_avg}
-      navigate={~p"/student/subjects"}
-      class="font-semibold col-span-2 text-center bg-card rounded-md w-full"
-    >
-      <%= @final_avg |> to_string() |> String.slice(0..4) %>
-    </.link>
-    <button phx-click="discard_all">
       <Heroicons.trash class="w-5 h-5" />
+      <span class="text-sm font-medium">
+        Discard All (<%= count_discardable_items(@messages, @attendance, @grades, @announcements, @discards) %>)
+      </span>
     </button>
   </div>
 

@@ -1,6 +1,6 @@
 defmodule ElixirusWeb.Modal do
   @moduledoc """
-  Terrible live_component modal
+  Modal component with liquid glass styling
   """
   use ElixirusWeb, :live_component
 
@@ -10,13 +10,34 @@ defmodule ElixirusWeb.Modal do
 
   def render(assigns) do
     ~H"""
-    <div class="absolute z-40 " id={@id} hidden={@hidden}>
-      <div id={"#{@id}-bg"} class=" fixed bg-black/50 inset-0 transition-opacity" aria-hidden="true" />
-      <div class="fixed inset-0 overflow-y-auto" role="dialog" aria-modal="true" tabindex="0">
-        <div class="flex min-h-full items-center justify-center">
+    <div 
+      class="fixed inset-0 z-[999999]" 
+      id={@id} 
+      hidden={@hidden}
+      style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 999999 !important; isolation: isolate !important;"
+    >
+      <div 
+        id={"#{@id}-bg"} 
+        class="fixed bg-black/60 backdrop-blur-sm inset-0 transition-opacity" 
+        aria-hidden="true"
+        style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 999999 !important;"
+      >
+      </div>
+      <div 
+        class="fixed inset-0 overflow-y-auto" 
+        role="dialog" 
+        aria-modal="true" 
+        tabindex="0"
+        style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; z-index: 1000000 !important;"
+      >
+        <div 
+          class="flex min-h-full items-center justify-center p-4"
+          style="z-index: 1000000 !important;"
+        >
           <div
             phx-click-away={hide_modal(@id)}
-            class="w-fit flex items-center justify-center max-w-3xl"
+            class="modal-glass-content"
+            style="z-index: 1000001 !important; position: relative !important;"
           >
             <%= render_slot(@inner_block) %>
           </div>

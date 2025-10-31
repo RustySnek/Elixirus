@@ -1,4 +1,5 @@
-<div class="flex flex-col gap-y-10 bg-[#121212] p-10 rounded-md xs:max-w-xs">
+<div class="flex flex-col glass-card backdrop-blur-xl p-8 sm:p-10 rounded-xl shadow-2xl max-w-md w-full mx-auto relative overflow-hidden">
+  <!-- Hidden storage hooks -->
   <div
     phx-target={@myself}
     phx-hook="retrieve_local_storage"
@@ -23,7 +24,6 @@
     hidden
   >
   </div>
-
   <div
     phx-target={@myself}
     phx-hook="retrieve_local_storage"
@@ -33,73 +33,81 @@
   >
   </div>
 
+  <!-- Form Title -->
+  <div class="mb-8 text-center">
+    <div class="flex items-center justify-center gap-3 mb-3">
+      <Heroicons.beaker class="h-12 w-12 text-purple-400 drop-shadow-[0_0_12px_rgba(168,85,247,0.8)] transition-all duration-300" />
+      <h2 class="font-quicksand text-4xl font-extrabold neon-text">
+        Elixir<span class="text-purple-300">us</span>
+      </h2>
+    </div>
+    <p class="text-sm text-purple-300/70">Sign in to your account</p>
+  </div>
+
+  <!-- Login Form -->
   <form
     phx-target={@myself}
     id="elixirus-login-form"
     phx-hook="login_form"
     phx-submit="login"
-    class="flex text-xl flex-col gap-y-6 items-center"
+    class="flex flex-col gap-6"
   >
-    <input
-      class="bg-transparent w-4/5 text-xl input-underline transition focus:ring-0"
-      placeholder="username"
-      value={@username}
-      type="text"
-      phx-update="ignore"
-      id="form-username"
-      name="username"
-      autocomplete="username"
-    />
-    <input
-      class="bg-transparent w-4/5 text-xl input-underline transition focus:ring-0"
-      id="form-password"
-      phx-update="ignore"
-      autocomplete="current-password"
-      placeholder="password"
-      type="password"
-      name="password"
-    />
-    <div class="flex flex-col md:flex-row lg:flex-col gap-y-4">
-      <div class="flex flex-row items-center justify-evenly">
-        <div class="flex flex-row justify-between items-center gap-x-4">
-          <span class="text-sm">Save session</span>
-          <div class="flex items-center justify-center">
-            <input
-              phx-change="save_token"
-              phx-target={@myself}
-              checked={@keep_alive}
-              type="checkbox"
-              id="toggle-session"
-              class="hidden toggle-checkbox"
-            />
-            <label
-              for="toggle-session"
-              class="flex items-center cursor-pointer border-b-2 border-fuchsia-600 w-12 h-6 relative transition-colors duration-300"
-            >
-              <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded transition-transform duration-300 toggle-square">
-              </div>
-            </label>
-            <select
-              :if={@keep_alive}
-              phx-hook="set_local_storage"
-              phx-change="change_ttl"
-              value={@ttl}
-              id="ttl-select"
-              name="ttl"
-              class="bg-fg border-none text-xs w-min h-min ml-2"
-            >
-              <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
-            </select>
-          </div>
-        </div>
-        <input
-          hidden
-          phx-hook="set_local_storage"
-          value={@notification_token |> Kernel.!=(nil) |> to_string()}
-          name="ntfy"
-          id="save-ntfy-checkbox"
-        />
+    <!-- Username Input -->
+    <div class="flex flex-col gap-2">
+      <label for="form-username" class="text-sm font-medium text-purple-300/80 ml-1">
+        Username
+      </label>
+      <input
+        class="bg-transparent w-full text-lg input-underline transition focus:ring-0 py-2.5 px-1 text-white placeholder:text-purple-400/50"
+        placeholder="Enter your username"
+        value={@username}
+        type="text"
+        phx-update="ignore"
+        id="form-username"
+        name="username"
+        autocomplete="username"
+      />
+    </div>
 
+    <!-- Password Input -->
+    <div class="flex flex-col gap-2">
+      <label for="form-password" class="text-sm font-medium text-purple-300/80 ml-1">
+        Password
+      </label>
+      <input
+        class="bg-transparent w-full text-lg input-underline transition focus:ring-0 py-2.5 px-1 text-white placeholder:text-purple-400/50"
+        id="form-password"
+        phx-update="ignore"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+        type="password"
+        name="password"
+      />
+    </div>
+
+    <!-- Save Session Section -->
+    <div class="flex flex-col gap-4 pt-2">
+      <div class="flex items-center justify-between p-3 rounded-lg bg-purple-500/5 border border-purple-500/10 hover:border-purple-500/20 transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-medium text-purple-200">Save session</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <input
+            phx-change="save_token"
+            phx-target={@myself}
+            checked={@keep_alive}
+            type="checkbox"
+            id="toggle-session"
+            class="hidden toggle-checkbox"
+          />
+          <label
+            for="toggle-session"
+            class="flex items-center cursor-pointer border-2 border-purple-500/50 w-14 h-7 rounded-full relative transition-all duration-300 hover:border-purple-400/70"
+          >
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 toggle-square shadow-md">
+            </div>
+          </label>
+        </div>
         <input
           hidden
           phx-hook="set_local_storage"
@@ -109,44 +117,70 @@
         />
       </div>
 
-      <div :if={@keep_alive} class="flex flex-row items-center justify-evenly">
-        <div class="flex flex-row justify-between items-center gap-x-4">
-          <span class="text-sm">ntfy.sh</span>
-          <div class="flex items-center justify-center">
-            <input
-              phx-change={JS.push("generate_notification_uuid", target: @myself)}
-              phx-target={@myself}
-              checked={@notification_token}
-              type="checkbox"
-              id="toggle-notifications"
-              class="hidden toggle-checkbox"
-            />
-            <label
-              for="toggle-notifications"
-              class="flex items-center cursor-pointer border-b-2 border-fuchsia-600 w-12 h-6 relative transition-colors duration-300"
-            >
-              <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded transition-transform duration-300 toggle-square">
-              </div>
-            </label>
-            <a
-              :if={@notification_token && @keep_alive}
-              href={"ntfy://ntfy.sh/#{@notification_token}"}
-              class="lg:hidden block border-fuchsia-600 border-b-2 text-sm ml-4 px-1 pt-1"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Open in ntfy.sh
-            </a>
-          </div>
-        </div>
+      <!-- Session Duration Selector -->
+      <div :if={@keep_alive} class="flex flex-col gap-2 p-3 rounded-lg bg-purple-500/5 border border-purple-500/10 transition-all animate-fade-in">
+        <label for="ttl-select" class="text-sm font-medium text-purple-200">
+          Session duration
+        </label>
+        <select
+          phx-hook="set_local_storage"
+          phx-change="change_ttl"
+          value={@ttl}
+          id="ttl-select"
+          name="ttl"
+          class="w-full bg-purple-500/10 border border-purple-500/30 rounded-md text-sm px-3 py-2 text-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400/50 transition-all hover:border-purple-400/50"
+        >
+          <%= Phoenix.HTML.Form.options_for_select(ttl_options(), @ttl) %>
+        </select>
       </div>
 
+      <!-- Ntfy.sh Section -->
+      <div :if={@keep_alive} class="flex items-center justify-between p-3 rounded-lg bg-purple-500/5 border border-purple-500/10 hover:border-purple-500/20 transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-medium text-purple-200">ntfy.sh notifications</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <input
+            phx-change={JS.push("generate_notification_uuid", target: @myself)}
+            phx-target={@myself}
+            checked={@notification_token}
+            type="checkbox"
+            id="toggle-notifications"
+            class="hidden toggle-checkbox"
+          />
+          <label
+            for="toggle-notifications"
+            class="flex items-center cursor-pointer border-2 border-purple-500/50 w-14 h-7 rounded-full relative transition-all duration-300 hover:border-purple-400/70"
+          >
+            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 toggle-square shadow-md">
+            </div>
+          </label>
+          <a
+            :if={@notification_token && @keep_alive}
+            href={"ntfy://ntfy.sh/#{@notification_token}"}
+            class="lg:hidden text-xs text-purple-300/70 hover:text-purple-200 underline underline-offset-2 transition-colors ml-2"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open app
+          </a>
+        </div>
+        <input
+          hidden
+          phx-hook="set_local_storage"
+          value={@notification_token |> Kernel.!=(nil) |> to_string()}
+          name="ntfy"
+          id="save-ntfy-checkbox"
+        />
+      </div>
+
+      <!-- Copy Ntfy Topic (Desktop) -->
       <div
         :if={@notification_token && @keep_alive}
-        class="lg:flex flex-col gap-y-2 hidden"
+        class="lg:flex flex-col gap-2 hidden"
         x-data={~c"{copied: false}"}
       >
-        <span class="text-sm text-center">
+        <span class="text-xs text-center text-purple-300/70 mb-1">
           Click to copy ntfy.sh topic:
         </span>
         <input
@@ -154,22 +188,35 @@
           x-on:click="
           navigator.clipboard.writeText($el.value);
           copied = true;
+          setTimeout(() => copied = false, 2000);
           "
-          class="w-full cursor-pointer rounded-3xl bg-[#1e1e1e]"
+          class="w-full cursor-pointer rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 px-3 py-2 text-xs text-purple-200 hover:bg-purple-500/15 transition-all"
           type="url"
           value={@notification_token}
           readonly
         />
-
-        <span class="self-center text-green-600/75" x-show="copied">Copied!</span>
+        <span class="self-center text-sm text-green-400/90 font-medium" x-show="copied" x-transition>
+          Copied!
+        </span>
       </div>
     </div>
-    <button class="bg-fuchsia-900 hover:brightness-125 transition rounded w-24 h-12 px-4 py-1">
+
+    <!-- Login Button -->
+    <button
+      type="submit"
+      class="glass-button hover:brightness-125 transition-all duration-300 rounded-lg w-full h-12 px-4 py-2 mt-4 text-lg font-semibold shadow-lg hover:shadow-purple-500/30"
+    >
       Login
     </button>
   </form>
+
+  <!-- Hidden token input -->
   <input hidden phx-hook="store_token" id="token_input" data-username={@username} value={@token} />
-  <h2 class="self-center text-lg text-red-600">
-    <%= @error_message %>
-  </h2>
+
+  <!-- Error Message -->
+  <div :if={@error_message != ""} class="mt-6 text-center">
+    <p class="text-sm text-red-400 font-medium bg-red-500/10 border border-red-500/20 rounded-lg py-2 px-4 backdrop-blur-sm">
+      <%= @error_message %>
+    </p>
+  </div>
 </div>

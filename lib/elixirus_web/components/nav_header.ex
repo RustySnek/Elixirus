@@ -16,10 +16,10 @@ defmodule ElixirusWeb.Components.NavHeader do
     )
   end
 
-  defp status() do
+  def status() do
     librus = Healthcheck.get_service_status(Services.LibrusConnection)
     proxy = Healthcheck.get_service_status(Services.ProxyAlive)
-    %{librus: librus, proxy: proxy}
+    Enum.map([{:librus, librus}, {:proxy, proxy}], fn {service, status} -> {service, status} end)
   end
 
   attr :name, :string, default: "My App"
@@ -68,7 +68,7 @@ defmodule ElixirusWeb.Components.NavHeader do
         <button
           phx-click={toggle_dropdown("#navbar-default")}
           type="button"
-          class="inline-flex items-center p-2 ml-3 text-sm text-gray-500 rounded-lg md:hidden focus:outline-none focus:ring-2 focus:ring-gray-200 "
+          class="inline-flex items-center p-2 ml-3 text-sm text-purple-300 rounded-lg md:hidden focus:outline-none focus:ring-2 focus:ring-purple-500/50 "
           aria-controls="navbar-default"
           aria-expanded="false"
         >
@@ -77,7 +77,7 @@ defmodule ElixirusWeb.Components.NavHeader do
         </button>
 
         <div
-          class="hidden w-full mt-4 md:mt-0 md:flex md:w-auto flex-row border rounded-lg border-gray-100 md:border-0 transition-all"
+          class="hidden w-full mt-4 md:mt-0 md:flex md:w-auto flex-row border rounded-lg border-purple-500/30 md:border-0 transition-all glass-card backdrop-blur-xl md:bg-transparent"
           id="navbar-default"
         >
           <ul class="flex flex-col p-4 md:flex-row md:space-x-4 lg:space-x-8 md:mt-0 md:text-sm md:font-medium">
@@ -86,18 +86,18 @@ defmodule ElixirusWeb.Components.NavHeader do
                 <.link
                   id={"link-#{title}"}
                   navigate={href}
-                  class="block hover:text-fuchsia-900 py-2 pl-3 pr-4 text-3xl xs:text-2xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700 md:p-0 "
+                  class="block hover:text-purple-400 py-2 pl-3 pr-4 text-3xl xs:text-2xl text-purple-400 rounded md:border-0 md:hover:text-purple-300 md:p-0 "
                 >
                   <%= title %>
                 </.link>
                 <div
                   :if={nested_links != []}
                   id={"expanded-#{title}"}
-                  class="md:absolute z-20 top-full md:bg-[#1f1f1f] md:py-4 rounded-lg left-2 sm:block md:hidden"
+                  class="md:absolute z-20 top-full glass-card backdrop-blur-xl md:py-4 rounded-lg left-2 sm:block md:hidden"
                 >
                   <%= for {title, href} <- nested_links do %>
                     <.link
-                      class="h-10 flex flex-col justify-center px-4 hover:bg-fuchsia-700/10 hover:text-fuchsia-900 xs:text-xl text-2xl text-fuchsia-700 rounded md:border-0 md:hover:text-purple-700"
+                      class="h-10 flex flex-col justify-center px-4 hover:bg-purple-500/10 hover:text-purple-400 xs:text-xl text-2xl text-purple-400 rounded md:border-0 md:hover:text-purple-300"
                       navigate={href}
                     >
                       <%= title %>

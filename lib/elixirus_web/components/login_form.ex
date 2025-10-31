@@ -7,6 +7,7 @@ defmodule ElixirusWeb.LoginForm do
   alias GenServer
   alias Elixirus.TokenWorker
   alias UUID
+  alias Heroicons
 
   def mount(socket) do
     socket =

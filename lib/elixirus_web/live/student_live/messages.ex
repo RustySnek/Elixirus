@@ -479,68 +479,102 @@ defmodule ElixirusWeb.StudentLive.Messages do
       <button phx-value-visibility="all" phx-click="toggle_visibility">
         <Heroicons.inbox
           mini
-          class={"w-10 #{@visibility |> Kernel.==("all") && "!text-fuchsia-400"}"}
+          class={"w-10 #{@visibility |> Kernel.==("all") && "!text-purple-400"}"}
         />
       </button>
       <button phx-value-visibility="seen" phx-click="toggle_visibility">
-        <Heroicons.eye mini class={"w-10 #{@visibility |> Kernel.==("seen") && "!text-fuchsia-400"}"} />
+        <Heroicons.eye mini class={"w-10 #{@visibility |> Kernel.==("seen") && "!text-purple-400"}"} />
       </button>
       <button phx-value-visibility="unread" phx-click="toggle_visibility">
         <Heroicons.eye_slash
           mini
-          class={"w-10 #{@visibility |> Kernel.==("unread") && "!text-fuchsia-400"}"}
+          class={"w-10 #{@visibility |> Kernel.==("unread") && "!text-purple-400"}"}
         />
       </button>
       <button phx-value-visibility="sent" phx-click="toggle_visibility">
         <div class="flex flex-row">
           <Heroicons.envelope
             mini
-            class={"w-10 #{@visibility |> Kernel.==("sent") && "!text-fuchsia-400"}"}
+            class={"w-10 #{@visibility |> Kernel.==("sent") && "!text-purple-400"}"}
           />
           <Heroicons.chevron_up
             mini
-            class={"w-10 #{@visibility |> Kernel.==("sent") && "!text-fuchsia-400"}"}
+            class={"w-10 #{@visibility |> Kernel.==("sent") && "!text-purple-400"}"}
           />
         </div>
       </button>
     </div>
-    <div class="px-10 flex-row gap-y-5 justify-start gap-x-10 flex-grow hidden md:flex items-center rounded-2xl pb-4 text-sm">
-      <.link patch={~p"/student/messages/send"}>
-        <div class="flex flex-col items-center">
-          <div class="flex flex-row">
-            <Heroicons.envelope class="w-10" />
-            <Heroicons.arrow_up class="w-10" />
-          </div>
-          <span>Send Message</span>
-        </div>
+    <div class="flex flex-row gap-3 flex-wrap justify-center lg:justify-start items-center pb-6 hidden md:flex">
+      <.link 
+        patch={~p"/student/messages/send"}
+        class="glass-card backdrop-blur-xl rounded-lg px-4 py-3 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/20 flex items-center gap-2 group"
+      >
+        <Heroicons.envelope class="w-5 h-5 text-purple-300 group-hover:text-purple-200 transition-colors" />
+        <Heroicons.arrow_up class="w-4 h-4 text-purple-300 group-hover:text-purple-200 transition-colors" />
+        <span class="text-sm font-medium text-purple-200">Send Message</span>
       </.link>
 
-      <button phx-value-visibility="all" phx-click="toggle_visibility">
-        <div class="flex flex-col items-center">
-          <Heroicons.inbox class={"w-10 #{@visibility |> Kernel.==("all") && "!text-fuchsia-400"}"} />
-          <span>Inbox</span>
-        </div>
+      <button 
+        phx-value-visibility="all" 
+        phx-click="toggle_visibility"
+        class={
+          "glass-card backdrop-blur-xl rounded-lg px-4 py-3 border transition-all duration-200 flex items-center gap-2 " <>
+          if(@visibility == "all", 
+            do: "border-purple-400/50 bg-purple-500/20 shadow-lg shadow-purple-500/20",
+            else: "border-purple-500/30 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/10"
+          )
+        }
+      >
+        <Heroicons.inbox class={"w-5 h-5 transition-colors #{if(@visibility == "all", do: "text-purple-200", else: "text-purple-300")}"} />
+        <span class={["text-sm font-medium transition-colors", if(@visibility == "all", do: "text-purple-200", else: "text-purple-300/70")]}>Inbox</span>
       </button>
-      <button phx-value-visibility="seen" phx-click="toggle_visibility">
-        <div class="flex flex-col items-center">
-          <Heroicons.envelope_open class={"w-10 #{@visibility |> Kernel.==("seen") && "!text-fuchsia-400"}"} />
-          <span>Seen</span>
-        </div>
+
+      <button 
+        phx-value-visibility="seen" 
+        phx-click="toggle_visibility"
+        class={
+          "glass-card backdrop-blur-xl rounded-lg px-4 py-3 border transition-all duration-200 flex items-center gap-2 " <>
+          if(@visibility == "seen", 
+            do: "border-purple-400/50 bg-purple-500/20 shadow-lg shadow-purple-500/20",
+            else: "border-purple-500/30 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/10"
+          )
+        }
+      >
+        <Heroicons.envelope_open class={"w-5 h-5 transition-colors #{if(@visibility == "seen", do: "text-purple-200", else: "text-purple-300")}"} />
+        <span class={["text-sm font-medium transition-colors", if(@visibility == "seen", do: "text-purple-200", else: "text-purple-300/70")]}>Seen</span>
       </button>
-      <button phx-value-visibility="unread" phx-click="toggle_visibility">
-        <div class="flex flex-col items-center">
-          <Heroicons.envelope class={"w-10 #{@visibility |> Kernel.==("unread") && "!text-fuchsia-400"}"} />
-          <span>Unread</span>
-        </div>
+
+      <button 
+        phx-value-visibility="unread" 
+        phx-click="toggle_visibility"
+        class={
+          "glass-card backdrop-blur-xl rounded-lg px-4 py-3 border transition-all duration-200 flex items-center gap-2 " <>
+          if(@visibility == "unread", 
+            do: "border-purple-400/50 bg-purple-500/20 shadow-lg shadow-purple-500/20",
+            else: "border-purple-500/30 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/10"
+          )
+        }
+      >
+        <Heroicons.envelope class={"w-5 h-5 transition-colors #{if(@visibility == "unread", do: "text-purple-200", else: "text-purple-300")}"} />
+        <span class={["text-sm font-medium transition-colors", if(@visibility == "unread", do: "text-purple-200", else: "text-purple-300/70")]}>Unread</span>
       </button>
-      <button phx-value-visibility="sent" phx-click="toggle_visibility">
-        <div class="flex flex-col items-center">
-          <div class="flex flex-row">
-            <Heroicons.envelope class={"w-10 #{@visibility |> Kernel.==("sent") && "!text-fuchsia-400"}"} />
-            <Heroicons.chevron_up class={"w-10 #{@visibility |> Kernel.==("sent") && "!text-fuchsia-400"}"} />
-          </div>
-          <span>Sent</span>
+
+      <button 
+        phx-value-visibility="sent" 
+        phx-click="toggle_visibility"
+        class={
+          "glass-card backdrop-blur-xl rounded-lg px-4 py-3 border transition-all duration-200 flex items-center gap-2 " <>
+          if(@visibility == "sent", 
+            do: "border-purple-400/50 bg-purple-500/20 shadow-lg shadow-purple-500/20",
+            else: "border-purple-500/30 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/10"
+          )
+        }
+      >
+        <div class="flex items-center gap-1">
+          <Heroicons.envelope class={"w-5 h-5 transition-colors #{if(@visibility == "sent", do: "text-purple-200", else: "text-purple-300")}"} />
+          <Heroicons.chevron_up class={"w-4 h-4 transition-colors #{if(@visibility == "sent", do: "text-purple-200", else: "text-purple-300")}"} />
         </div>
+        <span class={["text-sm font-medium transition-colors", if(@visibility == "sent", do: "text-purple-200", else: "text-purple-300/70")]}>Sent</span>
       </button>
     </div>
     """
@@ -548,24 +582,44 @@ defmodule ElixirusWeb.StudentLive.Messages do
 
   defp message(assigns) do
     ~H"""
-    <div class={
-    "hover:opacity-90 rotate-0 w-full
-    rounded bg-fuchsia-800/25
-    #{@message.unread == true && "!bg-red-700/25"}
-    "}>
-      <.link
-        class=" px-4 py-2 gap-x-2 flex flex-col xl:flex-row w-full text-lg justify-between h-24"
-        patch={~p"/student/messages/#{@message.href}"}
-      >
-        <div class="truncate xl:w-1/2 xl:text-justify w-full">
-          <%= @message.title %>
+    <.link
+      patch={~p"/student/messages/#{@message.href}"}
+      class={
+        "group relative w-full glass-card backdrop-blur-xl rounded-lg p-4 border transition-all duration-300 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/20 " <>
+        if(@message.unread == true, do: "border-red-500/40 bg-red-500/5", else: "border-purple-500/20")
+      }
+    >
+      <div class="flex flex-col gap-3">
+        <!-- Title Section -->
+        <div class="flex items-start justify-between gap-4">
+          <h3 class={[
+            "font-semibold text-lg line-clamp-2 flex-1 transition-colors",
+            @message.unread == true && "text-red-300 group-hover:text-red-200",
+            @message.unread != true && "text-purple-200 group-hover:text-purple-100"
+          ]}>
+            <%= @message.title %>
+          </h3>
+          <div :if={@message.unread == true} class="flex-shrink-0">
+            <div class="w-2 h-2 bg-red-400 rounded-full animate-pulse shadow-lg shadow-red-500/50"></div>
+          </div>
         </div>
-        <div class="text-base justify-between flex flex-col xl:w-1/3 w-full text-gray-400">
-          <p class="truncate text-end"><%= @message.author %></p>
-          <p class="truncate text-end"><%= @message.date %></p>
+        
+        <!-- Metadata Section -->
+        <div class="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 text-sm">
+          <div class="flex items-center gap-2 text-purple-300/70">
+            <Heroicons.user_circle class="w-4 h-4" />
+            <span class="truncate"><%= @message.author %></span>
+          </div>
+          <div class="flex items-center gap-2 text-purple-300/60">
+            <Heroicons.clock class="w-4 h-4" />
+            <span><%= @message.date %></span>
+          </div>
         </div>
-      </.link>
-    </div>
+      </div>
+      
+      <!-- Hover effect overlay -->
+      <div class="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+    </.link>
     """
   end
 end

@@ -1,58 +1,149 @@
-<div :if={@schedule == %{} && :schedule in @loadings} class="flex justify-center items-center">
-  <div class="mx-4 mb-8 grid xl:grid-cols-7 md:grid-cols-3 grid-cols-2 place-items-center gap-x-14 gap-y-4">
+<div class="flex flex-col gap-6 w-full px-4 lg:px-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-2">
+    <Heroicons.calendar class="w-8 h-8 text-purple-400" />
+    <h1 class="text-3xl font-bold text-purple-300">
+      Schedule - <%= Date.new!(@year, @month, 1) |> Calendar.strftime("%B %Y") %>
+    </h1>
+  </div>
+
+  <!-- Loading State -->
+  <div :if={@schedule == %{} && :schedule in @loadings} class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
     <div
       :for={_ <- 0..30}
-      class="p-1 space-y-2 overflow-y-auto bg-[#1e1e1e] rounded animate-pulse xs:w-32 xs:h-32 w-40 2xl:w-56 xl:w-40 md:w-60 h-40"
+      class="glass-card backdrop-blur-xl rounded-lg p-4 h-48 animate-pulse"
     >
     </div>
   </div>
-</div>
-<div
-  :if={@schedule}
-  class="mx-4 mb-8 grid xl:grid-cols-7 md:grid-cols-3 grid-cols-2 place-items-center gap-y-4"
->
+
+  <!-- Empty State -->
   <div
-    :if={@event_href}
-    class="hidden"
-    phx-mounted={ElixirusWeb.Modal.show_modal_js("event-#{@event_href}")}
+    :if={@schedule == %{} && !(:schedule in @loadings)}
+    class="flex flex-col justify-center items-center text-center py-16"
   >
+    <Heroicons.calendar class="w-20 h-20 text-purple-400/50 mb-4" />
+    <h2 class="font-bold text-purple-300/50 text-2xl">No schedule available</h2>
   </div>
+
+  <!-- Schedule Grid -->
   <div
-    :for={{day_num, day} <- @schedule |> Map.to_list()}
-    class="p-1 space-y-2 overflow-y-auto border border-fuchsia-600 xs:w-32 xs:h-32 w-40 2xl:w-56 xl:w-40 md:w-60 h-40"
+    :if={@schedule != %{}}
+    class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4"
   >
-    <%= day_num %>
     <div
-      :for={{event, event_num} <- day |> Enum.with_index()}
-      class="last:border-none h-14 bg-fuchsia-800/10 "
+      :if={@event_href}
+      class="hidden"
+      phx-mounted={ElixirusWeb.Modal.show_modal_js("event-#{@event_href}")}
     >
-      <.live_component module={Modal} id={"event-#{event_num}-#{event.day}"}>
-        <div class="bg-purple-950/95 p-4 space-y-8 rounded-sm md:w-[800px] xs:w-[260px] w-[360px]">
-          <p class="text-center text-2xl mb-6">
-            [<%= day_num %> - <%= Date.new!(@year, @month, day_num)
-            |> Calendar.strftime("%A") %>] <%= event.title %>
-          </p>
-          <div
-            :for={{key, value} <- event |> Map.get(:data) |> Map.to_list() |> Enum.reverse()}
-            :if={value != "unknown"}
-            class="text-xl"
+    </div>
+    
+    <div
+      :for={{day_num, day} <- @schedule |> Map.to_list() |> Enum.sort_by(fn {num, _} -> num end)}
+      class="glass-card backdrop-blur-xl rounded-lg p-3 min-h-[200px] flex flex-col hover:border-purple-400/60 transition-colors"
+    >
+      <!-- Day Header -->
+      <div class="flex items-center justify-between mb-3 pb-2 border-b border-purple-500/20">
+        <div class="flex flex-col">
+          <span class="text-2xl font-bold text-purple-300"><%= day_num %></span>
+          <span class="text-xs text-purple-400/70 uppercase">
+            <%= Date.new!(@year, @month, day_num) |> Calendar.strftime("%a") %>
+          </span>
+        </div>
+        <div :if={length(day) > 0} class="px-2 py-1 bg-purple-500/20 rounded-full">
+          <span class="text-xs font-medium text-purple-300"><%= length(day) %></span>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="flex-1 space-y-2 overflow-y-auto">
+        <div
+          :for={{event, event_num} <- day |> Enum.with_index()}
+          class="group"
+        >
+          <button
+            class="w-full text-left p-2 rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 hover:bg-purple-500/20 hover:border-purple-400/40 border border-transparent transition-all group"
+            phx-click={ElixirusWeb.Modal.show_modal_js("event-#{event_num}-#{day_num}")}
+            phx-target={"#event-#{event_num}-#{day_num}"}
           >
-            <span>
-              <%= key %>: <%= value %>
-            </span>
+            <div class="flex items-start gap-2">
+              <Heroicons.calendar_days class="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5 group-hover:text-purple-300 transition-colors" />
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium text-purple-200 line-clamp-2 mb-1">
+                  <%= event.title %>
+                </div>
+                <div :if={event.subject && event.subject != :unspecified} class="text-xs text-purple-400/70 line-clamp-1">
+                  <%= event.subject %>
+                </div>
+                <div :if={event.hour} class="text-xs text-purple-400/60 mt-1">
+                  <%= event.hour %>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+        
+        <!-- Empty Day Message -->
+        <div :if={length(day) == 0} class="text-center py-8">
+          <Heroicons.calendar class="w-8 h-8 text-purple-400/30 mx-auto mb-2" />
+          <span class="text-xs text-purple-400/50">No events</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Modals Rendered Outside Grid -->
+  <div :if={@schedule != %{}}>
+    <div
+      :for={{day_num, day} <- @schedule |> Map.to_list() |> Enum.sort_by(fn {num, _} -> num end)}
+    >
+      <.live_component
+        :for={{event, event_num} <- day |> Enum.with_index()}
+        module={Modal}
+        id={"event-#{event_num}-#{day_num}"}
+      >
+        <div class="glass-card backdrop-blur-xl rounded-lg p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto">
+          <!-- Modal Header -->
+          <div class="flex items-start gap-4 mb-6 pb-4 border-b border-purple-500/20">
+            <Heroicons.calendar_days class="w-8 h-8 text-purple-400 flex-shrink-0 mt-1" />
+            <div class="flex-1">
+              <h2 class="text-2xl font-bold text-purple-200 mb-2">
+                <%= event.title %>
+              </h2>
+              <div class="flex items-center gap-4 text-sm text-purple-400/70">
+                <div class="flex items-center gap-1">
+                  <Heroicons.calendar class="w-4 h-4" />
+                  <span><%= day_num %> <%= Date.new!(@year, @month, day_num) |> Calendar.strftime("%B %Y") %></span>
+                </div>
+                <div :if={event.subject && event.subject != :unspecified} class="flex items-center gap-1">
+                  <Heroicons.academic_cap class="w-4 h-4" />
+                  <span><%= event.subject %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Details -->
+          <div class="space-y-3">
+            <div
+              :for={{key, value} <- event |> Map.get(:data, %{}) |> Map.to_list() |> Enum.reverse()}
+              :if={value != "unknown" && value != "" && value != nil}
+              class="flex items-start gap-3 p-3 rounded-lg bg-purple-500/10 hover:bg-purple-500/15 transition-colors"
+            >
+              <div class="flex-shrink-0 mt-0.5">
+                <Heroicons.information_circle class="w-5 h-5 text-purple-400" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs uppercase text-purple-400/70 mb-1 font-medium">
+                  <%= String.replace(to_string(key), "_", " ") |> String.split(" ") |> Enum.map(&String.capitalize/1) |> Enum.join(" ") %>
+                </div>
+                <div class="text-sm text-purple-200 break-words">
+                  <%= value %>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </.live_component>
-      <button
-        class="w-full h-full "
-        phx-click={ElixirusWeb.Modal.show_modal_js("event-#{event_num}-#{event.day}")}
-        phx-target={"#event-#{event_num}-#{event.day}"}
-      >
-        <span class="line-clamp-1"><%= event.title %></span>
-        <span :if={event.subject != :unspecified} class="text-sm line-clamp-1">
-          <%= event.subject %>
-        </span>
-      </button>
     </div>
   </div>
 </div>

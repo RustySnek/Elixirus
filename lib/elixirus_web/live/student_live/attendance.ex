@@ -7,6 +7,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
   import ElixirusWeb.Helpers
   import Venomous
   alias Venomous.SnakeArgs
+  import Heroicons, except: [link: 1]
 
   @asyncs [
     :load_frequency,
@@ -15,9 +16,9 @@ defmodule ElixirusWeb.StudentLive.Attendance do
   ]
 
   def calculate_attendance_frequency(attend_marks, miss_lesson_offset \\ 0) do
-    unattended =
+    attended =
       Enum.reduce(
-        ["nb", "u"],
+        ["ob", "sp"],
         0,
         fn state, acc -> Map.get(attend_marks, state, 0) + acc end
       )
@@ -26,12 +27,11 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
     {attended, total} =
       if miss_lesson_offset < 0 do
-        attended = total - unattended + abs(miss_lesson_offset)
+        attended = attended + abs(miss_lesson_offset)
         {attended, total + abs(miss_lesson_offset)}
       else
-        unattended = unattended + miss_lesson_offset
         total = total + miss_lesson_offset
-        {total - unattended, total}
+        {attended, total}
       end
 
     (attended / max(1, total) * 10_000)
@@ -49,11 +49,10 @@ defmodule ElixirusWeb.StudentLive.Attendance do
         {offset, _} -> offset
       end
 
+    new_freq = calculate_attendance_frequency(attend_marks |> Map.get(name, %{}), offset)
+    
     {:noreply,
-     assign(socket, :subject_frequency, %{
-       frequencies
-       | name => calculate_attendance_frequency(attend_marks |> Map.get(name, %{}), offset)
-     })}
+     assign(socket, :subject_frequency, Map.put(frequencies, name, new_freq))}
   end
 
   def handle_async(:load_subject_attendance, {:ok, attendance}, socket) do
@@ -71,9 +70,17 @@ defmodule ElixirusWeb.StudentLive.Attendance do
             end)
             |> Enum.into(%{})
 
+          # Store initial sort order (lowest to highest frequency)
+          subject_order =
+            subject_frequencies
+            |> Map.to_list()
+            |> Enum.sort_by(fn {_subj, freq} -> freq end)
+            |> Enum.map(fn {subj, _freq} -> subj end)
+
           socket
           |> assign(:subject_attendance, subject_attendance)
           |> assign(:subject_frequency, subject_frequencies)
+          |> assign(:subject_order, subject_order)
           |> assign(:loadings, List.delete(socket.assigns.loadings, :subject_attendance))
 
         {_err, _msg, socket} ->
@@ -187,6 +194,17 @@ defmodule ElixirusWeb.StudentLive.Attendance do
         stats -> stats
       end
 
+    # Store initial sort order if subject_frequency is loaded
+    subject_order =
+      if subject_frequency != %{} do
+        subject_frequency
+        |> Map.to_list()
+        |> Enum.sort_by(fn {_subj, freq} -> freq end)
+        |> Enum.map(fn {subj, _freq} -> subj end)
+      else
+        []
+      end
+
     socket =
       socket
       |> assign(:attendance, [])
@@ -194,6 +212,7 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> assign(:frequency, [])
       |> assign(:subject_frequency, subject_frequency)
       |> assign(:subject_attendance, %{})
+      |> assign(:subject_order, subject_order)
       |> assign(:loadings, [])
       |> assign(:client, client)
       |> assign(:semester, semester)
@@ -252,35 +271,76 @@ defmodule ElixirusWeb.StudentLive.Attendance do
 
   defp absence(%{selected: true} = assigns) do
     ~H"""
-    <.link
-      id="selected-absence"
-      phx-hook="highlight_grade"
-      patch={~p"/student/attendance"}
-      class={"relative px-1 rounded-md bg-fg
-      col-span-4 md:col-span-12 w-full brightness-150 transition duration-300 order-last h-fit #{@class}"}
-    >
-      <h2 class="text-xs"><%= @absence.period %></h2>
-      <span class={"
-      text-#{attendance_color(@absence.symbol)} 
-      opacity-25
-      text-xl absolute top-1/2
-      left-1/2 -translate-x-1/2
-      -translate-y-1/2
-      "}>
-        <%= @absence.symbol %>
-      </span>
-      <div class="flex flex-col text-sm">
-        <span class={"text-#{attendance_color(@absence.symbol)}"}><%= @absence.type %></span>
-        <span><%= @absence.topic %></span>
-        <span>School trip: <%= excursion(@absence.excursion) %></span>
-        <span class="mb-6"><%= @absence.teacher %></span>
-      </div>
-      <span class="
-        absolute bottom-1 text-xs
-      truncate w-full
-      "><%= @absence.subject %></span>
-    </.link>
-    <.absence absence={@absence} selected={false} class="brightness-150" />
+    <div class="col-span-full order-last">
+      <.link
+        id="selected-absence"
+        phx-hook="highlight_grade"
+        patch={~p"/student/attendance"}
+        class={[
+          "block glass-card backdrop-blur-xl rounded-lg p-5 border-2 transition-all duration-300 hover:shadow-lg",
+          "border-purple-400/80 bg-purple-500/20 ring-2 ring-purple-400/30",
+          @class
+        ]}
+      >
+        <div class="flex flex-col md:flex-row gap-4">
+          <!-- Symbol Display -->
+          <div class="flex-shrink-0 flex items-center justify-center">
+            <div class={[
+              "relative w-20 h-20 rounded-lg border-2 flex items-center justify-center",
+              "border-#{attendance_color(@absence.symbol)}/60 bg-#{attendance_color(@absence.symbol)}/20"
+            ]}>
+              <span class={[
+                "text-4xl font-bold",
+                "text-#{attendance_color(@absence.symbol)}"
+              ]}>
+                <%= @absence.symbol %>
+              </span>
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div class="flex-1 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-purple-400/70 mb-1">Period</div>
+                <div class="text-lg font-bold text-purple-200"><%= @absence.period %></div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-purple-400/70 mb-1">Subject</div>
+                <div class="text-sm font-semibold text-purple-200 truncate max-w-[200px]"><%= @absence.subject %></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <div class="text-xs text-purple-400/70 mb-1">Type</div>
+                <div class={[
+                  "text-sm font-medium",
+                  "text-#{attendance_color(@absence.symbol)}"
+                ]}>
+                  <%= @absence.type %>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-xs text-purple-400/70 mb-1">Teacher</div>
+                <div class="text-sm text-purple-200"><%= @absence.teacher %></div>
+              </div>
+
+              <div>
+                <div class="text-xs text-purple-400/70 mb-1">Topic</div>
+                <div class="text-sm text-purple-200 break-words"><%= @absence.topic %></div>
+              </div>
+
+              <div>
+                <div class="text-xs text-purple-400/70 mb-1">School Trip</div>
+                <div class="text-sm text-purple-200"><%= excursion(@absence.excursion) %></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </.link>
+    </div>
     """
   end
 
@@ -288,25 +348,33 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     ~H"""
     <.link
       patch={~p"/student/attendance/#{@absence.href}"}
-      class={"
-      transition duration-300
-      relative px-1 h-20 min-w-20 
-      w-20 rounded-md bg-fg #{@class}
-      "}
+      class={[
+        "group relative aspect-square flex flex-col items-center justify-center rounded-lg border-2",
+        "transition-all duration-200 hover:scale-105 hover:shadow-lg overflow-hidden",
+        "border-#{attendance_color(@absence.symbol)}/60 bg-#{attendance_color(@absence.symbol)}/10",
+        "hover:border-#{attendance_color(@absence.symbol)}/80 hover:bg-#{attendance_color(@absence.symbol)}/20",
+        @class
+      ]}
     >
-      <h2 class="text-xs"><%= @absence.period %></h2>
-      <span class={"
-      text-#{attendance_color(@absence.symbol)} 
-      text-xl absolute top-1/2
-      left-1/2 -translate-x-1/2
-      -translate-y-1/2
-      "}>
+      <!-- Period -->
+      <div class="absolute top-1 left-1 text-xs font-semibold text-purple-200/70">
+        <%= @absence.period %>
+      </div>
+
+      <!-- Symbol -->
+      <span class={[
+        "text-2xl md:text-3xl font-bold",
+        "text-#{attendance_color(@absence.symbol)}"
+      ]}>
         <%= @absence.symbol %>
       </span>
-      <span class="
-      absolute bottom-1 text-xs
-      truncate w-full
-      "><%= @absence.subject %></span>
+
+      <!-- Subject -->
+      <div class="absolute bottom-1 left-1 right-1">
+        <span class="text-[10px] text-purple-200/80 truncate block text-center font-medium">
+          <%= @absence.subject %>
+        </span>
+      </div>
     </.link>
     """
   end

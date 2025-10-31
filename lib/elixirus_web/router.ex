@@ -53,6 +53,8 @@ defmodule ElixirusWeb.Router do
         live "/:subject", StudentLive.GradesLive.Subject
       end
 
+      live "/student_info", StudentLive.StudentInfo
+
       # scope "/scheduling" do
       #   
       # end

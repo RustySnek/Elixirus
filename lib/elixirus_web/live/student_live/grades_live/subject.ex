@@ -6,7 +6,7 @@ defmodule ElixirusWeb.StudentLive.GradesLive.Subject do
 
   import Venomous
   alias Venomous.SnakeArgs
-  import ElixirusWeb.Components.Loadings
+  import Heroicons
 
   @asyncs [:load_grades]
 

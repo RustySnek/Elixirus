@@ -8,13 +8,101 @@ html {
 
 :root {
   color-scheme: dark;
+  --neon-purple: #a855f7;
+  --neon-purple-bright: #c084fc;
+  --neon-purple-dark: #7c3aed;
+  --neon-purple-glow: #e879f9;
+}
+
+/* Neon Purple Liquid Glass Background */
+body {
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 25%, #0f0a1f 50%, #1a0a2e 75%, #0a0a0f 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  position: relative;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(192, 132, 252, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(232, 121, 249, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes neonGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5),
+                0 0 40px rgba(192, 132, 252, 0.3),
+                0 0 60px rgba(232, 121, 249, 0.2),
+                inset 0 0 20px rgba(168, 85, 247, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.7),
+                0 0 60px rgba(192, 132, 252, 0.5),
+                0 0 90px rgba(232, 121, 249, 0.3),
+                inset 0 0 30px rgba(168, 85, 247, 0.15);
+  }
+}
+
+@keyframes neonPulse {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(168, 85, 247, 0.8),
+                 0 0 20px rgba(192, 132, 252, 0.6),
+                 0 0 30px rgba(232, 121, 249, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(168, 85, 247, 1),
+                 0 0 30px rgba(192, 132, 252, 0.8),
+                 0 0 45px rgba(232, 121, 249, 0.6);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fill {
   from {
     width: 0%;
   }
-
   to {
     width: var(--percentage);
   }
@@ -24,30 +112,87 @@ html {
   animation: fill 1.2s forwards;
 }
 
-.toggle-checkbox:checked+label .toggle-square {
-  transform: translateX(160%);
-  background-color: rgb(210, 38, 220);
+/* Liquid Glass Card Effect */
+.glass-card {
+  background: rgba(30, 20, 50, 0.3);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
+.glass-card:hover {
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              0 0 20px rgba(168, 85, 247, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-header {
+  background: rgba(20, 10, 40, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.1);
+}
+
+/* Neon Purple Toggle */
+.toggle-checkbox:checked+label {
+  border-color: rgba(192, 132, 252, 0.6);
+  background-color: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+}
+
+.toggle-checkbox:checked+label .toggle-square {
+  transform: translateX(2rem);
+  background-color: var(--neon-purple-bright);
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.8),
+              0 0 40px rgba(232, 121, 249, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Neon Purple Input */
 .input-underline {
   border: none;
-  border-bottom: 2px solid rgb(134 25 143);
+  border-bottom: 2px solid rgba(168, 85, 247, 0.5);
   outline: none;
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-underline::placeholder {
+  transition: opacity 0.3s ease;
 }
 
 .input-underline:focus {
-  border-bottom-color: rgb(192 38 211);
+  border-bottom-color: var(--neon-purple-bright);
+  border-bottom-width: 2.5px;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3),
+              0 0 20px rgba(232, 121, 249, 0.15);
 }
 
+.input-underline:focus::placeholder {
+  opacity: 0.6;
+}
+
+/* Neon Purple Links */
 .announcement_link a {
-  color: fuchsia;
+  color: var(--neon-purple-bright);
   overflow-wrap: break-word;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+  transition: all 0.3s ease;
 }
 
 .announcement_link a:hover {
-  color: white;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(232, 121, 249, 0.9),
+               0 0 30px rgba(168, 85, 247, 0.6);
 }
 
+/* Neon Purple Circle Progress */
 .circle {
   width: 140px;
   height: 140px;
@@ -59,9 +204,10 @@ html {
   position: absolute;
   content: "";
   background-color: transparent;
-  border: 20px solid rgb(192 38 211);
+  border: 20px solid var(--neon-purple);
   background: transparent;
   border-radius: 100%;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
 }
 
 .circle .percentage-bar {
@@ -76,9 +222,8 @@ html {
   content: "";
   -webkit-clip-path: inset(0 50% 0 0);
   clip-path: inset(0 50% 0 0);
-  border: 20px solid rgb(74 4 78);
+  border: 20px solid var(--neon-purple-dark);
   border-radius: 100%;
-
 }
 
 .circle:before {
@@ -102,6 +247,1926 @@ html {
 
 .percentage-bar:after {
   transform: rotate(var(--progress-value));
+}
+
+/* Neon Text Effect */
+.neon-text {
+  color: var(--neon-purple-bright);
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.8),
+               0 0 20px rgba(192, 132, 252, 0.6),
+               0 0 30px rgba(232, 121, 249, 0.4);
+  animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* Glass Button */
+.glass-button {
+  background: rgba(168, 85, 247, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  color: var(--neon-purple-bright);
+  transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  text-shadow: 0 0 10px rgba(232, 121, 249, 0.8);
+}
+
+/* Modern Tab Navigation */
+.tab-container {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+  padding: 0.5rem;
+}
+
+.tab-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tab-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tab-container::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.5);
+  border-radius: 2px;
+}
+
+/* Tab Navigation Collapse on Scroll */
+.glass-header nav {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.25s ease-out,
+              max-height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(0);
+  opacity: 1;
+  max-height: 200px;
+  margin-top: 1rem;
+  overflow: hidden;
+  will-change: transform;
+  transform-origin: top;
+}
+
+.glass-header nav.tabs-collapsed {
+  transform: translateY(-100%);
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+}
+
+.tab-item {
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  background: rgba(30, 20, 50, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 0.75rem;
+  color: rgba(192, 132, 252, 0.7);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.tab-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.tab-item:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(192, 132, 252, 0.4);
+  color: var(--neon-purple-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.3),
+              0 0 20px rgba(168, 85, 247, 0.15);
+}
+
+.tab-item:hover::before {
+  left: 100%;
+}
+
+.tab-item.active {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(192, 132, 252, 0.5);
+  color: var(--neon-purple-bright);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4),
+              inset 0 0 20px rgba(168, 85, 247, 0.1);
+  text-shadow: 0 0 10px rgba(232, 121, 249, 0.8);
+}
+
+/* Status Indicator Pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: rgba(30, 20, 50, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.status-pill.status-up {
+  color: rgba(74, 222, 128, 0.9);
+  border-color: rgba(74, 222, 128, 0.3);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+}
+
+.status-pill.status-down {
+  color: rgba(239, 68, 68, 0.9);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+}
+
+/* Improved Header Layout */
+.modern-header {
+  padding: 1rem 1.5rem;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.header-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(168, 85, 247, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  border-radius: 0.75rem;
+  color: var(--neon-purple-bright);
+  transition: all 0.3s ease;
+}
+
+.header-action-btn:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  transform: scale(1.05);
+}
+
+.header-action-btn.logout:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+/* Enhanced Card Design */
+.enhanced-card {
+  background: rgba(30, 20, 50, 0.35);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 0 0 1px rgba(168, 85, 247, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.enhanced-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.enhanced-card:hover {
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 12px 40px rgba(168, 85, 247, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              0 0 30px rgba(168, 85, 247, 0.2);
+  transform: translateY(-4px) scale(1.01);
+}
+
+.enhanced-card:hover::before {
+  opacity: 1;
+}
+
+/* Mobile Navigation */
+.mobile-nav-toggle {
+  display: none;
+}
+
+/* Mobile Optimizations - Navbar */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: flex;
+  }
+  
+  /* Header Layout - More Compact */
+  .modern-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .header-content {
+    gap: 1rem;
+  }
+  
+  .header-logo-section h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  .header-logo-section svg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  .header-actions {
+    gap: 0.5rem;
+  }
+  
+  .status-pill {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    gap: 0.25rem;
+  }
+  
+  .status-pill svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .status-pill span {
+    display: none !important;
+  }
+  
+  .header-action-btn {
+    width: 2rem;
+    height: 2rem;
+    padding: 0.5rem;
+  }
+  
+  .header-action-btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  /* Tabs - Horizontal Scrollable */
+  .tab-container {
+    flex-direction: row !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .tab-item {
+    flex-shrink: 0;
+    width: auto;
+    min-width: fit-content;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    scroll-snap-align: start;
+  }
+  
+  .glass-header nav {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .header-logo-section h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .header-logo-section svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  .header-actions {
+    gap: 0.375rem;
+  }
+  
+  .status-pill {
+    padding: 0.25rem 0.375rem;
+  }
+  
+  .header-action-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0.375rem;
+  }
+  
+  .tab-container {
+    padding: 0.375rem 0.5rem;
+    gap: 0.25rem;
+  }
+  
+  .tab-item {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Smooth scrolling for tabs */
+.tab-container {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure content is above background layers */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   MODAL SYSTEM - LIQUID GLASS STYLE
+   ============================================ */
+
+/* Modal container - always on top - ESCAPE ALL STACKING CONTEXTS */
+.fixed.inset-0.z-\[999999\],
+div.fixed.inset-0[id] {
+  z-index: 999999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
+}
+
+/* Modal content wrapper - ensure it's above backdrop */
+div.fixed.inset-0[role="dialog"] {
+  z-index: 1000000 !important;
+}
+
+/* Modal glass content - FINAL LAYER */
+.modal-glass-content {
+  z-index: 1000001 !important;
+  width: 550px !important;
+  max-width: 550px !important;
+  min-width: 550px !important;
+  max-height: 85vh !important;
+  display: flex !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+  .modal-glass-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    min-width: 280px !important;
+    max-height: 90vh !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-glass-content {
+    width: 98vw !important;
+    max-width: 98vw !important;
+    min-width: 260px !important;
+    max-height: 95vh !important;
+  }
+}
+
+/* ============================================
+   PERIOD MODAL STYLING - THEME FITTING
+   ============================================ */
+
+.modal-period-content {
+  background: rgba(20, 10, 35, 0.5) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 20px 60px rgba(168, 85, 247, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              0 0 0 1px rgba(168, 85, 247, 0.2) !important;
+  padding: 0 !important;
+  width: 550px !important;
+  max-width: 550px !important;
+  min-width: 550px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+}
+
+@media (max-width: 640px) {
+  .modal-period-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    min-width: 280px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-period-content {
+    width: 98vw !important;
+    max-width: 98vw !important;
+    min-width: 260px !important;
+  }
+}
+
+.modal-period-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-period-content::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.5);
+  border-radius: 3px;
+}
+
+@media (max-width: 640px) {
+  .modal-period-content {
+    max-height: 90vh !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-period-content {
+    max-height: 95vh !important;
+  }
+}
+
+/* Header Section */
+.modal-header-section {
+  padding: 1.5rem 1.5rem 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(192, 132, 252, 0.1) 100%);
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 1.5rem 1.5rem 0 0;
+}
+
+@media (max-width: 640px) {
+  .modal-header-section {
+    padding: 1.25rem 1.25rem 1rem 1.25rem;
+  }
+}
+
+.modal-day-badge {
+  background: rgba(168, 85, 247, 0.25);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  color: var(--neon-purple-bright);
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+}
+
+.modal-lesson-badge {
+  background: rgba(30, 20, 50, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: rgba(192, 132, 252, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.modal-subject-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--neon-purple-bright);
+  margin-top: 1rem;
+  line-height: 1.3;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 4.5rem;
+}
+
+@media (max-width: 640px) {
+  .modal-subject-title {
+    font-size: 1.5rem;
+    max-height: 3.75rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+/* Status Section */
+.modal-status-section {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+}
+
+.modal-status-section::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modal-status-section::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.5);
+  border-radius: 2px;
+}
+
+@media (max-width: 640px) {
+  .modal-status-section {
+    padding: 0.875rem 1.25rem;
+    max-height: 150px;
+  }
+}
+
+.modal-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-status-red-700 {
+  background: rgba(185, 28, 28, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+}
+
+.modal-status-lime-400 {
+  background: rgba(163, 230, 53, 0.15);
+  border-color: rgba(163, 230, 53, 0.4);
+  color: #d9f99d;
+  box-shadow: 0 4px 16px rgba(163, 230, 53, 0.2);
+}
+
+.modal-status-blue-400 {
+  background: rgba(96, 165, 250, 0.2);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(96, 165, 250, 0.2);
+}
+
+.modal-status-fuchsia-600 {
+  background: rgba(192, 38, 211, 0.2);
+  border-color: rgba(232, 121, 249, 0.4);
+  color: #f0abfc;
+  box-shadow: 0 4px 16px rgba(232, 121, 249, 0.2);
+}
+
+.modal-status-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  flex-shrink: 0;
+}
+
+.modal-status-text {
+  flex: 1;
+}
+
+.modal-status-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.modal-status-detail-item {
+  padding-left: 1.5rem;
+}
+
+/* Events Section */
+.modal-events-section {
+  padding: 1.5rem 1.5rem;
+  border-top: 1px solid rgba(168, 85, 247, 0.15);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.15);
+  flex: 0 1 auto;
+  overflow: visible;
+}
+
+@media (max-width: 640px) {
+  .modal-events-section {
+    padding: 1.25rem 1.25rem;
+  }
+}
+
+.modal-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--neon-purple-bright);
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+}
+
+.modal-event-card {
+  background: rgba(30, 20, 50, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.modal-event-card:last-child {
+  margin-bottom: 0;
+}
+
+.modal-event-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.modal-event-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--neon-purple-bright);
+}
+
+.modal-event-subject {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(192, 132, 252, 0.8);
+  font-style: italic;
+}
+
+.modal-event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-event-detail {
+  color: rgba(192, 132, 252, 0.7);
+  font-size: 0.9375rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(168, 85, 247, 0.3);
+}
+
+/* Details Section */
+.modal-details-section {
+  padding: 1.5rem 1.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .modal-details-section {
+    padding: 1.25rem 1.25rem;
+  }
+}
+
+.modal-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.modal-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-detail-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(192, 132, 252, 0.7);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-detail-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  padding-left: 1.75rem;
+}
+
+/* Close Button */
+.modal-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(192, 132, 252, 0.15) 100%);
+  border: none;
+  border-top: 1px solid rgba(168, 85, 247, 0.3);
+  color: var(--neon-purple-bright);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-top: 0;
+  border-radius: 0 0 1.5rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .modal-close-button {
+    padding: 0.875rem;
+    font-size: 0.9375rem;
+  }
+}
+
+.modal-close-button:hover {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(192, 132, 252, 0.25) 100%);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  transform: translateY(-1px);
+}
+
+.modal-close-button:active {
+  transform: translateY(0);
+}
+
+/* Specific modal IDs - timetable modals */
+div[id^="Monday-"],
+div[id^="Tuesday-"],
+div[id^="Wednesday-"],
+div[id^="Thursday-"],
+div[id^="Friday-"],
+div[id^="Saturday-"],
+div[id^="Sunday-"],
+div[id^="event-"],
+div[id*="-googlecalendar"] {
+  z-index: 999999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  isolation: isolate !important;
+}
+
+/* Modal backdrop with liquid glass effect */
+div[id$="-bg"] {
+  z-index: 999999 !important;
+  background: rgba(10, 10, 15, 0.75) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  transition: opacity 0.3s ease !important;
+}
+
+/* Modal content with liquid glass styling */
+.modal-glass-content {
+  position: relative !important;
+  z-index: 1000000 !important;
+  background: rgba(30, 20, 50, 0.4) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1),
+              0 0 0 1px rgba(168, 85, 247, 0.1) !important;
+  border-radius: 1rem !important;
+  margin: auto !important;
+  width: fit-content !important;
+  max-width: 90vw !important;
+}
+
+/* ============================================
+   FORCE ALL BUTTONS BELOW MODALS - NUCLEAR OPTION
+   ============================================ */
+
+/* NUCLEAR: Force ALL buttons to z-index 1 - NO EXCEPTIONS */
+button,
+button *,
+#timetable-box button,
+#timetable-box button *,
+.period button,
+.period button *,
+button.glass-card,
+button.glass-card *,
+button[phx-click],
+button[phx-click] *,
+button.relative,
+button.relative * {
+  position: relative !important;
+  z-index: 1 !important;
+  isolation: auto !important;
+}
+
+/* Override ANY z-index on buttons - even inline styles can't save you */
+button[style*="z-index"],
+button[style*="z-index"] * {
+  z-index: 1 !important;
+}
+
+/* Override any z-index classes on buttons */
+button.z-10,
+button.z-20,
+button.z-\[10\],
+button.z-\[20\],
+button[class*="z-10"],
+button[class*="z-20"],
+div.z-10:not([id^="Monday-"]):not([id^="Tuesday-"]):not([id^="Wednesday-"]):not([id^="Thursday-"]):not([id^="Friday-"]):not([id^="Saturday-"]):not([id^="Sunday-"]):not([id^="event-"]):not([id*="-googlecalendar"]),
+div.z-20:not([id^="Monday-"]):not([id^="Tuesday-"]):not([id^="Wednesday-"]):not([id^="Thursday-"]):not([id^="Friday-"]):not([id^="Saturday-"]):not([id^="Sunday-"]):not([id^="event-"]):not([id*="-googlecalendar"]) {
+  z-index: 1 !important;
+}
+
+/* Force glass-card elements that are buttons to stay low */
+button.glass-card,
+button.glass-card * {
+  z-index: 1 !important;
+  position: relative !important;
+}
+
+/* Prevent any stacking context from trapping modals */
+.glass-header,
+main,
+.container {
+  isolation: auto;
+}
+
+/* Period Button Hover Effect - No layout shift */
+.period-button-hover {
+  box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+}
+
+.period-button-hover:hover {
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.2);
+}
+
+/* ============================================
+   PERIOD STATUS OVERLAY - REDESIGNED
+   ============================================ */
+
+.period-status-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  pointer-events: none;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.period-status-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 2px solid;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.period-status-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px currentColor,
+              0 0 24px currentColor;
+  flex-shrink: 0;
+}
+
+.period-status-text {
+  line-height: 1.2;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Red - Cancelled (odwołane) */
+.period-status-red-700 {
+  background: rgba(185, 28, 28, 0.4);
+}
+
+.period-status-red-700 .period-status-overlay-content {
+  background: rgba(185, 28, 28, 0.6);
+  border-color: rgba(239, 68, 68, 0.8);
+  color: #fca5a5;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.period-status-red-700 .period-status-icon {
+  background: #fca5a5;
+}
+
+/* Lime - School Holiday (dzień wolny szkoły) */
+.period-status-lime-400 {
+  background: rgba(163, 230, 53, 0.3);
+}
+
+.period-status-lime-400 .period-status-overlay-content {
+  background: rgba(163, 230, 53, 0.5);
+  border-color: rgba(217, 249, 157, 0.8);
+  color: #ecfccb;
+  box-shadow: 0 4px 16px rgba(163, 230, 53, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3),
+              0 0 20px rgba(163, 230, 53, 0.3);
+}
+
+.period-status-lime-400 .period-status-icon {
+  background: #ecfccb;
+}
+
+/* Blue - Moved (przesunięcie) */
+.period-status-blue-400 {
+  background: rgba(96, 165, 250, 0.3);
+}
+
+.period-status-blue-400 .period-status-overlay-content {
+  background: rgba(96, 165, 250, 0.5);
+  border-color: rgba(147, 197, 253, 0.8);
+  color: #dbeafe;
+  box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              0 0 20px rgba(96, 165, 250, 0.3);
+}
+
+.period-status-blue-400 .period-status-icon {
+  background: #dbeafe;
+}
+
+/* Fuchsia - Default */
+.period-status-fuchsia-600 {
+  background: rgba(192, 38, 211, 0.3);
+}
+
+.period-status-fuchsia-600 .period-status-overlay-content {
+  background: rgba(192, 38, 211, 0.5);
+  border-color: rgba(240, 171, 252, 0.8);
+  color: #fae8ff;
+  box-shadow: 0 4px 16px rgba(232, 121, 249, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2),
+              0 0 20px rgba(232, 121, 249, 0.3);
+}
+
+.period-status-fuchsia-600 .period-status-icon {
+  background: #fae8ff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .period-status-overlay-content {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.625rem;
+    gap: 0.375rem;
+  }
+
+  .period-status-icon {
+    width: 10px;
+    height: 10px;
+  }
+
+  .period-status-text {
+    font-size: 0.625rem;
+  }
+}
+
+/* ============================================
+   TIMETABLE NAVIGATION - REDESIGNED
+   ============================================ */
+
+.timetable-nav-container {
+  background: rgba(20, 10, 35, 0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+  .timetable-nav-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+}
+
+/* Calendar Input Section */
+.timetable-calendar-input {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.timetable-calendar-form {
+  width: 100%;
+  display: flex;
+}
+
+.timetable-calendar-input-field {
+  width: 100%;
+  background: rgba(30, 20, 50, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9375rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.timetable-calendar-input-field::placeholder {
+  color: rgba(192, 132, 252, 0.5);
+}
+
+.timetable-calendar-input-field:focus {
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2),
+              0 0 20px rgba(168, 85, 247, 0.15);
+  background: rgba(30, 20, 50, 0.7);
+}
+
+@media (max-width: 767px) {
+  .timetable-calendar-input-field {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+/* Navigation Controls */
+.timetable-nav-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex: 0 0 auto;
+}
+
+.timetable-nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: rgba(168, 85, 247, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  border-radius: 0.75rem;
+  color: var(--neon-purple-bright);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.timetable-nav-button:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  transform: translateY(-2px);
+}
+
+.timetable-nav-button:active {
+  transform: translateY(0);
+}
+
+.timetable-nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .timetable-nav-button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* Date Display */
+.timetable-date-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 180px;
+  position: relative;
+  padding-left: 3rem;
+}
+
+@media (max-width: 767px) {
+  .timetable-date-display {
+    padding-left: 2.5rem;
+  }
+}
+
+.timetable-date-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(168, 85, 247, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  color: var(--neon-purple-bright);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.timetable-date-button:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.25);
+  transform: translateY(-1px);
+}
+
+.timetable-date-button:active {
+  transform: translateY(0);
+}
+
+.timetable-date-static {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(30, 20, 50, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  color: rgba(192, 132, 252, 0.8);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.timetable-date-text {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.timetable-date-reset-icon {
+  opacity: 0.6;
+  transition: transform 0.3s ease;
+}
+
+.timetable-date-button:hover .timetable-date-reset-icon {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.timetable-loading-spinner {
+  position: absolute;
+  left: -2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timetable-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid rgba(168, 85, 247, 0.2);
+  border-top-color: var(--neon-purple-bright);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 767px) {
+  .timetable-date-display {
+    min-width: 150px;
+  }
+
+  .timetable-date-button,
+  .timetable-date-static {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .timetable-date-button svg,
+  .timetable-date-static svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .timetable-loading-spinner {
+    left: -2rem;
+  }
+
+  .timetable-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+/* ============================================
+   WEEKDAY HEADER - REDESIGNED
+   ============================================ */
+
+.weekday-header-container {
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.weekday-header-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.weekday-header {
+  width: 100%;
+  height: 100%;
+  background: rgba(30, 20, 50, 0.3);
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weekday-header-static {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  height: 100%;
+}
+
+.weekday-header-button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  height: 100%;
+}
+
+.weekday-header-button:hover {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.weekday-header-button:active {
+  transform: scale(0.98);
+}
+
+.weekday-header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  position: relative;
+  z-index: 2;
+  height: 100%;
+}
+
+.weekday-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--neon-purple-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.weekday-date {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(192, 132, 252, 0.8);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.weekday-event-indicator {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 0.75rem;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.weekday-event-glow {
+  position: absolute;
+  inset: 0;
+  background: rgba(239, 68, 68, 0.15);
+  backdrop-filter: blur(4px);
+  border-radius: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.weekday-header-button:hover .weekday-event-glow {
+  opacity: 1;
+}
+
+.weekday-event-dot {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.9),
+              0 0 16px rgba(239, 68, 68, 0.6);
+  animation: weekdayPulse 2s ease-in-out infinite;
+  z-index: 3;
+}
+
+@keyframes weekdayPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
+}
+
+@media (max-width: 640px) {
+  .weekday-header-container {
+    height: 2.75rem;
+  }
+
+  .weekday-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .weekday-name {
+    font-size: 0.8125rem;
+  }
+
+  .weekday-date {
+    font-size: 0.6875rem;
+  }
+
+  .weekday-event-dot {
+    width: 5px;
+    height: 5px;
+    top: 0.25rem;
+    right: 0.25rem;
+  }
+}
+
+/* ============================================
+   WEEKDAY EVENTS MODAL - REDESIGNED
+   ============================================ */
+
+.weekday-events-modal-content {
+  background: rgba(20, 10, 35, 0.5) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 20px 60px rgba(168, 85, 247, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15),
+              0 0 0 1px rgba(168, 85, 247, 0.2) !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 550px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+}
+
+.weekday-events-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.weekday-events-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.5);
+  border-radius: 3px;
+}
+
+/* Header */
+.weekday-events-header {
+  padding: 2rem 2rem 1.5rem 2rem;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(192, 132, 252, 0.1) 100%);
+  border-radius: 1.5rem 1.5rem 0 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.weekday-events-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.weekday-events-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--neon-purple-bright);
+  margin: 0;
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+
+.weekday-events-date {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(192, 132, 252, 0.9);
+  padding-left: 2.5rem;
+}
+
+/* Sections */
+.weekday-events-section {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid rgba(168, 85, 247, 0.15);
+  flex: 0 1 auto;
+}
+
+.weekday-events-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--neon-purple-bright);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.weekday-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Event Cards */
+.weekday-event-card {
+  background: rgba(30, 20, 50, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.weekday-event-card:hover {
+  border-color: rgba(192, 132, 252, 0.4);
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2);
+}
+
+.weekday-event-schedule {
+  border-left: 3px solid rgba(96, 165, 250, 0.6);
+}
+
+.weekday-event-google {
+  border-left: 3px solid rgba(232, 121, 249, 0.6);
+}
+
+.weekday-event-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.weekday-event-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--neon-purple-bright);
+  line-height: 1.3;
+}
+
+.weekday-event-subject {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(192, 132, 252, 0.8);
+  font-style: italic;
+}
+
+.weekday-event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.weekday-event-detail-row {
+  display: flex;
+  gap: 0.5rem;
+  color: rgba(192, 132, 252, 0.7);
+  font-size: 0.9375rem;
+}
+
+.weekday-event-detail-label {
+  font-weight: 600;
+  color: rgba(192, 132, 252, 0.8);
+  min-width: fit-content;
+}
+
+.weekday-event-detail-value {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.weekday-event-description {
+  color: rgba(192, 132, 252, 0.7);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.weekday-event-description p {
+  margin: 0.5rem 0;
+}
+
+.weekday-event-description p:first-child {
+  margin-top: 0;
+}
+
+.weekday-event-description p:last-child {
+  margin-bottom: 0;
+}
+
+/* Empty State */
+.weekday-events-empty {
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: rgba(192, 132, 252, 0.5);
+  text-align: center;
+}
+
+.weekday-events-empty svg {
+  opacity: 0.4;
+}
+
+.weekday-events-empty-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(192, 132, 252, 0.6);
+}
+
+/* Close Button */
+.weekday-events-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(192, 132, 252, 0.15) 100%);
+  border: none;
+  border-top: 1px solid rgba(168, 85, 247, 0.3);
+  color: var(--neon-purple-bright);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-top: auto;
+  border-radius: 0 0 1.5rem 1.5rem;
+}
+
+.weekday-events-close-button:hover {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(192, 132, 252, 0.25) 100%);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  transform: translateY(-1px);
+}
+
+.weekday-events-close-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .weekday-events-header {
+    padding: 1.5rem 1.5rem 1.25rem 1.5rem;
+  }
+
+  .weekday-events-title {
+    font-size: 1.5rem;
+  }
+
+  .weekday-events-date {
+    font-size: 0.9375rem;
+    padding-left: 2rem;
+  }
+
+  .weekday-events-section {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .weekday-event-card {
+    padding: 1rem;
+  }
+
+  .weekday-event-title {
+    font-size: 1rem;
+  }
+
+  .weekday-event-subject {
+    font-size: 0.9375rem;
+  }
+
+  .weekday-events-empty {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* ============================================
+   TIMETABLE MOBILE OPTIMIZATIONS
+   ============================================ */
+
+/* Mobile Timetable Layout - Fix Dual Scroll Issue */
+@media (max-width: 768px) {
+  /* Main timetable container - single scroll */
+  #timetable-box {
+    position: relative !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Timeline column - hide on mobile (first child div with specific classes) */
+  #timetable-box > div[class*="flex"][class*="flex-col"][class*="flex-shrink-0"] {
+    display: none !important;
+  }
+  
+  /* Horizontal grid lines - hide on mobile (absolute positioned div) */
+  #timetable-box > div[class*="absolute"][class*="left-0"][class*="right-0"][class*="pointer-events-none"] {
+    display: none !important;
+  }
+  
+  /* Weekdays container - remove absolute positioning, make it scrollable */
+  #timetable-box > div[class*="overflow-x-auto"][class*="absolute"] {
+    position: relative !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto !important;
+    scroll-snap-type: x mandatory;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Weekday columns - adjust width for mobile */
+  #timetable-box > div[class*="overflow-x-auto"] > div {
+    width: 85vw !important;
+    min-width: 85vw !important;
+    max-width: 85vw !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Period buttons - make more compact on mobile */
+  #timetable-box .period button,
+  #timetable-box .glass-card {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8125rem !important;
+  }
+  
+  /* Weekday headers - more compact */
+  .weekday-header-container {
+    height: 2.5rem !important;
+  }
+  
+  .weekday-header {
+    padding: 0.375rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .weekday-name {
+    font-size: 0.75rem !important;
+  }
+  
+  .weekday-date {
+    font-size: 0.625rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens - even more compact */
+  #timetable-box > div.overflow-x-auto > div {
+    width: 90vw !important;
+    min-width: 90vw !important;
+    max-width: 90vw !important;
+  }
+  
+  /* Period buttons - smaller */
+  #timetable-box .period button,
+  #timetable-box .glass-card {
+    padding: 0.375rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .weekday-header-container {
+    height: 2.25rem !important;
+  }
+  
+  .weekday-header {
+    padding: 0.25rem 0.375rem !important;
+  }
+  
+  .weekday-name {
+    font-size: 0.6875rem !important;
+  }
+  
+  .weekday-date {
+    font-size: 0.5625rem !important;
+  }
+  
+  /* Timetable navigation - more compact */
+  .timetable-nav-container {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+  }
+  
+  .timetable-calendar-input-field {
+    font-size: 0.8125rem !important;
+    padding: 0.5rem 0.625rem !important;
+  }
+  
+  .timetable-nav-controls {
+    gap: 0.5rem !important;
+  }
+  
+  .timetable-nav-button {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+  
+  .timetable-date-display {
+    min-width: auto !important;
+    padding-left: 2rem !important;
+  }
+  
+  .timetable-date-text {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ============================================
+   STATISTICS TABS STYLING
+   ============================================ */
+
+.stat-tab-button {
+  background: rgba(30, 20, 50, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-tab-button:hover {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(192, 132, 252, 0.3);
+}
+
+.stat-tab-button.active {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(192, 132, 252, 0.5);
+  color: var(--neon-purple-bright);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
 }
 
 /* This file is for your main application CSS */

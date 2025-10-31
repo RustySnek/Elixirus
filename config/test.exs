@@ -12,3 +12,8 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :hammer,
+  backend: {Hammer.Backend.ETS, [expiry_ms: 0, cleanup_interval_ms: 5_000]}
+
+config :venomous, :serpent_watcher, enable: true
