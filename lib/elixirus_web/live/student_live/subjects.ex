@@ -203,6 +203,8 @@ defmodule ElixirusWeb.StudentLive.Subjects do
   end
 
   def handle_async(task, {:exit, _reason}, socket) when task in @asyncs do
+    socket = socket
+    |> assign(:loadings, List.delete(socket.assigns.loadings || [], task))
     {:noreply, socket}
   end
 
@@ -238,12 +240,15 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           |> assign(:shown_grades, shown)
           |> assign(:semester_grades, semester_grades)
           |> assign_averages(current)
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :load_grades))
 
         {:token_error, _message, socket} ->
           socket
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :load_grades))
 
         {:error, _message, socket} ->
           socket
+          |> assign(:loadings, List.delete(socket.assigns.loadings, :load_grades))
       end
 
     {:noreply, socket}
@@ -272,6 +277,12 @@ defmodule ElixirusWeb.StudentLive.Subjects do
       |> assign(:shown_grades, %{})
       |> assign(:query_params, @default_params)
       |> assign(:page_title, "Subjects")
+      |> assign(:loadings, [])
+      |> assign(:query, @default_params.query)
+      |> assign(:grade_query, @default_params.grade_query)
+      |> assign(:hide_empty, false)
+      |> assign(:sort_grades, @default_params.sort_grades)
+      |> assign(:grade_averages, %{})
 
     socket =
       case data do
@@ -279,6 +290,7 @@ defmodule ElixirusWeb.StudentLive.Subjects do
           case Hammer.check_rate("grades:#{user_id}", 60_000, 5) do
             {:allow, _count} ->
               socket
+              |> assign(:loadings, [:load_grades])
               |> start_async(:load_grades, fn -> fetch_all_grades(client, semester) end)
 
             {:deny, _limit} ->

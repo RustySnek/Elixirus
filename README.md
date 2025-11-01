@@ -12,7 +12,7 @@
 
 
 
-### 📒 A better replacement for Synergia Learning Managment System web interface
+### 📒 A better replacement for Synergia Learning Management System web interface
 **Elixirus** is a web application written in Elixir Phoenix for the librus_apix web scraper, providing a superior replacement for the native Librus web interface.
 
 Check out the app [here](https://elixirus.rustysnek.xyz) 
@@ -62,13 +62,13 @@ Run `direnv allow` to allow `.envrc` execution
 
 
 ## Setup ✅
-   Set MIX_BUN_PATH (location of bun executable)):
+   Set MIX_BUN_PATH (location of bun executable):
    
       ```sh
    export MIX_BUN_PATH=$(which bun)
       ```
 
-   Install mix and bun dependancies:
+   Install mix and bun dependencies:
 
    ```sh
    mix deps.get

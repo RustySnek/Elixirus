@@ -24,6 +24,9 @@ const ActiveTab = {
     if (this.scrollTimeout) {
       clearTimeout(this.scrollTimeout);
     }
+    if (this.throttleTimeout) {
+      clearTimeout(this.throttleTimeout);
+    }
   },
 
   initScrollCollapse() {
@@ -38,8 +41,18 @@ const ActiveTab = {
     const SCROLL_DOWN_THRESHOLD = 50;  // Minimum pixels scrolled down to trigger collapse
     const SCROLL_UP_THRESHOLD = 30;    // Minimum pixels scrolled up to trigger expand
     const MIN_SCROLL_DISTANCE = 80;    // Only start collapsing after 80px total scroll
+    const THROTTLE_DELAY = 100;        // Throttle scroll handler more aggressively
 
     this.scrollHandler = () => {
+      // Additional throttling on top of requestAnimationFrame
+      if (this.throttleTimeout) {
+        return;
+      }
+      
+      this.throttleTimeout = setTimeout(() => {
+        this.throttleTimeout = null;
+      }, THROTTLE_DELAY);
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
