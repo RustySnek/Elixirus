@@ -39,6 +39,33 @@ defmodule ElixirusWeb.StudentLive.Attendance do
     |> Kernel./(100)
   end
 
+  def handle_event("filter_subject_attendance", params, socket) do
+    start_date = Map.get(params, "start_date", "") |> empty_to_nil()
+    end_date = Map.get(params, "end_date", "") |> empty_to_nil()
+
+    client = socket.assigns.client
+
+    socket =
+      socket
+      |> assign(:start_date, start_date)
+      |> assign(:end_date, end_date)
+      |> assign(:loadings, [:subject_attendance | socket.assigns.loadings])
+      |> assign(:subject_attendance, %{})
+      |> assign(:subject_frequency, %{})
+      |> assign(:subject_order, [])
+      |> start_async(:load_subject_attendance, fn ->
+        args = [client, start_date, end_date] |> Enum.reject(&is_nil/1)
+
+        SnakeArgs.from_params(:elixirus, :subject_attendance, args)
+        |> Venomous.python!(python_timeout: 20_000)
+      end)
+
+    {:noreply, socket}
+  end
+
+  defp empty_to_nil(""), do: nil
+  defp empty_to_nil(val), do: val
+
   def handle_event("offset_frequency", %{"name" => name, "offset" => offset}, socket) do
     frequencies = socket.assigns.subject_frequency
     attend_marks = socket.assigns.subject_attendance
@@ -218,6 +245,8 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> assign(:semester, semester)
       |> assign(:user_id, user_id)
       |> assign(:visible, nil)
+      |> assign(:start_date, nil)
+      |> assign(:end_date, nil)
       |> assign(:page_title, "Attendance")
       |> create_fetcher(user_id, frequency, :frequency, fn ->
         SnakeArgs.from_params(:elixirus, :frequency, [client])
@@ -226,7 +255,6 @@ defmodule ElixirusWeb.StudentLive.Attendance do
       |> create_fetcher(user_id, subject_attendance, :subject_attendance, fn ->
         SnakeArgs.from_params(:elixirus, :subject_attendance, [client])
         |> Venomous.python!(python_timeout: 20_000)
-        |> dbg
       end)
       |> create_fetcher(user_id, attendance, :attendance, fn ->
         {SnakeArgs.from_params(:elixirus, :attendance, [client, true])

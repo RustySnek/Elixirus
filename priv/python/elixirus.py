@@ -83,8 +83,10 @@ def frequency(client: Client):
     return status.value, freq
 
 
-def subject_frequency(client: Client, freq):
-    status, freq = sanitize_fetch(get_subject_frequency, client, freq)
+def subject_frequency(
+    client: Client, freq, start: datetime = None, stop: datetime = None
+):
+    status, freq = sanitize_fetch(get_subject_frequency, client, freq, start, stop)
     return status.value, freq
 
 
@@ -143,8 +145,12 @@ def attendance(client: Client, stats: bool = False, opt: str = "all"):
     return status.value, attendance, get_attendance_stats(attendance)
 
 
-def subject_attendance(client: Client):
-    status, attendance = sanitize_fetch(asyncio.run, _get_subject_attendance(client))
+def subject_attendance(client: Client, start: str = None, end: str = None):
+    start_dt = datetime.strptime(start, "%Y-%m-%d") if start else None
+    end_dt = datetime.strptime(end, "%Y-%m-%d") if end else None
+    status, attendance = sanitize_fetch(
+        asyncio.run, _get_subject_attendance(client, start_dt, end_dt)
+    )
     return status.value, attendance
 
 

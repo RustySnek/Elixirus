@@ -115,6 +115,45 @@
 
     <!-- Subject Frequency Section -->
     <div :if={@live_action == :subject_frequency} class="flex flex-col gap-4">
+      <!-- Date Filter -->
+      <form phx-submit="filter_subject_attendance" class="glass-card backdrop-blur-xl rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <Heroicons.funnel class="w-5 h-5 text-purple-400" />
+          <span class="font-semibold text-purple-200">Filter by Date Range</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div class="flex flex-col gap-1.5">
+            <label for="start_date" class="text-sm text-purple-400/70">From</label>
+            <input
+              type="date"
+              name="start_date"
+              id="start_date"
+              value={@start_date}
+              class="w-full px-3 py-2 rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 focus:outline-none focus:border-purple-400/60 [color-scheme:dark]"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="end_date" class="text-sm text-purple-400/70">To</label>
+            <input
+              type="date"
+              name="end_date"
+              id="end_date"
+              value={@end_date}
+              class="w-full px-3 py-2 rounded-lg glass-card backdrop-blur-xl bg-purple-500/10 border border-purple-500/20 text-purple-200 focus:outline-none focus:border-purple-400/60 [color-scheme:dark]"
+            />
+          </div>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-lg bg-purple-500/30 border border-purple-500/40 text-purple-200 font-medium hover:bg-purple-500/40 hover:border-purple-400/60 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+          >
+            Apply Filter
+          </button>
+        </div>
+        <p :if={@start_date || @end_date} class="text-xs text-purple-400/50 mt-3">
+          Showing attendance <%= if @start_date, do: "from #{@start_date}", else: "" %><%= if @start_date && @end_date, do: " ", else: "" %><%= if @end_date, do: "until #{@end_date}", else: "" %>
+        </p>
+      </form>
+
       <!-- Loading State -->
       <div :if={:subject_attendance in @loadings} class="flex flex-col gap-4">
         <div :for={_ <- 0..5} class="glass-card backdrop-blur-xl rounded-lg p-4 h-20 animate-pulse">
