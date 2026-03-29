@@ -69,7 +69,7 @@ Run `direnv allow` to allow `.envrc` execution
       ```
 
    Install mix and bun dependencies:
-
+ 
    ```sh
    mix deps.get
    bun install
